@@ -1,6 +1,7 @@
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import HeroSection from '@/containers/home/HeroSection';
+import ProductGrid from '@/containers/home/ProductGrid';
 import FeatureBanner from '@/containers/home/FeatureBanner';
 import CTASection from '@/containers/home/CTASection';
 export default function Home() {
@@ -9,6 +10,7 @@ export default function Home() {
       <Header />
       <div>
         <HeroSection />
+        <ProductGrid />
         <FeatureBanner />
         <CTASection />
       </div>
