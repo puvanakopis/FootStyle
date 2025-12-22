@@ -1,9 +1,20 @@
+import Header from '@/components/Header';
+import Footer from '@/components/Footer';
+import HeroSection from '@/containers/home/HeroSection';
+import ProductGrid from '@/containers/home/ProductGrid';
+import FeatureBanner from '@/containers/home/FeatureBanner';
+import CTASection from '@/containers/home/CTASection';
 export default function Home() {
   return (
-    <main className="flex min-h-screen items-center justify-center bg-white dark:bg-black">
-      <h1 className="text-4xl font-bold text-black dark:text-white">
-        Foot Style
-      </h1>
+    <main className="min-h-screen bg-background text-foreground">
+      <Header />
+      <div>
+        <HeroSection />
+        <ProductGrid />
+        <FeatureBanner />
+        <CTASection />
+      </div>
+      <Footer />
     </main>
   );
 }
