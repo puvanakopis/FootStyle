@@ -2,6 +2,7 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import HeroSection from '@/containers/home/HeroSection';
 import FeatureBanner from '@/containers/home/FeatureBanner';
+import CTASection from '@/containers/home/CTASection';
 export default function Home() {
   return (
     <main className="min-h-screen bg-background text-foreground">
@@ -9,6 +10,7 @@ export default function Home() {
       <div>
         <HeroSection />
         <FeatureBanner />
+        <CTASection />
       </div>
       <Footer />
     </main>
