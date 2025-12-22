@@ -11,9 +11,9 @@ interface SectionHeaderProps {
 
 const SectionHeader: React.FC<SectionHeaderProps> = ({
   title,
-  subtitle = "Don't Miss Out",
-  linkText = "View All Products",
-  linkHref = "#",
+  subtitle = "",
+  linkText = "",
+  linkHref = "",
 }) => {
   return (
     <section className="flex justify-center px-4 pt-8 md:px-10">
