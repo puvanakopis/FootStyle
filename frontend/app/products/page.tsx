@@ -1,6 +1,7 @@
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import Breadcrumbs from '@/components/Breadcrumbs';
+import Filters from '@/containers/products/Filters';
 
 export default function Products() {
     const breadcrumbItems = [
@@ -11,8 +12,9 @@ export default function Products() {
   return (
     <main className="min-h-screen bg-background text-foreground">
       <Header />
-      <div>
+      <div className='px-30'>
         <Breadcrumbs items={breadcrumbItems} />
+        <Filters/>
        
       </div>
       <Footer />
