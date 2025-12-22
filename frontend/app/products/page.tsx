@@ -17,10 +17,10 @@ export default function Products() {
         <Breadcrumbs items={breadcrumbItems} />
 
         <div className="flex flex-col lg:flex-row gap-6 mt-6">
-          <div className="w-full lg:w-1/4">
+          <div className="w-full lg:w-1/5">
             <Filters />
           </div>
-          <div className="w-full lg:w-3/4">
+          <div className="w-full lg:w-4/5">
             <ProductGrid />
           </div>
         </div>
