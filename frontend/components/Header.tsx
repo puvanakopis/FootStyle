@@ -98,8 +98,8 @@ const Header = () => {
               <Link href="/" className="text-sm font-medium hover:text-[#ee2b4b] transition-colors">
                 Home
               </Link>
-              <Link href="/shop" className="text-sm font-medium hover:text-[#ee2b4b] transition-colors">
-                Shop
+              <Link href="/products" className="text-sm font-medium hover:text-[#ee2b4b] transition-colors">
+                Products
               </Link>
               <Link href="/about" className="text-sm font-medium hover:text-[#ee2b4b] transition-colors">
                 About

@@ -17,9 +17,9 @@ const CTASection = () => {
 
           <div className="mt-6 flex w-full max-w-md flex-col gap-3 sm:flex-row">
             <input
-              type="email"
-              placeholder="Enter your email"
-              className="flex-1 rounded-lg border-none bg-white py-3 pl-4 text-sm text-gray-900 shadow-sm placeholder:text-gray-400 focus:ring-2 focus:ring-[#ee2b4b]"
+                type="email"
+                placeholder="Enter your email"
+                className="flex-1 rounded-lg border-0 bg-white py-3 pl-4 text-sm text-gray-900 shadow-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#ee2b4b]"
             />
             <button className="flex items-center justify-center rounded-lg bg-[#ee2b4b] px-6 py-3 text-sm font-bold text-white shadow-lg shadow-[#ee2b4b]/20 transition-transform hover:scale-105">
               Subscribe
