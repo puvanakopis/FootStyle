@@ -1,5 +1,8 @@
-import type { Metadata } from "next";
-import "./globals.css";
+import type { Metadata } from 'next'
+import { Inter } from 'next/font/google'
+import './globals.css'
+
+const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
   title: "Foot Style",
@@ -8,14 +11,14 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+}: {
+  children: React.ReactNode
+}) {
   return (
     <html lang="en">
-      <body className="antialiased">
+      <body className={`${inter.className} bg-background font-display text-foreground antialiased`}>
         {children}
       </body>
     </html>
-  );
+  )
 }
