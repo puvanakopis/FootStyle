@@ -1,5 +1,6 @@
 "use client";
 
+import { FaStar } from "react-icons/fa";
 import { FiShoppingCart } from "react-icons/fi";
 import { MdFavoriteBorder } from "react-icons/md";
 
@@ -24,7 +25,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
   badge,
 }) => {
   return (
-    <div className="group flex flex-col gap-4 rounded-xl bg-white p-4 shadow-sm transition-all duration-300 hover:-translate-y-2 hover:shadow-xl">
+    <div className="group flex flex-col gap-4 rounded-xl bg-white shadow-sm transition-all duration-300 hover:-translate-y-2 hover:shadow-xl">
       <div className="relative aspect-square w-full overflow-hidden rounded-lg bg-gray-100">
         <div
           className="h-full w-full bg-cover bg-center transition-transform duration-500 group-hover:scale-110"
@@ -43,12 +44,12 @@ const ProductCard: React.FC<ProductCardProps> = ({
         </div>
       </div>
 
-      <div className="flex flex-col gap-1">
+      <div className="flex flex-col gap-1 p-4">
         <div className="flex justify-between">
-          <h3 className="text-lg font-bold leading-tight">{name}</h3>
+          <h3 className="font-bold leading-tight">{name}</h3>
           <div className="flex items-center gap-1">
             <span className="material-symbols-outlined text-[16px] text-yellow-400 fill-current">
-              star
+             <FaStar />
             </span>
             <span className="text-xs font-bold text-gray-500">{rating}</span>
           </div>

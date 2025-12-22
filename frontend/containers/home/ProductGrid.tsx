@@ -60,7 +60,7 @@ const ProductGrid = () => {
       <SectionHeader title="Trending Now" linkText="View All Products" linkHref="/products" />
       <section className="flex justify-center px-4 py-8 md:px-10">
         <div className="w-full max-w-[1280px]">
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid grid-cols-1 gap-24 sm:grid-cols-2 lg:grid-cols-4">
             {products.map((product) => (
               <ProductCard key={product.id} {...product} />
             ))}

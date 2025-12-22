@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { MdOutlineTune } from "react-icons/md";
 
-const Filters: React.FC = () => {
+const Filters= () => {
   const [selectedGender, setSelectedGender] = useState<string[]>(["Men"]);
   const [selectedMaterial, setSelectedMaterial] = useState<string[]>(["Synthetic"]);
   const [selectedColor, setSelectedColor] = useState<string | null>(null);
@@ -78,7 +78,7 @@ const Filters: React.FC = () => {
   const maxPercentage = ((priceRange[1] - minPrice) / (maxPrice - minPrice)) * 100;
 
   return (
-    <aside className="w-full lg:w-1/4 xl:w-1/5 shrink-0">
+    <aside className="w-full">
       <div className="bg-white rounded-xl p-5 shadow-sm border border-[#f3e7e9] sticky top-24">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
