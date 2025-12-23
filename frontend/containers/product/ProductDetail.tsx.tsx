@@ -11,6 +11,7 @@ interface Thumbnail {
 }
 
 interface ProductDetailProps {
+    id: number;
     mainImage: string;
     mainAlt: string;
     thumbnails: Thumbnail[];
@@ -93,7 +94,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({
                         </h1>
                         <div className="flex items-center gap-4 mt-4">
                             <span className="text-3xl font-bold text-slate-900">
-                                Rs{price.toFixed(2)}
+                                Rs{price}
                             </span>
                             <div className="flex items-center gap-1">
                                 {Array.from({ length: 5 }, (_, i) => (

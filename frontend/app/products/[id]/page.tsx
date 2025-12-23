@@ -4,12 +4,24 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import Breadcrumbs from '@/components/Breadcrumbs';
 import ProductDetail from "@/containers/product/ProductDetail.tsx";
+import RelatedProducts from "@/containers/product/RelatedProducts";
 
 import { useParams } from 'next/navigation';
 
+interface Product {
+    name: string;
+    category: string;
+    price: string;
+    oldPrice?: string;
+    rating: string;
+    description?: string;
+    imageUrl: string;
+    alt: string;
+    badge?: string;
+}
+
 export default function ProductDetailPage() {
     const params = useParams();
-
     const productId = params.id;
 
     const product = {
@@ -24,8 +36,8 @@ export default function ProductDetailPage() {
         ],
         category: "Men's Road Running Shoes",
         name: "Nike Air Zoom Pegasus 39",
-        price: 120,
-        rating: 4.5,
+        price: "$120",
+        rating: "4.5",
         reviews: 128,
         description: "Running is your daily ritual, taking you from road to trail as you seek out new adventures and goals. The Nike Air Zoom Pegasus 39 can help you ascend to new heights with its comfortable, intuitive design.",
         colors: [
@@ -54,12 +66,54 @@ export default function ProductDetailPage() {
         { label: product.name, href: `/products/${productId}` },
     ];
 
+    const relatedProducts: Product[] = [
+        {
+            name: "Nike Zoom Fly 5",
+            category: "Men's Running Shoes",
+            price: "$160",
+            rating: "4.6",
+            description: "Men's Running Shoe",
+            imageUrl: "https://lh3.googleusercontent.com/aida-public/AB6AXuB4jmFhKJ5kODh1Pw9E-AbBdCy017Sxa6jkfuI7PX7yblRUh9XQlUb1rGePcIVNTIzAjWqQkSuofcUdBMZpBKa2UikAchL1HYhtdejhekoq7WuAjLXH2Wu5lyVhxoZHEjroJofWh6xIAw--tRbihEk-6uwg4KVhf83mCFqO4Cn4u24_LtB1RMpCPERYMSIxN5qGx85gZ8M5gBwXFS-Cm5hVoz9_CQI7T04A2cI7oB3GX0RGBjpmpic4uoZ9SbPVm-JFlYT1QP-vNpqo",
+            alt: "Green Nike running shoe floating on a dark background",
+        },
+        {
+            name: "Nike Air Max 270",
+            category: "Men's Running Shoes",
+            price: "$110",
+            oldPrice: "$150",
+            rating: "4.2",
+            description: "Men's Shoe",
+            badge: "SALE",
+            imageUrl: "https://lh3.googleusercontent.com/aida-public/AB6AXuDYpHtv2raM6c7GzG5PdnnZ-jx-nk_qZ3F_y88Ef-O9tikg_51ZC91n3G5hefPI9xM38_mwzpGhQuZLakMXWzS-KkbiAHjXFYHgjp_YG9PQLbXtatOFHZSbooDcH179xRi7LEoaCkFW5DZ8z5FCNGpCx-rIUaleL9v2AMgAJidVLep6RyhlFmOzF08D7kinH9u-MT0iEz2isbvnYLGJ8lwWUG3RDVbsfZVaLzeYllViWpEsoKAUrFdjrxPT2oVAh0N5lxTuqCOjANdU",
+            alt: "White and purple athletic shoe on gradient background",
+        },
+        {
+            name: "Nike Air Zoom Pegasus 36",
+            category: "Men's Running Shoes",
+            price: "$140",
+            rating: "4.4",
+            description: "Men's Running Shoe",
+            imageUrl: "https://lh3.googleusercontent.com/aida-public/AB6AXuDYpHtv2raM6c7GzG5PdnnZ-jx-nk_qZ3F_y88Ef-O9tikg_51ZC91n3G5hefPI9xM38_mwzpGhQuZLakMXWzS-KkbiAHjXFYHgjp_YG9PQLbXtatOFHZSbooDcH179xRi7LEoaCkFW5DZ8z5FCNGpCx-rIUaleL9v2AMgAJidVLep6RyhlFmOzF08D7kinH9u-MT0iEz2isbvnYLGJ8lwWUG3RDVbsfZVaLzeYllViWpEsoKAUrFdjrxPT2oVAh0N5lxTuqCOjANdU",
+            alt: "Blue Nike running shoe on white background",
+        },
+        {
+            name: "Nike React Infinity Run",
+            category: "Men's Running Shoes",
+            price: "$150",
+            rating: "4.5",
+            description: "Men's Running Shoe",
+            imageUrl: "https://lh3.googleusercontent.com/aida-public/AB6AXuB4jmFhKJ5kODh1Pw9E-AbBdCy017Sxa6jkfuI7PX7yblRUh9XQlUb1rGePcIVNTIzAjWqQkSuofcUdBMZpBKa2UikAchL1HYhtdejhekoq7WuAjLXH2Wu5lyVhxoZHEjroJofWh6xIAw--tRbihEk-6uwg4KVhf83mCFqO4Cn4u24_LtB1RMpCPERYMSIxN5qGx85gZ8M5gBwXFS-Cm5hVoz9_CQI7T04A2cI7oB3GX0RGBjpmpic4uoZ9SbPVm-JFlYT1QP-vNpqo",
+            alt: "Black Nike running shoe on white background",
+        },
+    ];
+
     return (
         <main className="min-h-screen bg-background text-foreground">
             <Header />
             <div className="px-30 py-6">
                 <Breadcrumbs items={breadcrumbItems} />
                 <ProductDetail {...product} />
+                <RelatedProducts products={relatedProducts} />
             </div>
             <Footer />
         </main>
