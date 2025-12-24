@@ -2,6 +2,7 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import Breadcrumbs from '@/components/Breadcrumbs';
 import Sidebar from '@/containers/account/Sidebar';
+import AccountDetails from '@/containers/account/AccountDetails';
 
 const breadcrumbItems = [
     { label: "Account", href: "/account" },
@@ -21,12 +22,11 @@ export default function Account() {
                     </div>
 
                     {/* Main content with remaining width */}
-                    <main className="w-full lg:w-4/5 p-4 bg-white rounded-lg shadow">
-                        <h1 className="text-2xl font-bold">Profile Page</h1>
+                    <main className="w-full lg:w-4/5">
+                    <AccountDetails/>
                     </main>
                 </div>
             </div>
-
             <Footer />
         </main>
     );
