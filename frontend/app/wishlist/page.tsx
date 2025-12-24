@@ -1,15 +1,14 @@
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import Breadcrumbs from '@/components/Breadcrumbs';
-import Sidebar from '@/containers/account/Sidebar';
-import AccountDetails from '@/containers/account/AccountDetails';
+import Sidebar from '@/containers/profile/Sidebar';
 
 const breadcrumbItems = [
-    { label: "Account", href: "/account" },
-    { label: "Profile", href: "/account/profile" },
+    { label: "Account", href: "" },
+    { label: "Wishlist", href: "/wishlist" },
 ];
 
-export default function Account() {
+export default function Wishlist() {
     return (
         <main className="min-h-screen bg-background text-foreground">
             <Header />
@@ -23,7 +22,9 @@ export default function Account() {
 
                     {/* Main content with remaining width */}
                     <main className="w-full lg:w-4/5">
-                    <AccountDetails/>
+                        <div>
+                            Wishlist
+                        </div>
                     </main>
                 </div>
             </div>
