@@ -176,7 +176,7 @@ const ProductGrid = () => {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
         <div>
           <h1 className="text-3xl font-bold text-[#1b0d10] tracking-tight">
-            Men's Running Shoes
+            Men&apos;s Running Shoes
           </h1>
           <p className="text-sm text-gray-500 mt-1">
             Showing {products.length} results
@@ -214,7 +214,7 @@ const ProductGrid = () => {
             id={product.id}
             name={product.name}
             category={product.category}
-            price={`$${product.price.toFixed(2)}`}
+            price={`Rs${product.price.toFixed(2)}`}
             oldPrice={product.oldPrice ? `$${product.oldPrice.toFixed(2)}` : undefined}
             rating={product.rating}
             imageUrl={product.image}

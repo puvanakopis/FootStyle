@@ -8,7 +8,7 @@ const HeroSection = () => {
       <div className="w-full max-w-[1280px]">
         <div className="@container">
           <div className="flex flex-col-reverse gap-8 rounded-2xl bg-white p-6 shadow-sm @[864px]:flex-row @[864px]:items-center @[864px]:p-12">
-            
+
             {/* Text Content */}
             <div className="flex flex-col gap-6 @[480px]:gap-8 @[864px]:w-1/2">
               <div className="flex flex-col gap-4 text-left">
@@ -38,11 +38,17 @@ const HeroSection = () => {
             </div>
 
             {/* Image Section */}
-            <div className="relative aspect-[4/3] w-full overflow-hidden rounded-xl @[864px]:h-full @[864px]:w-1/2">
-              <div className="absolute inset-0 bg-gradient-to-tr from-gray-200 to-gray-100"></div>
-              <div className="relative h-full w-full transition-transform duration-700 hover:scale-105">
-                {/* Image goes here */}
-              </div>
+
+
+            <div className="relative aspect-[4/3] w-full overflow-hidden rounded-xl group @[864px]:h-full @[864px]:w-1/2">
+              <div
+                className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
+                style={{
+                  backgroundImage:
+                    'url("https://images.unsplash.com/photo-1600185365483-26d7a4cc7519?w=800&auto=format&fit=crop")'
+                }}
+              />
+              <div className="absolute inset-0 bg-gradient-to-tr from-black/10 to-transparent"></div>
             </div>
 
           </div>
