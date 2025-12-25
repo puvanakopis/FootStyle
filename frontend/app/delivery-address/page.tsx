@@ -1,6 +1,7 @@
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import Breadcrumbs from '@/components/Breadcrumbs';
+import PageHeader from '@/components/PageHeader';
 
 const breadcrumbItems = [
     { label: "Home", href: "" },
@@ -13,6 +14,7 @@ export default function DeliveryAddress() {
             <Header />
             <div className="px-30 py-6">
                 <Breadcrumbs items={breadcrumbItems} />
+                <PageHeader title="Shipping Information" />
             </div>
             <Footer />
         </main>
