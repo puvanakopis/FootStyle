@@ -4,7 +4,7 @@ import Breadcrumbs from '@/components/Breadcrumbs';
 import ProfileDetails from '@/containers/profile/ProfileDetails';
 
 const breadcrumbItems = [
-    { label: "Account", href: "" },
+    { label: "Home", href: "" },
     { label: "Profile", href: "/profile" },
 ];
 
