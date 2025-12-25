@@ -36,7 +36,7 @@ export default function ProductDetailPage() {
         ],
         category: "Men's Road Running Shoes",
         name: "Nike Air Zoom Pegasus 39",
-        price: "$120",
+        price: "120",
         rating: "4.5",
         reviews: 128,
         description: "Running is your daily ritual, taking you from road to trail as you seek out new adventures and goals. The Nike Air Zoom Pegasus 39 can help you ascend to new heights with its comfortable, intuitive design.",
