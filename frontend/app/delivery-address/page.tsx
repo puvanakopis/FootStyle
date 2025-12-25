@@ -3,6 +3,7 @@ import Footer from '@/components/Footer';
 import Breadcrumbs from '@/components/Breadcrumbs';
 import PageHeader from '@/components/PageHeader';
 import SavedAddresses from "@/containers/delivery-address/SavedAddresses";
+import YourOrder from "@/containers/delivery-address/YourOrder";
 
 const breadcrumbItems = [
     { label: "Home", href: "" },
@@ -18,6 +19,7 @@ export default function DeliveryAddress() {
                 <PageHeader title="Shipping Information" />
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
                     <SavedAddresses />
+                    <YourOrder />
                 </div>
             </div>
             <Footer />
