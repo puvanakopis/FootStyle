@@ -2,6 +2,7 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import Breadcrumbs from '@/components/Breadcrumbs';
 import PageHeader from '@/components/PageHeader';
+import SavedAddresses from "@/containers/delivery-address/SavedAddresses";
 
 const breadcrumbItems = [
     { label: "Home", href: "" },
@@ -15,6 +16,9 @@ export default function DeliveryAddress() {
             <div className="px-30 py-6">
                 <Breadcrumbs items={breadcrumbItems} />
                 <PageHeader title="Shipping Information" />
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
+                    <SavedAddresses />
+                </div>
             </div>
             <Footer />
         </main>
