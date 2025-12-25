@@ -89,7 +89,7 @@ const ProfileDetails = () => {
     }));
   };
 
-  // Edit address (open modal)
+  // Edit address 
   const handleEditAddress = (id: number) => {
     const addr = formData.addresses.find((a) => a.id === id);
     if (addr) {
@@ -133,14 +133,12 @@ const ProfileDetails = () => {
     <div className="lg:col-span-9 space-y-8">
 
       {/* ---------------- Title ---------------- */}
-      <section className="bg-white rounded-2xl shadow-sm border border-neutral-100 p-6 sm:p-8">
+      <section className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-10">
         <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-neutral-900 mb-2">
           Profile Details
         </h1>
-        <p className="text-neutral-500">
-          Manage your personal information and shipping addresses.
-        </p>
       </section>
+
 
       {/* ---------------- Personal Information ---------------- */}
       <section className="bg-white rounded-2xl shadow-sm border border-neutral-100 p-6 sm:p-8">
