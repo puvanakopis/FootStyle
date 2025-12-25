@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 const OrderSummary = () => {
     return (
         <div className="bg-white rounded-2xl shadow-sm border border-neutral-100 p-6 sm:p-8">
@@ -23,9 +25,12 @@ const OrderSummary = () => {
                 <span className="text-3xl font-extrabold">Rs 459.00</span>
             </div>
 
-            <button className="w-full h-14 bg-[#ee2b4b] text-white font-bold rounded-xl hover:opacity-90 transition">
-                Proceed to Checkout
-            </button>
+            <Link href="/delivery-address">
+                <button className="w-full h-14 bg-[#ee2b4b] text-white font-bold rounded-xl hover:opacity-90 transition">
+                    Proceed to Checkout
+                </button>
+            </Link>
+
         </div>
     );
 };
