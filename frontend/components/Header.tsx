@@ -217,12 +217,12 @@ const Header = () => {
                           My Profile
                         </Link>
                         <Link 
-                          href="/orders" 
+                          href="/cart" 
                           className="flex items-center gap-3 px-3 py-2 rounded-md text-sm text-gray-700 hover:bg-[#f8f6f6] hover:text-[#ee2b4b] transition-colors"
                           onClick={() => setShowUserMenu(false)}
                         >
                           <FiShoppingCart className="text-base" />
-                          My Orders
+                          My Cart
                         </Link>
                         <Link 
                           href="/wishlist" 
@@ -352,12 +352,12 @@ const Header = () => {
                     </p>
                     <div className="space-y-1">
                       <Link 
-                        href="/orders" 
+                        href="/cart" 
                         onClick={() => setShowMobileMenu(false)}
                         className="flex items-center gap-3 px-4 py-3 text-sm text-gray-700 rounded-lg hover:bg-[#f8f6f6] hover:text-[#ee2b4b] transition-colors"
                       >
                         <FiShoppingCart className="text-lg" />
-                        My Orders
+                        My Cart
                       </Link>
                       <Link 
                         href="/wishlist" 
