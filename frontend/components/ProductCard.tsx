@@ -49,7 +49,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
           <h3 className="font-bold leading-tight">{name}</h3>
           <div className="flex items-center gap-1">
             <span className="material-symbols-outlined text-[16px] text-yellow-400 fill-current">
-             <FaStar />
+              <FaStar />
             </span>
             <span className="text-xs font-bold text-gray-500">{rating}</span>
           </div>

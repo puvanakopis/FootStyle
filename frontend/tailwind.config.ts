@@ -1,4 +1,6 @@
 import type { Config } from 'tailwindcss';
+import forms from '@tailwindcss/forms';
+import containerQueries from '@tailwindcss/container-queries';
 
 const config: Config = {
   darkMode: 'class',
@@ -17,6 +19,8 @@ const config: Config = {
         'text-main-dark': '#fcf8f9',
         'text-sec-light': '#582f35',
         'text-sec-dark': '#dcb8be',
+        'surface-light': '#edf0f5ff',
+        'surface-dark': '#1e1e1e',
       },
       fontFamily: {
         display: ['Manrope', 'sans-serif'],
@@ -29,10 +33,7 @@ const config: Config = {
       },
     },
   },
-  plugins: [
-    require('@tailwindcss/forms'),
-    require('@tailwindcss/container-queries'),
-  ],
+  plugins: [forms, containerQueries],
 };
 
 export default config;

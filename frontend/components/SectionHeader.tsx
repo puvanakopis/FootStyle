@@ -11,13 +11,13 @@ interface SectionHeaderProps {
 
 const SectionHeader: React.FC<SectionHeaderProps> = ({
   title,
-  subtitle = "Don't Miss Out",
-  linkText = "View All Products",
-  linkHref = "#",
+  subtitle = "",
+  linkText = "",
+  linkHref = "",
 }) => {
   return (
-    <section className="flex justify-center px-4 pt-8 md:px-10">
-      <div className="flex w-full max-w-[1280px] items-end justify-between border-b border-[#f3e7e9] pb-4">
+    <section className="flex justify-center pt-8 pb-4">
+      <div className="flex w-full max-w-[1280px] items-end justify-between pb-4">
         <div>
           <span className="text-sm font-bold uppercase tracking-widest text-[#ee2b4b]">
             {subtitle}
