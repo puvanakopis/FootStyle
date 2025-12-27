@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/dist/client/link";
+import { IoMdArrowBack } from "react-icons/io";
 import { IoLocationOutline } from "react-icons/io5";
 
 const SavedAddresses = () => {
@@ -203,6 +205,17 @@ const SavedAddresses = () => {
                     </div>
                 </div>
             </form>
+
+            {/* Back Link */}
+            <div className="flex items-center justify-between pt-4">
+                <Link
+                    href="/cart"
+                    className="flex items-center gap-2 text-neutral-500 hover:text-neutral-900 font-medium"
+                >
+                    <span className="material-symbols-outlined"><IoMdArrowBack /></span>
+                    Back to Cart
+                </Link>
+            </div>
         </div>
     );
 };

@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { IoArrowForwardOutline } from "react-icons/io5";
 
 const YourOrder = () => {
@@ -73,12 +74,16 @@ const YourOrder = () => {
           <span className="text-2xl font-extrabold">Rs 459.00</span>
         </div>
 
-        <button className="w-full bg-[#ee2b4b] hover:bg-[#d4203e] text-white font-bold text-lg h-14 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 group">
+        <Link
+          href="/payment"
+          className="w-full bg-[#ee2b4b] hover:bg-[#d4203e] text-white font-bold text-lg h-14 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 group"
+        >
           Continue to Payment
-          <span className="material-symbols-outlined group-hover:translate-x-1 transition-transform">
+          <span className="group-hover:translate-x-1 transition-transform">
             <IoArrowForwardOutline />
           </span>
-        </button>
+        </Link>
+
       </div>
     </div>
   );
