@@ -1,6 +1,9 @@
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import Breadcrumbs from '@/components/Breadcrumbs';
+import Sidebar from '@/components/Sidebar';
+import OrderHistory from '@/containers/orders/OrderHistory';
+import OrderFilter from '@/containers/orders/OrderFilter';
 
 const breadcrumbItems = [
     { label: "Account", href: "" },
@@ -13,7 +16,18 @@ export default function Orders() {
             <Header />
             <div className="px-30 py-6">
                 <Breadcrumbs items={breadcrumbItems} />
-                Orders
+                <div className="flex flex-col lg:flex-row gap-6 mt-6">
+                    {/* Sidebar with fixed width */}
+                    <div className='w-full lg:w-1/5'>
+                        <Sidebar />
+                    </div>
+
+                    {/* Main content with remaining width */}
+                    <section className="w-full lg:w-4/5 space-y-6">
+                        <OrderFilter />
+                        <OrderHistory />
+                    </section>
+                </div>
             </div>
             <Footer />
         </main>
