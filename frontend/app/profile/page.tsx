@@ -1,10 +1,11 @@
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import Breadcrumbs from '@/components/Breadcrumbs';
+import Sidebar from '@/components/Sidebar';
 import ProfileDetails from '@/containers/profile/ProfileDetails';
 
 const breadcrumbItems = [
-    { label: "Home", href: "" },
+    { label: "Account", href: "" },
     { label: "Profile", href: "/profile" },
 ];
 
@@ -14,7 +15,17 @@ export default function Profile() {
             <Header />
             <div className="px-30 py-6">
                 <Breadcrumbs items={breadcrumbItems} />
-                <ProfileDetails />
+                <div className="flex flex-col lg:flex-row gap-6 mt-6">
+                    {/* Sidebar with fixed width */}
+                    <div className='w-full lg:w-1/5'>
+                        <Sidebar />
+                    </div>
+
+                    {/* Main content with remaining width */}
+                    <main className="w-full lg:w-4/5">
+                        <ProfileDetails />
+                    </main>
+                </div>
             </div>
             <Footer />
         </main>
