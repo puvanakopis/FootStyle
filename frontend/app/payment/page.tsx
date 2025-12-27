@@ -3,6 +3,7 @@ import Footer from '@/components/Footer';
 import Breadcrumbs from '@/components/Breadcrumbs';
 import PageHeader from '@/components/PageHeader';
 import PaymentMethod from '@/containers/payment/PaymentMethod';
+import OrderSummary from '@/containers/payment/OrderSummary';
 
 const breadcrumbItems = [
     { label: "Home", href: "/" },
@@ -20,6 +21,7 @@ export default function Payment() {
                 <PageHeader title="Checkout" />
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
                     <PaymentMethod/>
+                    <OrderSummary/>
                 </div>
             </div>
             <Footer />
