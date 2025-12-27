@@ -2,6 +2,7 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import Breadcrumbs from '@/components/Breadcrumbs';
 import PageHeader from '@/components/PageHeader';
+import PaymentMethod from '@/containers/payment/PaymentMethod';
 
 const breadcrumbItems = [
     { label: "Home", href: "/" },
@@ -16,9 +17,9 @@ export default function Payment() {
             <Header />
             <div className="px-30 py-6">
                 <Breadcrumbs items={breadcrumbItems} />
-                <PageHeader title="Payment Information" />
+                <PageHeader title="Checkout" />
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
-                    Payment Information
+                    <PaymentMethod/>
                 </div>
             </div>
             <Footer />
