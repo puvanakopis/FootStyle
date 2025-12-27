@@ -2,6 +2,8 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import Breadcrumbs from '@/components/Breadcrumbs';
 import Sidebar from '@/components/Sidebar';
+import OrderHistory from '@/containers/orders/OrderHistory';
+import OrderFilter from '@/containers/orders/OrderFilter';
 
 const breadcrumbItems = [
     { label: "Account", href: "" },
@@ -22,7 +24,8 @@ export default function Orders() {
 
                     {/* Main content with remaining width */}
                     <section className="w-full lg:w-4/5 space-y-6">
-                        Orders
+                        <OrderFilter />
+                        <OrderHistory />
                     </section>
                 </div>
             </div>
