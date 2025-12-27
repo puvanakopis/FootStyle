@@ -12,7 +12,7 @@ const OrderFilter = () => {
                 <select
                     value={filter}
                     onChange={(e) => setFilter(e.target.value)}
-                    className="appearance-none bg-white border border-neutral-200 text-neutral-900 text-sm rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ee2b4b] block w-40 p-2.5 pr-8"
+                    className="appearance-none bg-white border border-neutral-200 text-neutral-900 text-sm rounded-lg focus:ring-[#ee2b4b] focus:border-[#ee2b4b] block w-48 p-2.5 pr-8"
                 >
                     <option value="all">All Orders</option>
                     <option value="processing">Processing</option>

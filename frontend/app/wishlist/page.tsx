@@ -3,6 +3,7 @@ import Footer from '@/components/Footer';
 import Breadcrumbs from '@/components/Breadcrumbs';
 import Sidebar from '@/components/Sidebar';
 import ProductList from '@/containers/wishlist/ProductList';
+import WishlistFilter from '@/containers/wishlist/WishlistFilter';
 
 const breadcrumbItems = [
     { label: "Account", href: "" },
@@ -23,6 +24,7 @@ export default function Wishlist() {
 
                     {/* Main content with remaining width */}
                     <section className="w-full lg:w-4/5 space-y-6">
+                        <WishlistFilter/>
                         <ProductList/>
                     </section>
                 </div>
