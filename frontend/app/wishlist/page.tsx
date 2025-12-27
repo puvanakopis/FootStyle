@@ -2,6 +2,7 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import Breadcrumbs from '@/components/Breadcrumbs';
 import Sidebar from '@/components/Sidebar';
+import ProductList from '@/containers/wishlist/ProductList';
 
 const breadcrumbItems = [
     { label: "Account", href: "" },
@@ -22,7 +23,7 @@ export default function Wishlist() {
 
                     {/* Main content with remaining width */}
                     <section className="w-full lg:w-4/5 space-y-6">
-                        Wishlist
+                        <ProductList/>
                     </section>
                 </div>
             </div>
