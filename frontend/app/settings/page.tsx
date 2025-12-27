@@ -2,6 +2,8 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import Breadcrumbs from '@/components/Breadcrumbs';
 import Sidebar from '@/components/Sidebar';
+import SecuritySection from '@/containers/settings/SecuritySection';
+import DeleteAccountSection from '@/containers/settings/DeleteAccountSection';
 
 const breadcrumbItems = [
     { label: "Account", href: "" },
@@ -21,9 +23,10 @@ export default function Settings() {
                     </div>
 
                     {/* Main content with remaining width */}
-                    <main className="w-full lg:w-4/5">
-                        Settings
-                    </main>
+                    <section className="w-full lg:w-4/5 space-y-6">
+                        <SecuritySection />
+                        <DeleteAccountSection />
+                    </section>
                 </div>
             </div>
             <Footer />

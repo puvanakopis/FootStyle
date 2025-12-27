@@ -21,8 +21,9 @@ export default function Wishlist() {
                     </div>
 
                     {/* Main content with remaining width */}
-                    <main className="w-full lg:w-4/5">
-                        Wishlist                    </main>
+                    <section className="w-full lg:w-4/5 space-y-6">
+                        Wishlist
+                    </section>
                 </div>
             </div>
             <Footer />

@@ -21,9 +21,9 @@ export default function Orders() {
                     </div>
 
                     {/* Main content with remaining width */}
-                    <main className="w-full lg:w-4/5">
+                    <section className="w-full lg:w-4/5 space-y-6">
                         Orders
-                    </main>
+                    </section>
                 </div>
             </div>
             <Footer />

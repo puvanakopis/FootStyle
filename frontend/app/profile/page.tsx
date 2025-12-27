@@ -22,9 +22,9 @@ export default function Profile() {
                     </div>
 
                     {/* Main content with remaining width */}
-                    <main className="w-full lg:w-4/5">
+                    <section className="w-full lg:w-4/5 space-y-6">
                         <ProfileDetails />
-                    </main>
+                    </section>
                 </div>
             </div>
             <Footer />
