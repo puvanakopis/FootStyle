@@ -15,7 +15,7 @@ export default function LoginPage() {
     };
 
     return (
-        <main className="flex-1 flex flex-col items-center justify-center p-4 sm:p-6 relative bg-['#dcb8be] overflow-hidden">
+        <main className="flex-1 flex flex-col min-h-screen items-center justify-center p-4 sm:p-6 relative bg-['#dcb8be] overflow-hidden">
             {/* Background effects */}
             <div className="absolute inset-0 z-0 opacity-40 pointer-events-none">
                 <div className="absolute -top-24 -left-24 w-96 h-96 rounded-full bg-[#ee2b4b]/5 blur-3xl" />

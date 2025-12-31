@@ -29,7 +29,7 @@ export default function ForgotPasswordPage() {
     };
 
     return (
-        <main className="flex min-h-screen  bg-['#dcb8be] justify-center items-center p-4">
+        <main className="flex min-h-screen bg-['#dcb8be] justify-center items-center p-4">
             <div className="w-full max-w-md bg-white rounded-2xl shadow-lg border border-gray-200 p-8 sm:p-10">
 
                 {step === "email" && (
