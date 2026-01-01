@@ -45,7 +45,7 @@ export default function AdminDashboard() {
     };
 
     return (
-        <div className="flex-1 overflow-y-auto p-4 lg:p-6 scroll-smooth">
+        <div className="flex-1 overflow-y-auto p-4 lg:p-10 scroll-smooth">
             <div className="max-w-7xl mx-auto flex flex-col gap-8">
 
                 {/* Breadcrumbs & Heading */}
