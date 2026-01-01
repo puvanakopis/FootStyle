@@ -82,28 +82,23 @@ userSchema.virtual('id').get(function () {
     return this._id;
 });
 
-userSchema.pre('save', async function (next) {
-    try {
-        if (this.isNew && !this._id) {
-            const counter = await Counter.findByIdAndUpdate(
-                'user',
-                { $inc: { seq: 1 } },
-                { new: true, upsert: true }
-            );
-            const number = String(counter.seq).padStart(2, '0');
-            this._id = `user_${number}`;
-        }
+userSchema.pre('save', async function () {
+    if (this.isNew && !this._id) {
+        const counter = await Counter.findByIdAndUpdate(
+            'user',
+            { $inc: { seq: 1 } },
+            { new: true, upsert: true }
+        );
+        const number = String(counter.seq).padStart(2, '0');
+        this._id = `user_${number}`;
+    }
 
-        if (this.isModified('password')) {
-            const salt = await bcrypt.genSalt(12);
-            this.password = await bcrypt.hash(this.password, salt);
-        }
-
-        next();
-    } catch (error) {
-        next(error);
+    if (this.isModified('password')) {
+        const salt = await bcrypt.genSalt(12);
+        this.password = await bcrypt.hash(this.password, salt);
     }
 });
+
 
 const User = mongoose.model('User', userSchema);
 
