@@ -54,20 +54,13 @@ export default function Sidebar() {
     return (
         <>
             {/* Mobile top bar */}
-            <div className="lg:hidden h-16 flex items-center px-4 border-b border-[#f3e7e9] bg-white">
+            <div className="lg:hidden w-16 h-16 flex items-center px-4 border-b border-[#f3e7e9] bg-white">
                 <button
                     onClick={() => setOpen(true)}
                     className="text-2xl text-text-main"
                 >
                     <MdMenu />
                 </button>
-
-                <div className="ml-3 flex items-center gap-2">
-                    <div className="bg-[#ee2b4b]/10 rounded-full p-1.5">
-                        <MdHiking className="text-[#ee2b4b] text-xl" />
-                    </div>
-                    <h1 className="text-lg font-bold">FootStyle</h1>
-                </div>
             </div>
 
             {/* Overlay (mobile) */}
@@ -82,14 +75,16 @@ export default function Sidebar() {
             <aside
                 className={`
                     fixed lg:static top-0 left-0 z-50
-                    w-64 min-h-screen bg-white border-r border-[#f3e7e9]
-                    flex flex-col transition-transform duration-300
+                    w-64 bg-white border-r border-[#f3e7e9]
+                    flex flex-col
+                    h-full lg:h-screen
+                    transition-transform duration-300
                     ${open ? "translate-x-0" : "-translate-x-full"}
                     lg:translate-x-0
                 `}
             >
                 {/* Header */}
-                <div className="h-16 flex items-center justify-between px-6 border-b border-[#f3e7e9]">
+                <div className="h-16 flex items-center justify-between px-6 border-b border-[#f3e7e9] flex-shrink-0">
                     <div className="flex items-center gap-3">
                         <div className="bg-[#ee2b4b]/10 rounded-full p-1.5">
                             <MdHiking className="text-[#ee2b4b] text-2xl" />
@@ -133,17 +128,19 @@ export default function Sidebar() {
                                     setOpen(false);
                                 }}
                                 className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors group text-left
-                                    ${isActive
-                                        ? "bg-[#ee2b4b]/10 text-[#ee2b4b]"
-                                        : "text-text-main hover:bg-gray-50"
+                                    ${
+                                        isActive
+                                            ? "bg-[#ee2b4b]/10 text-[#ee2b4b]"
+                                            : "text-text-main hover:bg-gray-50"
                                     }
                                 `}
                             >
                                 <span
                                     className={`text-[22px]
-                                        ${isActive
-                                            ? "text-[#ee2b4b]"
-                                            : "text-text-secondary group-hover:text-[#ee2b4b]"
+                                        ${
+                                            isActive
+                                                ? "text-[#ee2b4b]"
+                                                : "text-text-secondary group-hover:text-[#ee2b4b]"
                                         }
                                     `}
                                 >
@@ -151,10 +148,11 @@ export default function Sidebar() {
                                 </span>
 
                                 <span
-                                    className={`text-sm ${isActive
-                                        ? "font-semibold"
-                                        : "font-medium"
-                                        }`}
+                                    className={`text-sm ${
+                                        isActive
+                                            ? "font-semibold"
+                                            : "font-medium"
+                                    }`}
                                 >
                                     {item.label}
                                 </span>
@@ -166,7 +164,7 @@ export default function Sidebar() {
                 </nav>
 
                 {/* User */}
-                <div className="p-4 border-t border-[#f3e7e9]">
+                <div className="p-4 border-t border-[#f3e7e9] flex-shrink-0">
                     <div className="flex items-center gap-3 p-2 rounded-xl bg-gray-50">
                         <div
                             className="size-10 rounded-full bg-cover bg-center"
