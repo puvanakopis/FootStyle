@@ -1,4 +1,4 @@
-require('dotenv').config(); 
+require('dotenv').config();
 
 const nodemailer = require('nodemailer');
 const User = require('../model/userModel');
@@ -18,12 +18,12 @@ const transporter = nodemailer.createTransport({
     },
 });
 
-
 // ------------------- REQUEST OTP -------------------
 exports.requestOtp = async (req, res) => {
     try {
         const { firstName, lastName, email, password } = req.body;
 
+        // Validate input
         if (!email || !password || !firstName || !lastName) {
             return res.status(400).json({ message: 'All fields are required' });
         }
@@ -42,23 +42,29 @@ exports.requestOtp = async (req, res) => {
             return res.status(409).json({ message: 'Email already in use at FootStyle' });
         }
 
+        // Generate OTP
         const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+
+        // Hash password immediately for security
+        const hashedTempPassword = await bcrypt.hash(password, 10);
 
         const otpData = {
             email: email.toLowerCase(),
             otp: otpCode,
-            tempPassword: password,
+            tempPassword: hashedTempPassword,
             firstName,
             lastName,
             expiresAt: new Date(Date.now() + 5 * 60 * 1000),
         };
 
+        // Upsert OTP record
         await OTP.findOneAndUpdate(
             { email: email.toLowerCase() },
             otpData,
             { upsert: true, new: true }
         );
 
+        // Send OTP email
         await transporter.sendMail({
             from: `FootStyle Support <${process.env.EMAIL_USER}>`,
             to: email,
@@ -79,7 +85,6 @@ exports.requestOtp = async (req, res) => {
         res.status(500).json({ message: 'Server error - FootStyle' });
     }
 };
-
 
 // ------------------- VERIFY OTP & SIGNUP -------------------
 exports.verifyOtpAndSignup = async (req, res) => {
@@ -104,18 +109,18 @@ exports.verifyOtpAndSignup = async (req, res) => {
             return res.status(400).json({ message: 'Invalid OTP.' });
         }
 
-        const hashedPassword = await bcrypt.hash(otpRecord.tempPassword, 10);
-
+        // Create user with the already hashed password
         const newUser = new User({
             firstName: otpRecord.firstName,
             lastName: otpRecord.lastName,
-            email: email.toLowerCase(),
-            password: hashedPassword,
+            email: otpRecord.email.toLowerCase(),
+            password: otpRecord.tempPassword,
         });
 
         await newUser.save();
         await OTP.deleteOne({ email: email.toLowerCase() });
 
+        // Generate JWT
         const token = jwt.sign(
             { id: newUser._id, email: newUser.email, role: newUser.role },
             JWT_SECRET,
@@ -135,6 +140,48 @@ exports.verifyOtpAndSignup = async (req, res) => {
         });
     } catch (error) {
         console.error('Verify OTP Error:', error);
+        res.status(500).json({ message: 'Server error - FootStyle' });
+    }
+};
+
+// ------------------- LOGIN -------------------
+exports.login = async (req, res) => {
+    try {
+        const { email, password } = req.body;
+
+        if (!email || !password) {
+            return res.status(400).json({ message: 'Email and password are required' });
+        }
+
+        const user = await User.findOne({ email: email.toLowerCase() });
+        if (!user) {
+            return res.status(401).json({ message: 'Invalid email' });
+        }
+
+        const isPasswordMatch = await bcrypt.compare(password, user.password);
+        if (!isPasswordMatch) {
+            return res.status(401).json({ message: 'Invalid password' });
+        }
+
+        const token = jwt.sign(
+            { id: user._id, email: user.email, role: user.role },
+            JWT_SECRET,
+            { expiresIn: JWT_EXPIRES_IN }
+        );
+
+        res.status(200).json({
+            message: 'Login successful - FootStyle',
+            token,
+            user: {
+                id: user._id,
+                firstName: user.firstName,
+                lastName: user.lastName,
+                email: user.email,
+                role: user.role,
+            },
+        });
+    } catch (error) {
+        console.error('Login Error:', error);
         res.status(500).json({ message: 'Server error - FootStyle' });
     }
 };
