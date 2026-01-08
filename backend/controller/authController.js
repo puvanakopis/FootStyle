@@ -240,3 +240,34 @@ exports.requestPasswordReset = async (req, res) => {
         res.status(500).json({ message: 'Server error' });
     }
 };
+
+
+// ------------------- VERIFY OTP FOR PASSWORD RESET -------------------
+exports.verifyPasswordResetOtp = async (req, res) => {
+    try {
+        const { email, otp } = req.body;
+
+        if (!email || !otp) {
+            return res.status(400).json({ message: 'Email and OTP are required' });
+        }
+
+        const otpRecord = await OTP.findOne({ email: email.toLowerCase() });
+        if (!otpRecord) {
+            return res.status(400).json({ message: 'OTP not found. Please request again.' });
+        }
+
+        if (otpRecord.expiresAt < new Date()) {
+            await OTP.deleteOne({ email: email.toLowerCase() });
+            return res.status(400).json({ message: 'OTP expired. Please request again.' });
+        }
+
+        if (otpRecord.otp !== otp.toString()) {
+            return res.status(400).json({ message: 'Invalid OTP.' });
+        }
+
+        res.status(200).json({ message: 'OTP verified. You can now reset your password.' });
+    } catch (error) {
+        console.error('Verify Password Reset OTP Error:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
