@@ -18,6 +18,7 @@ const transporter = nodemailer.createTransport({
     },
 });
 
+
 // ------------------- REQUEST OTP -------------------
 exports.requestOtp = async (req, res) => {
     try {
@@ -86,6 +87,7 @@ exports.requestOtp = async (req, res) => {
     }
 };
 
+
 // ------------------- VERIFY OTP & SIGNUP -------------------
 exports.verifyOtpAndSignup = async (req, res) => {
     try {
@@ -144,6 +146,7 @@ exports.verifyOtpAndSignup = async (req, res) => {
     }
 };
 
+
 // ------------------- LOGIN -------------------
 exports.login = async (req, res) => {
     try {
@@ -183,5 +186,57 @@ exports.login = async (req, res) => {
     } catch (error) {
         console.error('Login Error:', error);
         res.status(500).json({ message: 'Server error - FootStyle' });
+    }
+};
+
+
+// ------------------- REQUEST PASSWORD RESET OTP -------------------
+exports.requestPasswordReset = async (req, res) => {
+    try {
+        const { email } = req.body;
+
+        if (!email) {
+            return res.status(400).json({ message: 'Email is required' });
+        }
+
+        const user = await User.findOne({ email: email.toLowerCase() });
+        if (!user) {
+            return res.status(404).json({ message: 'User with this email not found' });
+        }
+
+        // Generate OTP
+        const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+
+        const otpData = {
+            email: email.toLowerCase(),
+            otp: otpCode,
+            tempPassword: null,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            expiresAt: new Date(Date.now() + 5 * 60 * 1000), 
+        };
+
+        await OTP.findOneAndUpdate(
+            { email: email.toLowerCase() },
+            otpData,
+            { upsert: true, new: true }
+        );
+
+        // Send OTP email
+        await transporter.sendMail({
+            from: `FootStyle Support <${process.env.EMAIL_USER}>`,
+            to: email,
+            subject: 'Your FootStyle Password Reset OTP',
+            html: `
+                <p>Hello ${user.firstName},</p>
+                <p>Your OTP to reset your password is: <b>${otpCode}</b></p>
+                <p>This OTP expires in 5 minutes.</p>
+            `,
+        });
+
+        res.status(200).json({ message: 'OTP sent to your email', email: email.toLowerCase() });
+    } catch (error) {
+        console.error('Request Password Reset Error:', error);
+        res.status(500).json({ message: 'Server error' });
     }
 };
