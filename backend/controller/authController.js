@@ -271,3 +271,46 @@ exports.verifyPasswordResetOtp = async (req, res) => {
         res.status(500).json({ message: 'Server error' });
     }
 };
+
+// ------------------- RESET PASSWORD -------------------
+exports.resetPassword = async (req, res) => {
+    try {
+        const { email, otp, newPassword } = req.body;
+
+        if (!email || !otp || !newPassword) {
+            return res.status(400).json({ message: 'Email, OTP, and new password are required' });
+        }
+
+        const otpRecord = await OTP.findOne({ email: email.toLowerCase() });
+        if (!otpRecord) {
+            return res.status(400).json({ message: 'OTP not found. Please request again.' });
+        }
+
+        if (otpRecord.expiresAt < new Date()) {
+            await OTP.deleteOne({ email: email.toLowerCase() });
+            return res.status(400).json({ message: 'OTP expired. Please request again.' });
+        }
+
+        if (otpRecord.otp !== otp.toString()) {
+            return res.status(400).json({ message: 'Invalid OTP.' });
+        }
+
+        if (newPassword.length < 6) {
+            return res.status(400).json({ message: 'Password must be at least 6 characters long' });
+        }
+
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+        await User.findOneAndUpdate(
+            { email: email.toLowerCase() },
+            { password: hashedPassword }
+        );
+
+        await OTP.deleteOne({ email: email.toLowerCase() });
+
+        res.status(200).json({ message: 'Password reset successful. You can now login with new password.' });
+    } catch (error) {
+        console.error('Reset Password Error:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
