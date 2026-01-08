@@ -2,6 +2,7 @@ const express = require("express");
 const mongoose = require("mongoose");
 const dotenv = require("dotenv");
 const authRoutes = require("./routes/authRoutes");
+const googleAuthRoutes = require('./routes/googleAuthRoutes');
 
 dotenv.config();
 
@@ -28,6 +29,7 @@ app.use((req, res, next) => {
 
 // Routes
 app.use("/api/auth", authRoutes);
+app.use('/auth/google', googleAuthRoutes);
 
 app.get("/", (req, res) => {
   res.send("Hello World from Express!");
