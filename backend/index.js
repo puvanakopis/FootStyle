@@ -29,7 +29,7 @@ app.use((req, res, next) => {
 
 // Routes
 app.use("/api/auth", authRoutes);
-app.use('/auth/google', googleAuthRoutes);
+app.use('/api/authGoogle', googleAuthRoutes);
 
 app.get("/", (req, res) => {
   res.send("Hello World from Express!");

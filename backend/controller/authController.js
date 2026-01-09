@@ -5,6 +5,8 @@ const User = require('../model/userModel');
 const OTP = require('../model/otpModel');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const fs = require('fs');
+const path = require('path');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your_jwt_secret';
 const JWT_EXPIRES_IN = '1d';
@@ -17,6 +19,21 @@ const transporter = nodemailer.createTransport({
         pass: process.env.EMAIL_PASS,
     },
 });
+
+
+// ------------------- Load Template -------------------
+const loadTemplate = (fileName, replacements) => {
+    let html = fs.readFileSync(
+        path.join(__dirname, '../templates', fileName),
+        'utf8'
+    );
+
+    Object.keys(replacements).forEach(key => {
+        html = html.replace(new RegExp(`{{${key}}}`, 'g'), replacements[key]);
+    });
+
+    return html;
+};
 
 
 // ------------------- REQUEST OTP -------------------
@@ -65,16 +82,16 @@ exports.requestOtp = async (req, res) => {
             { upsert: true, new: true }
         );
 
-        // Send OTP email
+        const html = loadTemplate('signupOtp.html', {
+            firstName: firstName,
+            otpCode: otpCode
+        });
+
         await transporter.sendMail({
             from: `FootStyle Support <${process.env.EMAIL_USER}>`,
             to: email,
             subject: 'Your FootStyle Signup OTP',
-            html: `
-                <p>Hello ${firstName},</p>
-                <p>Your OTP is: <b>${otpCode}</b></p>
-                <p>This OTP expires in 5 minutes.</p>
-            `,
+            html
         });
 
         res.status(200).json({
@@ -213,7 +230,7 @@ exports.requestPasswordReset = async (req, res) => {
             tempPassword: null,
             firstName: user.firstName,
             lastName: user.lastName,
-            expiresAt: new Date(Date.now() + 5 * 60 * 1000), 
+            expiresAt: new Date(Date.now() + 5 * 60 * 1000),
         };
 
         await OTP.findOneAndUpdate(
@@ -222,17 +239,18 @@ exports.requestPasswordReset = async (req, res) => {
             { upsert: true, new: true }
         );
 
-        // Send OTP email
+        const html = loadTemplate('passwordResetOtp.html', {
+            firstName: user.firstName,
+            otpCode: otpCode
+        });
+
         await transporter.sendMail({
             from: `FootStyle Support <${process.env.EMAIL_USER}>`,
             to: email,
             subject: 'Your FootStyle Password Reset OTP',
-            html: `
-                <p>Hello ${user.firstName},</p>
-                <p>Your OTP to reset your password is: <b>${otpCode}</b></p>
-                <p>This OTP expires in 5 minutes.</p>
-            `,
+            html
         });
+
 
         res.status(200).json({ message: 'OTP sent to your email', email: email.toLowerCase() });
     } catch (error) {
