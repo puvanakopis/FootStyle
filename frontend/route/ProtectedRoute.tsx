@@ -10,8 +10,7 @@ interface ProtectedRouteProps {
     redirectTo?: string;
 }
 
-const publicRoutes = ['/'];
-const authRoutes = ['/login', '/signup', '/forgot-password'];
+const authRoutes = ['/login', '/signup', '/forgot-password', '/signup-verify'];
 
 export default function ProtectedRoute({
     children,
@@ -21,14 +20,16 @@ export default function ProtectedRoute({
     const router = useRouter();
 
     useEffect(() => {
-        if (!isLoading) {
-            const path = window.location.pathname;
+        if (isLoading) return;
 
-            if (!isAuthenticated) {
-                router.push(redirectTo);
-            } else if (isAuthenticated && authRoutes.includes(path)) {
-                router.push('/');
-            }
+        const path = window.location.pathname;
+
+        if (!isAuthenticated && !authRoutes.includes(path)) {
+            router.push(redirectTo);
+        }
+
+        if (isAuthenticated && authRoutes.includes(path)) {
+            router.push('/');
         }
     }, [isAuthenticated, isLoading, router, redirectTo]);
 

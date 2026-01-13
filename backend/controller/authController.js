@@ -110,8 +110,8 @@ exports.verifyOtpAndSignup = async (req, res) => {
     try {
         const { email, otp } = req.body;
 
-        if (!email || !otp) {
-            return res.status(400).json({ message: 'Email and OTP are required' });
+        if (!otp) {
+            return res.status(400).json({ message: 'OTP are required' });
         }
 
         const otpRecord = await OTP.findOne({ email: email.toLowerCase() });
@@ -265,8 +265,8 @@ exports.verifyPasswordResetOtp = async (req, res) => {
     try {
         const { email, otp } = req.body;
 
-        if (!email || !otp) {
-            return res.status(400).json({ message: 'Email and OTP are required' });
+        if (!otp) {
+            return res.status(400).json({ message: 'OTP are required' });
         }
 
         const otpRecord = await OTP.findOne({ email: email.toLowerCase() });

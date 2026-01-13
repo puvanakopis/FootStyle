@@ -3,7 +3,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import Cookies from 'js-cookie';
 import { authApi } from '@/services/authServices';
-import { AuthContextType, User } from '@/interfaces/authInterface';
+import { AuthContextType, User, SignupRequest, OTPRequest } from '@/interfaces/authInterface';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -27,7 +27,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-        // Check for saved token on initial load
         const initializeAuth = () => {
             try {
                 const savedToken = Cookies.get('token');
@@ -60,29 +59,26 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         setUser(null);
         setIsAuthenticated(false);
         setError(null);
-
         Cookies.remove('token');
     };
 
     const handleError = (err: any) => {
         let errorMessage = 'An error occurred';
-
         if (err.response?.data?.message) {
             errorMessage = err.response.data.message;
         } else if (err.message) {
             errorMessage = err.message;
         }
-
         setError(errorMessage);
     };
 
+    // LOGIN
     const login = async (email: string, password: string) => {
         try {
             setIsLoading(true);
             setError(null);
             const response = await authApi.login({ email, password });
             updateAuthState(response.token, response.user);
-            console.log(user)
         } catch (err: any) {
             handleError(err);
         } finally {
@@ -90,9 +86,42 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         }
     };
 
+    // LOGOUT
     const logout = () => {
         clearAuthState();
     };
+
+    // SIGNUP - Request OTP
+    const requestSignupOtp = async (data: SignupRequest) => {
+        try {
+            setIsLoading(true);
+            setError(null);
+            const response = await authApi.requestSignupOtp(data);
+            return response;
+        } catch (err: any) {
+            handleError(err);
+            throw err;
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    // SIGNUP - Verify OTP
+    const verifySignupOtp = async (data: OTPRequest) => {
+        try {
+            setIsLoading(true);
+            setError(null);
+            const response = await authApi.verifySignupOtp(data);
+            updateAuthState(response.token, response.user);
+        } catch (err: any) {
+            handleError(err);
+            throw err;
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const clearError = () => setError(null);
 
     const value: AuthContextType = {
         user,
@@ -102,6 +131,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         error,
         login,
         logout,
+        requestSignupOtp,
+        verifySignupOtp,
+        clearError,
     };
 
     return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
