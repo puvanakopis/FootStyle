@@ -2,8 +2,8 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import Cookies from 'js-cookie';
-import { authApi } from '@/lib/api/auth';
-import { AuthContextType, User } from '@/interfaces/auth';
+import { authApi } from '@/services/authServices';
+import { AuthContextType, User } from '@/interfaces/authInterface';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
