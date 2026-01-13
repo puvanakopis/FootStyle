@@ -49,6 +49,12 @@ export interface OTPRequest {
     otp: string;
 }
 
+// PASSWORD RESET
+export interface PasswordResetRequest {
+    email: string;
+    otp: string;
+    newPassword: string;
+}
 
 export interface AuthState {
     user: User | null;
@@ -61,7 +67,10 @@ export interface AuthState {
 export interface AuthContextType extends AuthState {
     login: (email: string, password: string) => Promise<void>;
     logout: () => void;
+    clearError: () => void;
     requestSignupOtp: (data: SignupRequest) => Promise<void>;
     verifySignupOtp: (data: OTPRequest) => Promise<void>;
-    clearError: () => void;
+    requestPasswordResetOtp: (email: string) => Promise<void>;
+    verifyPasswordResetOtp: (data: OTPRequest) => Promise<void>;
+    resetPassword: (data: PasswordResetRequest) => Promise<void>;
 }

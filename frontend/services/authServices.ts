@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { LoginRequest, AuthResponse, SignupRequest, OTPRequest } from '@/interfaces/authInterface';
+import { LoginRequest, AuthResponse, SignupRequest, OTPRequest, PasswordResetRequest } from '@/interfaces/authInterface';
 
 const API_BASE_URL = process.env.API_URL || 'http://localhost:4000';
 
@@ -29,6 +29,25 @@ export const authApi = {
         const response = await api.post('/api/auth/signup/verify-otp', data);
         return response.data;
     },
+
+    // PASSWORD RESET - Request OTP
+    requestPasswordResetOtp: async (data: { email: string }): Promise<{ message: string; email: string }> => {
+        const response = await api.post('/api/auth/forgot-password/request-otp', data);
+        return response.data;
+    },
+
+    // PASSWORD RESET - Verify OTP
+    verifyPasswordResetOtp: async (data: OTPRequest): Promise<{ message: string }> => {
+        const response = await api.post('/api/auth/forgot-password/verify-otp', data);
+        return response.data;
+    },
+
+    // PASSWORD RESET - Reset Password
+    resetPassword: async (data: PasswordResetRequest): Promise<{ message: string }> => {
+        const response = await api.post('/api/auth/forgot-password/reset', data);
+        return response.data;
+    },
+
 };
 
 export default api;
