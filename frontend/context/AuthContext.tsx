@@ -1,16 +1,28 @@
-'use client';
+"use client";
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import Cookies from 'js-cookie';
-import { authApi } from '@/services/authServices';
-import { AuthContextType, User, SignupRequest, OTPRequest } from '@/interfaces/authInterface';
+import React, {
+    createContext,
+    useContext,
+    useEffect,
+    useState,
+    ReactNode,
+} from "react";
+import Cookies from "js-cookie";
+import { authApi } from "@/services/authServices";
+import {
+    AuthContextType,
+    User,
+    SignupRequest,
+    OTPRequest,
+    PasswordResetRequest,
+} from "@/interfaces/authInterface";
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const useAuth = () => {
     const context = useContext(AuthContext);
     if (!context) {
-        throw new Error('useAuth must be used within an AuthProvider');
+        throw new Error("useAuth must be used within an AuthProvider");
     }
     return context;
 };
@@ -27,59 +39,40 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-        const initializeAuth = () => {
-            try {
-                const savedToken = Cookies.get('token');
-
-                if (savedToken) {
-                    setToken(savedToken);
-                    setIsAuthenticated(true);
-                }
-            } catch (err) {
-                console.error('Error loading auth state:', err);
-                Cookies.remove('token');
-            } finally {
-                setIsLoading(false);
-            }
-        };
-
-        initializeAuth();
+        const token = Cookies.get("token");
+        if (token) {
+            setToken(token);
+            setIsAuthenticated(true);
+        }
+        setIsLoading(false);
     }, []);
 
-    const updateAuthState = (newToken: string, newUser: User) => {
-        setToken(newToken);
-        setUser(newUser);
+    const updateAuthState = (token: string, user: User) => {
+        Cookies.set("token", token, { expires: 1 });
+        setToken(token);
+        setUser(user);
         setIsAuthenticated(true);
         setError(null);
-        Cookies.set('token', newToken, { expires: 1 });
     };
 
     const clearAuthState = () => {
-        setToken(null);
+        Cookies.remove("token");
         setUser(null);
+        setToken(null);
         setIsAuthenticated(false);
-        setError(null);
-        Cookies.remove('token');
     };
 
     const handleError = (err: any) => {
-        let errorMessage = 'An error occurred';
-        if (err.response?.data?.message) {
-            errorMessage = err.response.data.message;
-        } else if (err.message) {
-            errorMessage = err.message;
-        }
-        setError(errorMessage);
+        setError(err?.response?.data?.message || err.message || "Something went wrong");
     };
 
     // LOGIN
     const login = async (email: string, password: string) => {
         try {
             setIsLoading(true);
-            setError(null);
-            const response = await authApi.login({ email, password });
-            updateAuthState(response.token, response.user);
-        } catch (err: any) {
+            const res = await authApi.login({ email, password });
+            updateAuthState(res.token, res.user);
+        } catch (err) {
             handleError(err);
         } finally {
             setIsLoading(false);
@@ -87,18 +80,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     };
 
     // LOGOUT
-    const logout = () => {
-        clearAuthState();
-    };
+    const logout = () => clearAuthState();
 
-    // SIGNUP - Request OTP
+    // SIGNUP OTP
     const requestSignupOtp = async (data: SignupRequest) => {
         try {
             setIsLoading(true);
-            setError(null);
-            const response = await authApi.requestSignupOtp(data);
-            return response;
-        } catch (err: any) {
+            return await authApi.requestSignupOtp(data);
+        } catch (err) {
             handleError(err);
             throw err;
         } finally {
@@ -106,14 +95,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         }
     };
 
-    // SIGNUP - Verify OTP
     const verifySignupOtp = async (data: OTPRequest) => {
         try {
             setIsLoading(true);
-            setError(null);
-            const response = await authApi.verifySignupOtp(data);
-            updateAuthState(response.token, response.user);
-        } catch (err: any) {
+            const res = await authApi.verifySignupOtp(data);
+            updateAuthState(res.token, res.user);
+        } catch (err) {
             handleError(err);
             throw err;
         } finally {
@@ -121,20 +108,62 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         }
     };
 
-    const clearError = () => setError(null);
-
-    const value: AuthContextType = {
-        user,
-        token,
-        isAuthenticated,
-        isLoading,
-        error,
-        login,
-        logout,
-        requestSignupOtp,
-        verifySignupOtp,
-        clearError,
+    // PASSWORD RESET FLOW
+    const requestPasswordResetOtp = async (email: string) => {
+        try {
+            setIsLoading(true);
+            await authApi.requestPasswordResetOtp({ email });
+        } catch (err) {
+            handleError(err);
+            throw err;
+        } finally {
+            setIsLoading(false);
+        }
     };
 
-    return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+    const verifyPasswordResetOtp = async (data: OTPRequest) => {
+        try {
+            setIsLoading(true);
+            await authApi.verifyPasswordResetOtp(data);
+        } catch (err) {
+            handleError(err);
+            throw err;
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const resetPassword = async (data: PasswordResetRequest) => {
+        try {
+            setIsLoading(true);
+            await authApi.resetPassword(data);
+        } catch (err) {
+            handleError(err);
+            throw err;
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    return (
+        <AuthContext.Provider
+            value={{
+                user,
+                token,
+                isAuthenticated,
+                isLoading,
+                error,
+                login,
+                logout,
+                requestSignupOtp,
+                verifySignupOtp,
+                requestPasswordResetOtp,
+                verifyPasswordResetOtp,
+                resetPassword,
+                clearError: () => setError(null),
+            }}
+        >
+            {children}
+        </AuthContext.Provider>
+    );
 };

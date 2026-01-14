@@ -10,7 +10,7 @@ interface ProtectedRouteProps {
     redirectTo?: string;
 }
 
-const authRoutes = ['/login', '/signup', '/forgot-password', '/signup-verify'];
+const authRoutes = ['/login', '/signup', '/forgot-password', '/forgot-password-otp', '/forgot-password-verify', '/signup-verify'];
 
 export default function ProtectedRoute({
     children,
