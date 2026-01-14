@@ -1,43 +1,55 @@
 'use client';
 
 import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import Loading from '@/components/loading';
 
 interface ProtectedRouteProps {
     children: React.ReactNode;
-    requireAuth?: boolean;
-    redirectTo?: string;
 }
 
-const authRoutes = ['/login', '/signup', '/forgot-password', '/forgot-password-otp', '/forgot-password-verify', '/signup-verify'];
+const authRoutes = [
+    '/login',
+    '/signup',
+    '/forgot-password',
+    '/forgot-password-otp',
+    '/forgot-password-verify',
+    '/signup-verify',
+];
 
-export default function ProtectedRoute({
-    children,
-    redirectTo = '/login',
-}: ProtectedRouteProps) {
+const publicRoutes = [
+    '/',
+    '/products',
+    '/about',
+    '/contact',
+];
+
+export default function ProtectedRoute({ children }: ProtectedRouteProps) {
     const { isAuthenticated, isLoading } = useAuth();
     const router = useRouter();
+    const pathname = usePathname();
 
     useEffect(() => {
         if (isLoading) return;
 
-        const path = window.location.pathname;
+        const isPublicRoute = publicRoutes.includes(pathname);
+        const isAuthRoute = authRoutes.includes(pathname);
 
-        if (!isAuthenticated && !authRoutes.includes(path)) {
-            router.push(redirectTo);
+        if (!isAuthenticated) {
+            if (!isPublicRoute && !isAuthRoute) {
+                router.replace('/login');
+            }
+            return;
         }
 
-        if (isAuthenticated && authRoutes.includes(path)) {
-            router.push('/');
+        if (isAuthenticated && isAuthRoute) {
+            router.replace('/');
         }
-    }, [isAuthenticated, isLoading, router, redirectTo]);
+    }, [isAuthenticated, isLoading, pathname, router]);
 
     if (isLoading) {
-        return (
-            <Loading />
-        );
+        return <Loading />;
     }
 
     return <>{children}</>;
