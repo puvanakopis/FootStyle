@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
+import Loading from '@/components/loading';
 
 interface ProtectedRouteProps {
     children: React.ReactNode;
@@ -35,9 +36,7 @@ export default function ProtectedRoute({
 
     if (isLoading) {
         return (
-            <div className="min-h-screen flex items-center justify-center">
-                <p>Loading...</p>
-            </div>
+            <Loading />
         );
     }
 
