@@ -361,3 +361,72 @@ exports.getCurrentUser = async (req, res) => {
         res.status(500).json({ message: 'Server error' });
     }
 };
+
+// ------------------- UPDATE CURRENT USER -------------------
+exports.updateCurrentUser = async (req, res) => {
+    try {
+        const userId = req.user._id;
+
+        // Allowed fields for update
+        const allowedUpdates = [
+            'firstName',
+            'lastName',
+            'username',
+            'phoneNumber',
+            'country',
+            'state',
+            'pinCode',
+            'profileImage',
+            'address'
+        ];
+
+        // Prepare update object
+        const updates = {};
+        allowedUpdates.forEach(field => {
+            if (req.body[field] !== undefined) {
+                updates[field] = req.body[field];
+            }
+        });
+
+        if (Object.keys(updates).length === 0) {
+            return res.status(400).json({ message: 'No valid fields provided for update' });
+        }
+
+        // Handle nested address updates safely
+        if (updates.address) {
+            const currentAddress = req.user.address || {};
+            updates.address = { ...currentAddress, ...updates.address };
+        }
+
+        // Update user
+        const updatedUser = await User.findByIdAndUpdate(
+            userId,
+            { $set: updates },
+            { new: true, runValidators: true }
+        ).select('-password');
+
+        res.status(200).json({
+            message: 'User updated successfully',
+            user: {
+                id: updatedUser._id,
+                firstName: updatedUser.firstName,
+                lastName: updatedUser.lastName,
+                username: updatedUser.username,
+                email: updatedUser.email,
+                role: updatedUser.role,
+                phoneNumber: updatedUser.phoneNumber,
+                country: updatedUser.country,
+                state: updatedUser.state,
+                pinCode: updatedUser.pinCode,
+                profileImage: updatedUser.profileImage,
+                address: updatedUser.address,
+                isActive: updatedUser.isActive,
+                createdAt: updatedUser.createdAt,
+                updatedAt: updatedUser.updatedAt
+            }
+        });
+    } catch (error) {
+        console.error('Update Current User Error:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};

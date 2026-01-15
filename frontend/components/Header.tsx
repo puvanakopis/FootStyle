@@ -44,7 +44,7 @@ const Header = () => {
   const toggleMobileMenu = () => setShowMobileMenu(!showMobileMenu);
 
   const getUserDisplayName = () => {
-    if (user) return user.name || user.email?.split('@')[0] || 'User';
+    if (user) return user.firstName || 'User';
     return 'Guest';
   };
 
