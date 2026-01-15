@@ -4,7 +4,6 @@ import React from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { BiPackage } from "react-icons/bi";
 import { IoIosLogOut } from "react-icons/io";
-import { IoSettingsOutline } from "react-icons/io5";
 import { LuUserRound } from "react-icons/lu";
 import { MdFavoriteBorder } from "react-icons/md";
 import { VscAccount } from "react-icons/vsc";
@@ -13,7 +12,6 @@ const navItems = [
     { label: "My Profile", icon: <LuUserRound />, path: "/profile" },
     { label: "Orders", icon: <BiPackage />, path: "/orders" },
     { label: "Wishlist", icon: <MdFavoriteBorder />, path: "/wishlist" },
-    { label: "Settings", icon: <IoSettingsOutline />, path: "/settings" },
     { label: "Log Out", icon: <IoIosLogOut />, color: "text-red-500", path: "/logout" },
 ];
 

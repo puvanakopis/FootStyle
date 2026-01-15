@@ -14,9 +14,6 @@ const publicRoutes = [
     '/products',
     '/about',
     '/contact',
-];
-
-const authRoutes = [
     '/login',
     '/signup',
     '/forgot-password',
@@ -25,8 +22,15 @@ const authRoutes = [
     '/signup-verify',
 ];
 
+const adminRoutes = [
+    '/admin',
+    '/admin/products',
+    '/admin/orders',
+    '/admin/customers',
+];
+
 export default function ProtectedRoute({ children }: ProtectedRouteProps) {
-    const { isAuthenticated, isLoading } = useAuth();
+    const { isAuthenticated, isLoading, user } = useAuth();
     const router = useRouter();
     const pathname = usePathname();
 
@@ -34,19 +38,36 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
         if (isLoading) return;
 
         const isPublicRoute = publicRoutes.includes(pathname);
-        const isAuthRoute = authRoutes.includes(pathname);
+        const isAdminRoute = adminRoutes.some(route =>
+            pathname.startsWith(route)
+        );
 
         if (!isAuthenticated) {
-            if (!isPublicRoute && !isAuthRoute) {
+            if (!isPublicRoute) {
                 router.replace('/login');
             }
             return;
         }
 
-        if (isAuthenticated && isAuthRoute) {
-            router.replace('/');
+        if (user?.role === 'admin') {
+            if (!isAdminRoute) {
+                router.replace('/admin');
+            }
+            return;
         }
-    }, [isAuthenticated, isLoading, pathname, router]);
+
+        if (user?.role === 'customer') {
+            if (isAdminRoute) {
+                router.replace('/');
+                return;
+            }
+
+            if (['/login', '/signup'].includes(pathname)) {
+                router.replace('/');
+                return;
+            }
+        }
+    }, [isAuthenticated, isLoading, pathname, router, user]);
 
     if (isLoading) {
         return <Loading />;
