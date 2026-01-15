@@ -39,12 +39,24 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-        const token = Cookies.get("token");
-        if (token) {
-            setToken(token);
-            setIsAuthenticated(true);
-        }
-        setIsLoading(false);
+        const initializeAuth = async () => {
+            const savedToken = Cookies.get("token");
+            if (savedToken) {
+                setToken(savedToken);
+                setIsAuthenticated(true);
+                try {
+                    const res = await authApi.getCurrentUser();
+                    setUser(res.user);
+                } catch (err: any) {
+                    console.error("Failed to fetch current user:", err);
+                    setError(err?.response?.data?.message || "Failed to fetch user");
+                    clearAuthState();
+                }
+            }
+            setIsLoading(false);
+        };
+
+        initializeAuth();
     }, []);
 
     const updateAuthState = (token: string, user: User) => {
@@ -66,7 +78,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         setError(err?.response?.data?.message || err.message || "Something went wrong");
     };
 
-    // LOGIN
+    // ---------------- LOGIN ----------------
     const login = async (email: string, password: string) => {
         try {
             setIsLoading(true);
@@ -74,15 +86,16 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             updateAuthState(res.token, res.user);
         } catch (err) {
             handleError(err);
+            throw err;
         } finally {
             setIsLoading(false);
         }
     };
 
-    // LOGOUT
+    // ---------------- LOGOUT ----------------
     const logout = () => clearAuthState();
 
-    // SIGNUP OTP
+    // ---------------- SIGNUP OTP ----------------
     const requestSignupOtp = async (data: SignupRequest) => {
         try {
             setIsLoading(true);
@@ -108,7 +121,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         }
     };
 
-    // PASSWORD RESET FLOW
+    // ---------------- PASSWORD RESET FLOW ----------------
     const requestPasswordResetOtp = async (email: string) => {
         try {
             setIsLoading(true);
@@ -145,6 +158,22 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         }
     };
 
+
+    // ---------------- GET CURRENT USER ----------------
+    const getCurrentUser = async () => {
+        try {
+            setIsLoading(true);
+            const res = await authApi.getCurrentUser();
+            setUser(res.user);
+            setIsAuthenticated(true);
+        } catch (err) {
+            handleError(err);
+            clearAuthState();
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
     return (
         <AuthContext.Provider
             value={{
@@ -160,6 +189,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
                 requestPasswordResetOtp,
                 verifyPasswordResetOtp,
                 resetPassword,
+                getCurrentUser,
                 clearError: () => setError(null),
             }}
         >

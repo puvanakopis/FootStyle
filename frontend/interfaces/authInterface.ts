@@ -2,8 +2,9 @@ export interface User {
     id: string;
     firstName: string;
     lastName: string;
+    username?: string;
     email: string;
-    role: 'user' | 'admin';
+    role: 'customer' | 'admin';
     profileImage?: string;
     phoneNumber?: string;
     country?: string;
@@ -27,9 +28,7 @@ export interface AuthResponse {
     user: User;
 }
 
-
-// ----------------- SIGNUP -----------------
-
+// ----------------- LOGIN -----------------
 export interface LoginRequest {
     email: string;
     password: string;
@@ -56,6 +55,7 @@ export interface PasswordResetRequest {
     newPassword: string;
 }
 
+// Redux or Context State
 export interface AuthState {
     user: User | null;
     token: string | null;
@@ -73,4 +73,5 @@ export interface AuthContextType extends AuthState {
     requestPasswordResetOtp: (email: string) => Promise<void>;
     verifyPasswordResetOtp: (data: OTPRequest) => Promise<void>;
     resetPassword: (data: PasswordResetRequest) => Promise<void>;
+    getCurrentUser: () => Promise<void>; 
 }
