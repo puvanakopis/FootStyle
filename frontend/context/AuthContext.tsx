@@ -8,6 +8,7 @@ import React, {
     ReactNode,
 } from "react";
 import Cookies from "js-cookie";
+import { AxiosError } from "axios";
 import { authApi } from "@/services/authServices";
 import {
     AuthContextType,
@@ -15,6 +16,7 @@ import {
     SignupRequest,
     OTPRequest,
     PasswordResetRequest,
+    UpdateUserRequest,
 } from "@/interfaces/authInterface";
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -47,9 +49,16 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
                 try {
                     const res = await authApi.getCurrentUser();
                     setUser(res.user);
-                } catch (err: any) {
+                } catch (err: unknown) {
                     console.error("Failed to fetch current user:", err);
-                    setError(err?.response?.data?.message || "Failed to fetch user");
+                    const error = err as AxiosError<{ message: string }> | Error;
+                    if ('response' in error && error.response?.data?.message) {
+                        setError(error.response.data.message);
+                    } else if ('message' in error) {
+                        setError(error.message || "Failed to fetch user");
+                    } else {
+                        setError("Failed to fetch user");
+                    }
                     clearAuthState();
                 }
             }
@@ -74,8 +83,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         setIsAuthenticated(false);
     };
 
-    const handleError = (err: any) => {
-        setError(err?.response?.data?.message || err.message || "Something went wrong");
+    const handleError = (err: unknown) => {
+        const error = err as AxiosError<{ message: string }> | Error;
+        if ('response' in error && error.response?.data?.message) {
+            setError(error.response.data.message);
+        } else if ('message' in error) {
+            setError(error.message || "Something went wrong");
+        } else {
+            setError("Something went wrong");
+        }
     };
 
     // ---------------- LOGIN ----------------
@@ -99,7 +115,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const requestSignupOtp = async (data: SignupRequest) => {
         try {
             setIsLoading(true);
-            return await authApi.requestSignupOtp(data);
+            await authApi.requestSignupOtp(data);
         } catch (err) {
             handleError(err);
             throw err;
@@ -158,7 +174,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         }
     };
 
-
     // ---------------- GET CURRENT USER ----------------
     const getCurrentUser = async () => {
         try {
@@ -169,6 +184,20 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         } catch (err) {
             handleError(err);
             clearAuthState();
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    // ---------------- UPDATE CURRENT USER ----------------
+    const updateCurrentUser = async (data: UpdateUserRequest) => {
+        try {
+            setIsLoading(true);
+            const res = await authApi.updateCurrentUser(data);
+            setUser(res.user);
+        } catch (err) {
+            handleError(err);
+            throw err;
         } finally {
             setIsLoading(false);
         }
@@ -190,6 +219,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
                 verifyPasswordResetOtp,
                 resetPassword,
                 getCurrentUser,
+                updateCurrentUser,
                 clearError: () => setError(null),
             }}
         >

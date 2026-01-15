@@ -337,24 +337,17 @@ exports.resetPassword = async (req, res) => {
 // ------------------- GET CURRENT USER -------------------
 exports.getCurrentUser = async (req, res) => {
     try {
+        // req.user is assumed to be populated from JWT middleware
+        const userId = req.user.id;
+
+        const user = await User.findById(userId).select('-password'); // exclude password
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
         res.status(200).json({
-            user: {
-                id: req.user._id,
-                firstName: req.user.firstName,
-                lastName: req.user.lastName,
-                username: req.user.username,
-                email: req.user.email,
-                role: req.user.role,
-                phoneNumber: req.user.phoneNumber,
-                country: req.user.country,
-                state: req.user.state,
-                pinCode: req.user.pinCode,
-                profileImage: req.user.profileImage,
-                address: req.user.address,
-                isActive: req.user.isActive,
-                createdAt: req.user.createdAt,
-                updatedAt: req.user.updatedAt,
-            },
+            message: 'Current user fetched successfully',
+            user
         });
     } catch (error) {
         console.error('Get Current User Error:', error);
@@ -365,65 +358,36 @@ exports.getCurrentUser = async (req, res) => {
 // ------------------- UPDATE CURRENT USER -------------------
 exports.updateCurrentUser = async (req, res) => {
     try {
-        const userId = req.user._id;
+        const userId = req.user.id;
+        const {
+            firstName,
+            lastName,
+            phoneNumber,
+            profileImage,
+            address // { street, city, state, zipCode, country }
+        } = req.body;
 
-        // Allowed fields for update
-        const allowedUpdates = [
-            'firstName',
-            'lastName',
-            'username',
-            'phoneNumber',
-            'country',
-            'state',
-            'pinCode',
-            'profileImage',
-            'address'
-        ];
+        // Build update object dynamically
+        const updateData = {};
+        if (firstName) updateData.firstName = firstName;
+        if (lastName) updateData.lastName = lastName;
+        if (phoneNumber) updateData.phoneNumber = phoneNumber;
+        if (profileImage) updateData.profileImage = profileImage;
+        if (address) updateData.address = { ...address };
 
-        // Prepare update object
-        const updates = {};
-        allowedUpdates.forEach(field => {
-            if (req.body[field] !== undefined) {
-                updates[field] = req.body[field];
-            }
-        });
-
-        if (Object.keys(updates).length === 0) {
-            return res.status(400).json({ message: 'No valid fields provided for update' });
-        }
-
-        // Handle nested address updates safely
-        if (updates.address) {
-            const currentAddress = req.user.address || {};
-            updates.address = { ...currentAddress, ...updates.address };
-        }
-
-        // Update user
         const updatedUser = await User.findByIdAndUpdate(
             userId,
-            { $set: updates },
-            { new: true, runValidators: true }
+            updateData,
+            { new: true, runValidators: true, context: 'query' }
         ).select('-password');
+
+        if (!updatedUser) {
+            return res.status(404).json({ message: 'User not found' });
+        }
 
         res.status(200).json({
             message: 'User updated successfully',
-            user: {
-                id: updatedUser._id,
-                firstName: updatedUser.firstName,
-                lastName: updatedUser.lastName,
-                username: updatedUser.username,
-                email: updatedUser.email,
-                role: updatedUser.role,
-                phoneNumber: updatedUser.phoneNumber,
-                country: updatedUser.country,
-                state: updatedUser.state,
-                pinCode: updatedUser.pinCode,
-                profileImage: updatedUser.profileImage,
-                address: updatedUser.address,
-                isActive: updatedUser.isActive,
-                createdAt: updatedUser.createdAt,
-                updatedAt: updatedUser.updatedAt
-            }
+            user: updatedUser
         });
     } catch (error) {
         console.error('Update Current User Error:', error);

@@ -46,18 +46,6 @@ const userSchema = new mongoose.Schema({
         type: String,
         match: [/^\+?[\d\s\-\(\)]+$/, 'Please provide a valid phone number']
     },
-    country: {
-        type: String,
-        trim: true
-    },
-    state: {
-        type: String,
-        trim: true
-    },
-    pinCode: {
-        type: String,
-        match: [/^[0-9]{4,10}$/, 'Please provide a valid pin code']
-    },
     profileImage: {
         type: String,
         default: null

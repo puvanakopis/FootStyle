@@ -6,18 +6,18 @@ import {
     SignupRequest,
     OTPRequest,
     PasswordResetRequest,
-    User
+    User,
+    UpdateUserRequest
 } from '@/interfaces/authInterface';
 
 const API_BASE_URL = process.env.API_URL || 'http://localhost:4000';
 
 const api = axios.create({
     baseURL: API_BASE_URL,
-    headers: {
-        'Content-Type': 'application/json',
-    },
+    headers: { 'Content-Type': 'application/json' },
 });
 
+// Attach token automatically
 api.interceptors.request.use((config) => {
     const token = Cookies.get('token');
     if (token && config.headers) {
@@ -65,16 +65,21 @@ export const authApi = {
     // ----------------- GET CURRENT USER -----------------
     getCurrentUser: async (): Promise<{ user: User }> => {
         const token = Cookies.get('token');
-        if (!token) {
-            throw new Error('No token found. Please login.');
-        }
-
+        if (!token) throw new Error('No token found. Please login.');
         const response = await api.get('/api/auth/me');
         return response.data;
     },
 
+    // ----------------- UPDATE CURRENT USER -----------------
+    updateCurrentUser: async (data: UpdateUserRequest): Promise<{ user: User }> => {
+        const token = Cookies.get('token');
+        if (!token) throw new Error('No token found. Please login.');
+        const response = await api.put('/api/auth/me', data);
+        return response.data;
+    },
+
     // ----------------- LOGOUT -----------------
-    logout: () => {
+    logout: (): void => {
         Cookies.remove('token');
     },
 };
