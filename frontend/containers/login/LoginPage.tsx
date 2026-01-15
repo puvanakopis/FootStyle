@@ -1,17 +1,27 @@
-"use client";
+'use client';
 
-import Link from "next/dist/client/link";
+import Link from "next/link";
 import { useState } from "react";
 import { FcGoogle } from "react-icons/fc";
+import { useAuth } from '@/context/AuthContext';
 
 export default function LoginPage() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
+    const { login, isLoading, error } = useAuth();
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        console.log({ email, password });
+
+        try {
+            await login(email, password);
+        } catch (err) {
+            console.error('Login failed:', err);
+        }
+    };
+
+    const handleGoogleLogin = () => {
     };
 
     return (
@@ -45,6 +55,13 @@ export default function LoginPage() {
                         </p>
                     </div>
 
+                    {/* Error Message */}
+                    {error && (
+                        <div className="p-3 bg-red-50 border border-red-200 text-red-600 rounded-lg text-sm">
+                            {error}
+                        </div>
+                    )}
+
                     {/* Form */}
                     <form className="flex flex-col gap-5" onSubmit={handleSubmit}>
                         {/* Email */}
@@ -58,6 +75,8 @@ export default function LoginPage() {
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                                 className="h-12 px-4 rounded-lg border border-[#e7cfd3] bg-['#dcb8be] text-text-dark focus:ring-2 focus:ring-[#ee2b4b]/20 focus:border-[#ee2b4b] outline-none transition"
+                                required
+                                disabled={isLoading}
                             />
                         </label>
 
@@ -73,11 +92,15 @@ export default function LoginPage() {
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
                                     className="h-12 w-full px-4 pr-12 rounded-lg border border-[#e7cfd3] bg-['#dcb8be] text-text-dark focus:ring-2 focus:ring-[#ee2b4b]/20 focus:border-[#ee2b4b] outline-none transition"
+                                    required
+                                    minLength={6}
+                                    disabled={isLoading}
                                 />
                                 <button
                                     type="button"
                                     onClick={() => setShowPassword(!showPassword)}
                                     className="absolute right-4 top-1/2 -translate-y-1/2 text-text-muted hover:text-text-dark"
+                                    disabled={isLoading}
                                 >
                                     {showPassword ? "🙈" : "👁️"}
                                 </button>
@@ -93,9 +116,17 @@ export default function LoginPage() {
                         {/* Submit */}
                         <button
                             type="submit"
-                            className="h-12 rounded-lg bg-[#ee2b4b] hover:bg-red-600 text-white font-bold shadow-lg shadow-[#ee2b4b]/20 hover:shadow-[#ee2b4b]/30 transition"
+                            disabled={isLoading}
+                            className="h-12 rounded-lg bg-[#ee2b4b] hover:bg-red-600 text-white font-bold shadow-lg shadow-[#ee2b4b]/20 hover:shadow-[#ee2b4b]/30 transition disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                            Log in with Email
+                            {isLoading ? (
+                                <div className="flex items-center justify-center">
+                                    <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-white"></div>
+                                    <span className="ml-2">Logging in...</span>
+                                </div>
+                            ) : (
+                                'Log in with Email'
+                            )}
                         </button>
                     </form>
 
@@ -110,7 +141,12 @@ export default function LoginPage() {
 
                     {/* OAuth */}
                     <div className="grid">
-                        <button className="h-11 flex items-center justify-center gap-2 rounded-lg border border-[#e7cfd3] bg-white font-bold hover:bg-gray-50 transition">
+                        <button
+                            type="button"
+                            onClick={handleGoogleLogin}
+                            disabled={isLoading}
+                            className="h-11 flex items-center justify-center gap-2 rounded-lg border border-[#e7cfd3] bg-white font-bold hover:bg-gray-50 transition disabled:opacity-50"
+                        >
                             <FcGoogle className="text-xl" />
                             Continue with Google
                         </button>
@@ -125,7 +161,6 @@ export default function LoginPage() {
                         >
                             Sign Up
                         </Link>
-
                     </p>
                 </div>
             </div>
