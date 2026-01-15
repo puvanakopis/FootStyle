@@ -6,11 +6,19 @@
   "author": "",
   "type": "commonjs",
   "main": "index.js",
-   "scripts": {
+  "scripts": {
     "start": "node server.js",
     "dev": "nodemon index.js"
   },
   "dependencies": {
-    "express": "^5.2.1"
+    "bcryptjs": "^3.0.3",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.3",
+    "mongoose": "^9.1.1",
+    "nodemailer": "^7.0.12",
+    "passport": "^0.7.0",
+    "passport-google-oauth20": "^2.0.0"
   }
 }
