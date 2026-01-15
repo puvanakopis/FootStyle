@@ -332,3 +332,32 @@ exports.resetPassword = async (req, res) => {
         res.status(500).json({ message: 'Server error' });
     }
 };
+
+
+// ------------------- GET CURRENT USER -------------------
+exports.getCurrentUser = async (req, res) => {
+    try {
+        res.status(200).json({
+            user: {
+                id: req.user._id,
+                firstName: req.user.firstName,
+                lastName: req.user.lastName,
+                username: req.user.username,
+                email: req.user.email,
+                role: req.user.role,
+                phoneNumber: req.user.phoneNumber,
+                country: req.user.country,
+                state: req.user.state,
+                pinCode: req.user.pinCode,
+                profileImage: req.user.profileImage,
+                address: req.user.address,
+                isActive: req.user.isActive,
+                createdAt: req.user.createdAt,
+                updatedAt: req.user.updatedAt,
+            },
+        });
+    } catch (error) {
+        console.error('Get Current User Error:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};

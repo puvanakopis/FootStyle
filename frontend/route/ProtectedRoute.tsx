@@ -9,6 +9,13 @@ interface ProtectedRouteProps {
     children: React.ReactNode;
 }
 
+const publicRoutes = [
+    '/',
+    '/products',
+    '/about',
+    '/contact',
+];
+
 const authRoutes = [
     '/login',
     '/signup',
@@ -16,13 +23,6 @@ const authRoutes = [
     '/forgot-password-otp',
     '/forgot-password-verify',
     '/signup-verify',
-];
-
-const publicRoutes = [
-    '/',
-    '/products',
-    '/about',
-    '/contact',
 ];
 
 export default function ProtectedRoute({ children }: ProtectedRouteProps) {
