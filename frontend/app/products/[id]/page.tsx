@@ -22,7 +22,7 @@ interface Product {
 
 export default function ProductDetailPage() {
     const params = useParams();
-    const productId = params.id;
+    const productId = typeof params.id === 'string' ? parseInt(params.id, 10) : 1;
 
     const product = {
         id: productId,
@@ -36,8 +36,8 @@ export default function ProductDetailPage() {
         ],
         category: "Men's Road Running Shoes",
         name: "Nike Air Zoom Pegasus 39",
-        price: "120",
-        rating: "4.5",
+        price: 120,
+        rating: 4.5,
         reviews: 128,
         description: "Running is your daily ritual, taking you from road to trail as you seek out new adventures and goals. The Nike Air Zoom Pegasus 39 can help you ascend to new heights with its comfortable, intuitive design.",
         colors: [
@@ -110,7 +110,7 @@ export default function ProductDetailPage() {
     return (
         <main className="min-h-screen bg-background text-foreground">
             <Header />
-            <div className="px-30 py-6">
+            <div className="px-8 lg:px-30 py-6">
                 <Breadcrumbs items={breadcrumbItems} />
                 <ProductDetail {...product} />
                 <RelatedProducts products={relatedProducts} />
