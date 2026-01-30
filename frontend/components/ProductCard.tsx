@@ -5,11 +5,10 @@ import { FiShoppingCart } from "react-icons/fi";
 import { MdFavoriteBorder } from "react-icons/md";
 
 interface ProductCardProps {
-  id: number;
+  id: string | number;
   name: string;
   category: string;
   price: string;
-  oldPrice?: string;
   rating: string;
   imageUrl: string;
   badge?: string;
@@ -19,7 +18,6 @@ const ProductCard: React.FC<ProductCardProps> = ({
   name,
   category,
   price,
-  oldPrice,
   rating,
   imageUrl,
   badge,
@@ -65,7 +63,6 @@ const ProductCard: React.FC<ProductCardProps> = ({
         <div className="mt-2 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <p className="text-lg font-bold text-[#ee2b4b]">{price}</p>
-            {oldPrice && <p className="text-sm text-gray-400 line-through">{oldPrice}</p>}
           </div>
           <button className="rounded-full bg-[#e7e1e1ff] p-2 text-text-main-light transition-colors hover:bg-[#ee2b4b] hover:text-white">
             <span className="material-symbols-outlined block text-[20px] cursor-pointer">

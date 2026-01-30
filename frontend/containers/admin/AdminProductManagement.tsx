@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { IoSearch } from "react-icons/io5";
 import { MdOutlineEdit, MdOutlineAdd, MdDeleteOutline, MdClose } from "react-icons/md";
 import { LuChevronLeft, LuChevronRight } from "react-icons/lu";
-import { MdCategory, MdInventory, MdAttachMoney } from "react-icons/md";
+import { MdCategory, MdInventory, MdAttachMoney, MdBuild } from "react-icons/md";
 import { Size, Product } from "@/interfaces/productInterface";
 import { useProduct } from "@/context/ProductContext";
 import { Toaster } from "react-hot-toast";
@@ -14,6 +14,7 @@ type ProductFormData = {
     name: string;
     title: string;
     category: "Men" | "Women" | "Kids" | "";
+    material: "Mesh" | "Leather" | "Synthetic" | "Other" | "";
     description: string;
     price: number | "";
     sizes: Size[];
@@ -33,6 +34,7 @@ const AdminProductManagement = () => {
     // State for filters
     const [searchQuery, setSearchQuery] = useState("");
     const [categoryFilter, setCategoryFilter] = useState("All");
+    const [materialFilter, setMaterialFilter] = useState("All");
     const [stockFilter, setStockFilter] = useState("All");
     const [priceFilter, setPriceFilter] = useState("All");
 
@@ -59,6 +61,7 @@ const AdminProductManagement = () => {
         name: "",
         title: "",
         category: "",
+        material: "",
         description: "",
         price: "",
         sizes: [{ size: "S", stock: 0 }],
@@ -88,17 +91,22 @@ const AdminProductManagement = () => {
     const filteredProducts = products.filter((product) => {
         const matchesSearch =
             product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            product.title?.toLowerCase().includes(searchQuery.toLowerCase())
+            product.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            product.material?.toLowerCase().includes(searchQuery.toLowerCase());
 
         const matchesCategory =
             categoryFilter === "All" ||
             product.category === categoryFilter;
 
+        const matchesMaterial =
+            materialFilter === "All" ||
+            product.material === materialFilter;
+
         const matchesStock =
             stockFilter === "All" ||
             getStockStatus(product) === stockFilter;
 
-        return matchesSearch && matchesCategory && matchesStock;
+        return matchesSearch && matchesCategory && matchesMaterial && matchesStock;
     });
 
     // Calculate pagination values
@@ -170,6 +178,7 @@ const AdminProductManagement = () => {
             name: "",
             title: "",
             category: "",
+            material: "",
             description: "",
             price: "",
             sizes: [{ size: "S", stock: 0 }],
@@ -186,6 +195,7 @@ const AdminProductManagement = () => {
             name: product.name,
             title: product.title || "",
             category: product.category,
+            material: product.material || "",
             description: product.description || "",
             price: product.price,
             sizes: [...product.sizes],
@@ -272,8 +282,8 @@ const AdminProductManagement = () => {
         e.preventDefault();
 
         // Validate required fields
-        if (!formData.name || !formData.category || formData.price === "") {
-            showToast('error', "Please fill in all required fields (Name, Category, Price)");
+        if (!formData.name || !formData.category || !formData.material || formData.price === "") {
+            showToast('error', "Please fill in all required fields (Name, Category, Material, Price)");
             return;
         }
 
@@ -293,6 +303,7 @@ const AdminProductManagement = () => {
                     name: formData.name,
                     title: formData.title,
                     category: formData.category as "Men" | "Women" | "Kids",
+                    material: formData.material as "Mesh" | "Leather" | "Synthetic" | "Other",
                     description: formData.description,
                     price: formData.price as number,
                     sizes: formData.sizes,
@@ -318,6 +329,7 @@ const AdminProductManagement = () => {
                     name: formData.name,
                     title: formData.title,
                     category: formData.category as "Men" | "Women" | "Kids",
+                    material: formData.material as "Mesh" | "Leather" | "Synthetic" | "Other",
                     description: formData.description,
                     price: formData.price as number,
                     sizes: formData.sizes,
@@ -345,6 +357,7 @@ const AdminProductManagement = () => {
                 name: "",
                 title: "",
                 category: "",
+                material: "",
                 description: "",
                 price: "",
                 sizes: [{ size: "S", stock: 0 }],
@@ -388,6 +401,7 @@ const AdminProductManagement = () => {
             name: "",
             title: "",
             category: "",
+            material: "",
             description: "",
             price: "",
             sizes: [{ size: "S", stock: 0 }],
@@ -520,6 +534,22 @@ const AdminProductManagement = () => {
                                 </select>
                             </div>
 
+                            {/* Material Filter */}
+                            <div className="relative">
+                                <MdBuild className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary text-lg pointer-events-none" />
+                                <select
+                                    className="pl-10 pr-4 py-2 bg-[#f8f6f6] border-none rounded-xl text-sm text-text-main focus:ring-2 focus:ring-[#ee2b4b]/20"
+                                    value={materialFilter}
+                                    onChange={(e) => setMaterialFilter(e.target.value)}
+                                >
+                                    <option value="All">All Materials</option>
+                                    <option value="Mesh">Mesh</option>
+                                    <option value="Leather">Leather</option>
+                                    <option value="Synthetic">Synthetic</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+
                             {/* Stock Filter */}
                             <div className="relative">
                                 <MdInventory className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary text-lg pointer-events-none" />
@@ -559,7 +589,7 @@ const AdminProductManagement = () => {
                                 <IoSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary text-lg" />
                                 <input
                                     type="text"
-                                    placeholder="Search by name, title or ID..."
+                                    placeholder="Search by name, title, material or ID..."
                                     className="w-full pl-9 pr-4 py-2 bg-[#f8f6f6] border-none rounded-xl text-sm focus:ring-2 focus:ring-[#ee2b4b]/20 placeholder-text-secondary/70"
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
@@ -583,6 +613,7 @@ const AdminProductManagement = () => {
                                     </th>
                                     <th className="px-6 py-4 font-semibold">Product</th>
                                     <th className="px-6 py-4 font-semibold">Category</th>
+                                    <th className="px-6 py-4 font-semibold">Material</th>
                                     <th className="px-6 py-4 font-semibold">Price</th>
                                     <th className="px-6 py-4 font-semibold">Stock</th>
                                     <th className="px-6 py-4 font-semibold">Status</th>
@@ -592,7 +623,7 @@ const AdminProductManagement = () => {
                             <tbody className="divide-y divide-[#f3e7e9]">
                                 {isLoading ? (
                                     <tr>
-                                        <td colSpan={7} className="px-6 py-8 text-center">
+                                        <td colSpan={8} className="px-6 py-8 text-center">
                                             <div className="flex justify-center">
                                                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#ee2b4b]"></div>
                                             </div>
@@ -600,7 +631,7 @@ const AdminProductManagement = () => {
                                     </tr>
                                 ) : currentProducts.length === 0 ? (
                                     <tr>
-                                        <td colSpan={7} className="px-6 py-8 text-center text-text-secondary">
+                                        <td colSpan={8} className="px-6 py-8 text-center text-text-secondary">
                                             No products found
                                         </td>
                                     </tr>
@@ -632,6 +663,11 @@ const AdminProductManagement = () => {
                                                 <td className="px-6 py-4">
                                                     <span className="text-sm text-text-main font-medium bg-[#f8f6f6] px-2.5 py-1 rounded-lg">
                                                         {product.category}
+                                                    </span>
+                                                </td>
+                                                <td className="px-6 py-4">
+                                                    <span className="text-sm text-text-main font-medium bg-blue-50 px-2.5 py-1 rounded-lg border border-blue-100">
+                                                        {product.material}
                                                     </span>
                                                 </td>
                                                 <td className="px-6 py-4 text-sm font-bold text-text-main">
@@ -785,6 +821,24 @@ const AdminProductManagement = () => {
                                         <option value="Men">Men</option>
                                         <option value="Women">Women</option>
                                         <option value="Kids">Kids</option>
+                                    </select>
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-sm font-medium text-text-main block">
+                                        Material *
+                                    </label>
+                                    <select
+                                        name="material"
+                                        value={formData.material}
+                                        onChange={handleInputChange}
+                                        className="w-full px-4 py-2.5 bg-[#f8f6f6] border-none rounded-xl text-sm focus:ring-2 focus:ring-[#ee2b4b]/20"
+                                        required
+                                    >
+                                        <option value="">Select Material</option>
+                                        <option value="Mesh">Mesh</option>
+                                        <option value="Leather">Leather</option>
+                                        <option value="Synthetic">Synthetic</option>
+                                        <option value="Other">Other</option>
                                     </select>
                                 </div>
                                 <div className="space-y-2">

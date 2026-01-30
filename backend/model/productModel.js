@@ -59,6 +59,11 @@ const ProductSchema = new mongoose.Schema(
             required: true,
             enum: ["Men", "Women", "Kids"]
         },
+        material: {
+            type: String,
+            required: true,
+            enum: ["Mesh", "Leather", "Synthetic", "Other"]
+        },
         description: {
             type: String
         },

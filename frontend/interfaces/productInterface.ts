@@ -17,6 +17,7 @@ export interface Product {
     title?: string;
     name: string;
     category: 'Men' | 'Women' | 'Kids';
+    material: 'Mesh' | 'Leather' | 'Synthetic' | 'Other';
     description?: string;
     price: number;
     images: string[];
@@ -32,6 +33,7 @@ export interface CreateProductRequest {
     title?: string;
     name: string;
     category: 'Men' | 'Women' | 'Kids';
+    material: 'Mesh' | 'Leather' | 'Synthetic' | 'Other';
     description?: string;
     price: number;
     sizes?: Size[];
@@ -42,6 +44,7 @@ export interface UpdateProductRequest {
     title?: string;
     name?: string;
     category?: 'Men' | 'Women' | 'Kids';
+    material?: 'Mesh' | 'Leather' | 'Synthetic' | 'Other';
     description?: string;
     price?: number;
     sizes?: Size[];

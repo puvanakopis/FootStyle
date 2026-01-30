@@ -5,13 +5,13 @@ const path = require("path");
 // ------------- CREATE PRODUCT -------------
 exports.createProduct = async (req, res) => {
     try {
-        const { title, name, category, description, price, sizes, isActive } = req.body;
+        const { title, name, category, material, description, price, sizes, isActive } = req.body;
 
         // Validate required fields
-        if (!name || !category || !price === undefined) {
+        if (!name || !category || !material || !price === undefined) {
             return res.status(400).json({
                 success: false,
-                message: "Name, category, and price are required"
+                message: "Name, category, material, and price are required"
             });
         }
 
@@ -19,6 +19,13 @@ exports.createProduct = async (req, res) => {
             return res.status(400).json({
                 success: false,
                 message: `${category} is not a valid category`
+            });
+        }
+
+        if (!["Mesh", "Leather", "Synthetic", "Other"].includes(material)) {
+            return res.status(400).json({
+                success: false,
+                message: `${material} is not a valid material`
             });
         }
 
@@ -50,6 +57,7 @@ exports.createProduct = async (req, res) => {
             title: title || "",
             name,
             category,
+            material,
             description: description || "",
             price,
             sizes: formattedSizes,
@@ -140,7 +148,7 @@ exports.getProductById = async (req, res) => {
 exports.updateProduct = async (req, res) => {
     try {
         const { id } = req.params;
-        const { title, name, category, description, price, sizes, isActive } = req.body;
+        const { title, name, category, material, description, price, sizes, isActive } = req.body;
 
         const product = await Product.findById(id);
         if (!product) {
@@ -161,6 +169,15 @@ exports.updateProduct = async (req, res) => {
                 });
             }
             product.category = category;
+        }
+        if (material !== undefined) {
+            if (!["Mesh", "Leather", "Synthetic", "Other"].includes(material)) {
+                return res.status(400).json({
+                    success: false,
+                    message: `${material} is not a valid material`
+                });
+            }
+            product.material = material;
         }
         if (description !== undefined) product.description = description;
         if (price !== undefined) product.price = price;
