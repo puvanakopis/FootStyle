@@ -83,5 +83,3 @@ export const authApi = {
         Cookies.remove('token');
     },
 };
-
-export default api;

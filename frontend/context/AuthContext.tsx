@@ -9,7 +9,7 @@ import React, {
 } from "react";
 import Cookies from "js-cookie";
 import { AxiosError } from "axios";
-import { authApi } from "@/services/authServices";
+import { authApi } from "@/services/authApi";
 import {
     AuthContextType,
     User,
