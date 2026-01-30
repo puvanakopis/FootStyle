@@ -7,6 +7,7 @@ import { LuChevronLeft, LuChevronRight } from "react-icons/lu";
 import { MdCategory, MdInventory, MdAttachMoney } from "react-icons/md";
 import { Size, Product } from "@/interfaces/productInterface";
 import { useProduct } from "@/context/ProductContext";
+import toast, { Toaster } from "react-hot-toast"; // Add this import
 
 type ProductFormData = {
     name: string;
@@ -47,7 +48,6 @@ const AdminProductManagement = () => {
     const [editingProductId, setEditingProductId] = useState<string | null>(null);
     const [deletingProductId, setDeletingProductId] = useState<string | null>(null);
     const [isUploading, setIsUploading] = useState(false);
-    const [notification, setNotification] = useState<{ type: 'success' | 'error', message: string } | null>(null);
 
     // Pagination state
     const [currentPage, setCurrentPage] = useState(1);
@@ -68,10 +68,27 @@ const AdminProductManagement = () => {
         fetchProducts();
     }, []);
 
-    // Show notification
-    const showNotification = (type: 'success' | 'error', message: string) => {
-        setNotification({ type, message });
-        setTimeout(() => setNotification(null), 3000);
+    // Custom toast styling function
+    const showCustomToast = (type: 'success' | 'error', message: string) => {
+        const toastOptions = {
+            duration: 3000,
+            style: {
+                background: type === 'success' ? '#f0fdf4' : '#fef2f2',
+                color: type === 'success' ? '#166534' : '#991b1b',
+                border: `1px solid ${type === 'success' ? '#bbf7d0' : '#fecaca'}`,
+                borderRadius: '0.75rem',
+                padding: '0.75rem 1rem',
+                fontSize: '0.875rem',
+                fontWeight: 500,
+                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+            },
+        };
+
+        if (type === 'success') {
+            toast.success(message, toastOptions);
+        } else {
+            toast.error(message, toastOptions);
+        }
     };
 
     // Calculate total stock
@@ -123,19 +140,19 @@ const AdminProductManagement = () => {
             // Check if we already have 4 images
             const totalImages = imageFiles.filter(img => !img.isExisting).length + newImageFiles.length;
             if (totalImages >= 4) {
-                showNotification('error', "Maximum 4 images allowed");
+                showCustomToast('error', "Maximum 4 images allowed");
                 return;
             }
 
             // Check file type
             if (!file.type.match('image.*')) {
-                showNotification('error', `File ${file.name} is not an image`);
+                showCustomToast('error', `File ${file.name} is not an image`);
                 return;
             }
 
             // Check file size 
             if (file.size > 10 * 1024 * 1024) {
-                showNotification('error', `File ${file.name} is too large. Max size is 10MB`);
+                showCustomToast('error', `File ${file.name} is too large. Max size is 10MB`);
                 return;
             }
 
@@ -221,7 +238,7 @@ const AdminProductManagement = () => {
         if (deletingProductId) {
             try {
                 await deleteProduct(deletingProductId);
-                showNotification('success', "Product deleted successfully");
+                showCustomToast('success', "Product deleted successfully");
                 setShowDeleteModal(false);
                 setDeletingProductId(null);
 
@@ -230,7 +247,7 @@ const AdminProductManagement = () => {
                     setCurrentPage(currentPage - 1);
                 }
             } catch (error) {
-                showNotification('error', "Failed to delete product");
+                showCustomToast('error', "Failed to delete product");
             }
         }
     };
@@ -278,14 +295,14 @@ const AdminProductManagement = () => {
 
         // Validate required fields
         if (!formData.name || !formData.category || formData.price === "") {
-            showNotification('error', "Please fill in all required fields (Name, Category, Price)");
+            showCustomToast('error', "Please fill in all required fields (Name, Category, Price)");
             return;
         }
 
         // Validate images - ensure exactly 4 images
         const totalImages = imageFiles.length;
         if (totalImages !== 4) {
-            showNotification('error', `Please upload exactly 4 images. Currently: ${totalImages}/4`);
+            showCustomToast('error', `Please upload exactly 4 images. Currently: ${totalImages}/4`);
             return;
         }
 
@@ -315,7 +332,7 @@ const AdminProductManagement = () => {
                     imagesToUpload.length > 0 ? imagesToUpload : undefined
                 );
 
-                showNotification('success', "Product updated successfully");
+                showCustomToast('success', "Product updated successfully");
                 setShowEditModal(false);
             } else {
                 // Add new product
@@ -335,7 +352,7 @@ const AdminProductManagement = () => {
 
                 await createProduct(createData, images);
 
-                showNotification('success', "Product created successfully");
+                showCustomToast('success', "Product created successfully");
                 setShowAddModal(false);
             }
 
@@ -362,7 +379,7 @@ const AdminProductManagement = () => {
 
         } catch (error) {
             console.error("Error processing product:", error);
-            showNotification('error', "Error processing product. Please try again.");
+            showCustomToast('error', "Error processing product. Please try again.");
         } finally {
             setIsUploading(false);
         }
@@ -472,11 +489,17 @@ const AdminProductManagement = () => {
 
     return (
         <div className="flex-1 overflow-y-auto p-6 lg:p-10 scroll-smooth">
-            {notification && (
-                <div className={`fixed top-4 right-4 z-50 px-4 py-2 rounded-xl shadow-lg ${notification.type === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-                    {notification.message}
-                </div>
-            )}
+            {/* Toaster Component */}
+            <Toaster
+                position="top-right"
+                toastOptions={{
+                    duration: 3000,
+                    style: {
+                        maxWidth: '400px',
+                        fontFamily: 'inherit',
+                    },
+                }}
+            />
 
             <div className="max-w-7xl mx-auto flex flex-col gap-8">
                 {/* Header */}
