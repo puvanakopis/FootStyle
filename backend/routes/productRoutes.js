@@ -6,5 +6,6 @@ const { authorize, protect } = require("../middleware/authMiddleware");
 
 router.post("/", uploadProductImages, protect, authorize('admin'), productController.createProduct);
 router.get("/", productController.getProducts);
+router.get("/:id", productController.getProductById);
 
 module.exports = router;
