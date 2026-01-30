@@ -2,6 +2,8 @@ const Product = require("../model/productModel");
 const fs = require("fs");
 const path = require("path");
 
+
+// Create products
 exports.createProduct = async (req, res) => {
     try {
         const { title, name, category, description, price, sizes, isActive } = req.body;
@@ -70,6 +72,26 @@ exports.createProduct = async (req, res) => {
             data: product
         });
 
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({
+            success: false,
+            message: "Server error",
+            error: error.message
+        });
+    }
+};
+
+// Get all products
+exports.getProducts = async (req, res) => {
+    try {
+        const products = await Product.find();
+
+        res.status(200).json({
+            success: true,
+            count: products.length,
+            data: products
+        });
     } catch (error) {
         console.error(error);
         res.status(500).json({
