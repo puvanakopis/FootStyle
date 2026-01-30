@@ -263,3 +263,74 @@ exports.deleteProduct = async (req, res) => {
         });
     }
 };
+
+// ------------- ADD REVIEW -------------
+exports.addReview = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { rating, comment } = req.body;
+
+        // Validate rating and comment
+        if (rating === undefined || comment === undefined) {
+            return res.status(400).json({
+                success: false,
+                message: "Rating and comment are required"
+            });
+        }
+
+        if (rating < 0 || rating > 5) {
+            return res.status(400).json({
+                success: false,
+                message: "Rating must be between 0 and 5"
+            });
+        }
+
+        // Find product
+        const product = await Product.findById(id);
+        if (!product) {
+            return res.status(404).json({
+                success: false,
+                message: "Product not found"
+            });
+        }
+
+        // Check if user already reviewed
+        const alreadyReviewed = product.reviews.find(
+            r => r.user === req.user._id.toString()
+        );
+
+        if (alreadyReviewed) {
+            return res.status(400).json({
+                success: false,
+                message: "You have already reviewed this product"
+            });
+        }
+
+        // Add new review
+        const review = {
+            user: req.user._id.toString(),
+            rating,
+            comment
+        };
+
+        product.reviews.push(review);
+
+        product.rating = product.reviews.reduce((acc, r) => acc + r.rating, 0) / product.reviews.length;
+
+        await product.save();
+
+        res.status(201).json({
+            success: true,
+            message: "Review added successfully",
+            data: review
+        });
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({
+            success: false,
+            message: "Server error",
+            error: error.message
+        });
+    }
+};
