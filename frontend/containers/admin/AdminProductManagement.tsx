@@ -7,7 +7,8 @@ import { LuChevronLeft, LuChevronRight } from "react-icons/lu";
 import { MdCategory, MdInventory, MdAttachMoney } from "react-icons/md";
 import { Size, Product } from "@/interfaces/productInterface";
 import { useProduct } from "@/context/ProductContext";
-import toast, { Toaster } from "react-hot-toast"; // Add this import
+import { Toaster } from "react-hot-toast";
+import { showToast } from "@/lib/toast";
 
 type ProductFormData = {
     name: string;
@@ -68,29 +69,6 @@ const AdminProductManagement = () => {
         fetchProducts();
     }, []);
 
-    // Custom toast styling function
-    const showCustomToast = (type: 'success' | 'error', message: string) => {
-        const toastOptions = {
-            duration: 3000,
-            style: {
-                background: type === 'success' ? '#f0fdf4' : '#fef2f2',
-                color: type === 'success' ? '#166534' : '#991b1b',
-                border: `1px solid ${type === 'success' ? '#bbf7d0' : '#fecaca'}`,
-                borderRadius: '0.75rem',
-                padding: '0.75rem 1rem',
-                fontSize: '0.875rem',
-                fontWeight: 500,
-                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
-            },
-        };
-
-        if (type === 'success') {
-            toast.success(message, toastOptions);
-        } else {
-            toast.error(message, toastOptions);
-        }
-    };
-
     // Calculate total stock
     const getStockStatus = (product: Product) => {
         const totalStock = product.sizes.reduce((sum, size) => sum + size.stock, 0);
@@ -140,19 +118,19 @@ const AdminProductManagement = () => {
             // Check if we already have 4 images
             const totalImages = imageFiles.filter(img => !img.isExisting).length + newImageFiles.length;
             if (totalImages >= 4) {
-                showCustomToast('error', "Maximum 4 images allowed");
+                showToast('error', "Maximum 4 images allowed");
                 return;
             }
 
             // Check file type
             if (!file.type.match('image.*')) {
-                showCustomToast('error', `File ${file.name} is not an image`);
+                showToast('error', `File ${file.name} is not an image`);
                 return;
             }
 
             // Check file size 
             if (file.size > 10 * 1024 * 1024) {
-                showCustomToast('error', `File ${file.name} is too large. Max size is 10MB`);
+                showToast('error', `File ${file.name} is too large. Max size is 10MB`);
                 return;
             }
 
@@ -238,7 +216,7 @@ const AdminProductManagement = () => {
         if (deletingProductId) {
             try {
                 await deleteProduct(deletingProductId);
-                showCustomToast('success', "Product deleted successfully");
+                showToast('success', "Product deleted successfully");
                 setShowDeleteModal(false);
                 setDeletingProductId(null);
 
@@ -247,7 +225,7 @@ const AdminProductManagement = () => {
                     setCurrentPage(currentPage - 1);
                 }
             } catch (error) {
-                showCustomToast('error', "Failed to delete product");
+                showToast('error', "Failed to delete product");
             }
         }
     };
@@ -295,14 +273,14 @@ const AdminProductManagement = () => {
 
         // Validate required fields
         if (!formData.name || !formData.category || formData.price === "") {
-            showCustomToast('error', "Please fill in all required fields (Name, Category, Price)");
+            showToast('error', "Please fill in all required fields (Name, Category, Price)");
             return;
         }
 
         // Validate images - ensure exactly 4 images
         const totalImages = imageFiles.length;
         if (totalImages !== 4) {
-            showCustomToast('error', `Please upload exactly 4 images. Currently: ${totalImages}/4`);
+            showToast('error', `Please upload exactly 4 images. Currently: ${totalImages}/4`);
             return;
         }
 
@@ -332,7 +310,7 @@ const AdminProductManagement = () => {
                     imagesToUpload.length > 0 ? imagesToUpload : undefined
                 );
 
-                showCustomToast('success', "Product updated successfully");
+                showToast('success', "Product updated successfully");
                 setShowEditModal(false);
             } else {
                 // Add new product
@@ -352,7 +330,7 @@ const AdminProductManagement = () => {
 
                 await createProduct(createData, images);
 
-                showCustomToast('success', "Product created successfully");
+                showToast('success', "Product created successfully");
                 setShowAddModal(false);
             }
 
@@ -379,7 +357,7 @@ const AdminProductManagement = () => {
 
         } catch (error) {
             console.error("Error processing product:", error);
-            showCustomToast('error', "Error processing product. Please try again.");
+            showToast('error', "Error processing product. Please try again.");
         } finally {
             setIsUploading(false);
         }

@@ -24,13 +24,20 @@ const ProductCard: React.FC<ProductCardProps> = ({
   imageUrl,
   badge,
 }) => {
+
+  const getImageUrl = (imageName: string) => {
+    const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+    return `${API_BASE_URL}/uploads/product/${imageName}`;
+  };
+
   return (
     <div className="group flex flex-col gap-4 rounded-xl bg-white shadow-sm transition-all duration-300 hover:-translate-y-2 hover:shadow-xl">
       <div className="relative aspect-square w-full overflow-hidden rounded-lg bg-gray-100">
         <div
           className="h-full w-full bg-cover bg-center transition-transform duration-500 group-hover:scale-110"
-          style={{ backgroundImage: `url("${imageUrl}")` }}
-          aria-label={name}
+          style={{
+            backgroundImage: `url(${getImageUrl(imageUrl)})`
+          }} aria-label={name}
         />
         {badge && (
           <div className="absolute left-3 top-3 rounded bg-[#ee2b4b] px-2 py-1 text-xs font-bold text-white">
