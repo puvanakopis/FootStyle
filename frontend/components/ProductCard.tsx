@@ -7,7 +7,7 @@ import { MdFavoriteBorder } from "react-icons/md";
 interface ProductCardProps {
   id: string | number;
   name: string;
-  category: string;
+  gender: string;
   price: string;
   rating: string;
   imageUrl: string;
@@ -16,7 +16,7 @@ interface ProductCardProps {
 
 const ProductCard: React.FC<ProductCardProps> = ({
   name,
-  category,
+  gender,
   price,
   rating,
   imageUrl,
@@ -59,7 +59,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
             <span className="text-xs font-bold text-gray-500">{rating}</span>
           </div>
         </div>
-        <p className="text-sm text-text-sec-light">{category}</p>
+        <p className="text-sm text-text-sec-light">{gender}</p>
         <div className="mt-2 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <p className="text-lg font-bold text-[#ee2b4b]">{price}</p>

@@ -16,7 +16,7 @@ export interface Product {
     _id?: string;
     title?: string;
     name: string;
-    category: 'Men' | 'Women' | 'Kids';
+    gender: 'Men' | 'Women' | 'Kids';
     material: 'Mesh' | 'Leather' | 'Synthetic' | 'Other';
     description?: string;
     price: number;
@@ -32,7 +32,7 @@ export interface Product {
 export interface CreateProductRequest {
     title?: string;
     name: string;
-    category: 'Men' | 'Women' | 'Kids';
+    gender: 'Men' | 'Women' | 'Kids';
     material: 'Mesh' | 'Leather' | 'Synthetic' | 'Other';
     description?: string;
     price: number;
@@ -43,7 +43,7 @@ export interface CreateProductRequest {
 export interface UpdateProductRequest {
     title?: string;
     name?: string;
-    category?: 'Men' | 'Women' | 'Kids';
+    gender?: 'Men' | 'Women' | 'Kids';
     material?: 'Mesh' | 'Leather' | 'Synthetic' | 'Other';
     description?: string;
     price?: number;

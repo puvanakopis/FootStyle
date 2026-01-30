@@ -5,20 +5,20 @@ const path = require("path");
 // ------------- CREATE PRODUCT -------------
 exports.createProduct = async (req, res) => {
     try {
-        const { title, name, category, material, description, price, sizes, isActive } = req.body;
+        const { title, name, gender , material, description, price, sizes, isActive } = req.body;
 
         // Validate required fields
-        if (!name || !category || !material || !price === undefined) {
+        if (!name || !gender  || !material || !price === undefined) {
             return res.status(400).json({
                 success: false,
-                message: "Name, category, material, and price are required"
+                message: "Name, gender , material, and price are required"
             });
         }
 
-        if (!["Men", "Women", "Kids"].includes(category)) {
+        if (!["Men", "Women", "Kids"].includes(gender )) {
             return res.status(400).json({
                 success: false,
-                message: `${category} is not a valid category`
+                message: `${gender } is not a valid gender `
             });
         }
 
@@ -56,7 +56,7 @@ exports.createProduct = async (req, res) => {
         const product = new Product({
             title: title || "",
             name,
-            category,
+            gender ,
             material,
             description: description || "",
             price,
@@ -148,7 +148,7 @@ exports.getProductById = async (req, res) => {
 exports.updateProduct = async (req, res) => {
     try {
         const { id } = req.params;
-        const { title, name, category, material, description, price, sizes, isActive } = req.body;
+        const { title, name, gender , material, description, price, sizes, isActive } = req.body;
 
         const product = await Product.findById(id);
         if (!product) {
@@ -161,14 +161,14 @@ exports.updateProduct = async (req, res) => {
         // Update fields if provided
         if (title !== undefined) product.title = title;
         if (name !== undefined) product.name = name;
-        if (category !== undefined) {
-            if (!["Men", "Women", "Kids"].includes(category)) {
+        if (gender  !== undefined) {
+            if (!["Men", "Women", "Kids"].includes(gender )) {
                 return res.status(400).json({
                     success: false,
-                    message: `${category} is not a valid category`
+                    message: `${gender } is not a valid gender `
                 });
             }
-            product.category = category;
+            product.gender  = gender ;
         }
         if (material !== undefined) {
             if (!["Mesh", "Leather", "Synthetic", "Other"].includes(material)) {

@@ -4,16 +4,17 @@ import React, { useState, useEffect, useRef } from "react";
 import { IoSearch } from "react-icons/io5";
 import { MdOutlineEdit, MdOutlineAdd, MdDeleteOutline, MdClose } from "react-icons/md";
 import { LuChevronLeft, LuChevronRight } from "react-icons/lu";
-import { MdCategory, MdInventory, MdAttachMoney, MdBuild } from "react-icons/md";
+import { MdInventory, MdAttachMoney, MdBuild } from "react-icons/md";
 import { Size, Product } from "@/interfaces/productInterface";
 import { useProduct } from "@/context/ProductContext";
 import { Toaster } from "react-hot-toast";
 import { showToast } from "@/lib/toast";
+import { FaTransgender } from "react-icons/fa";
 
 type ProductFormData = {
     name: string;
     title: string;
-    category: "Men" | "Women" | "Kids" | "";
+    gender: "Men" | "Women" | "Kids" | "";
     material: "Mesh" | "Leather" | "Synthetic" | "Other" | "";
     description: string;
     price: number | "";
@@ -33,7 +34,7 @@ const AdminProductManagement = () => {
 
     // State for filters
     const [searchQuery, setSearchQuery] = useState("");
-    const [categoryFilter, setCategoryFilter] = useState("All");
+    const [genderFilter, setgenderFilter] = useState("All");
     const [materialFilter, setMaterialFilter] = useState("All");
     const [stockFilter, setStockFilter] = useState("All");
     const [priceFilter, setPriceFilter] = useState("All");
@@ -60,7 +61,7 @@ const AdminProductManagement = () => {
     const [formData, setFormData] = useState<ProductFormData>({
         name: "",
         title: "",
-        category: "",
+        gender: "",
         material: "",
         description: "",
         price: "",
@@ -94,9 +95,9 @@ const AdminProductManagement = () => {
             product.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
             product.material?.toLowerCase().includes(searchQuery.toLowerCase());
 
-        const matchesCategory =
-            categoryFilter === "All" ||
-            product.category === categoryFilter;
+        const matchesgender =
+            genderFilter === "All" ||
+            product.gender === genderFilter;
 
         const matchesMaterial =
             materialFilter === "All" ||
@@ -106,7 +107,7 @@ const AdminProductManagement = () => {
             stockFilter === "All" ||
             getStockStatus(product) === stockFilter;
 
-        return matchesSearch && matchesCategory && matchesMaterial && matchesStock;
+        return matchesSearch && matchesgender && matchesMaterial && matchesStock;
     });
 
     // Calculate pagination values
@@ -177,7 +178,7 @@ const AdminProductManagement = () => {
         setFormData({
             name: "",
             title: "",
-            category: "",
+            gender: "",
             material: "",
             description: "",
             price: "",
@@ -194,7 +195,7 @@ const AdminProductManagement = () => {
         setFormData({
             name: product.name,
             title: product.title || "",
-            category: product.category,
+            gender: product.gender,
             material: product.material || "",
             description: product.description || "",
             price: product.price,
@@ -282,8 +283,8 @@ const AdminProductManagement = () => {
         e.preventDefault();
 
         // Validate required fields
-        if (!formData.name || !formData.category || !formData.material || formData.price === "") {
-            showToast('error', "Please fill in all required fields (Name, Category, Material, Price)");
+        if (!formData.name || !formData.gender || !formData.material || formData.price === "") {
+            showToast('error', "Please fill in all required fields (Name, gender, Material, Price)");
             return;
         }
 
@@ -302,7 +303,7 @@ const AdminProductManagement = () => {
                 const updateData = {
                     name: formData.name,
                     title: formData.title,
-                    category: formData.category as "Men" | "Women" | "Kids",
+                    gender: formData.gender as "Men" | "Women" | "Kids",
                     material: formData.material as "Mesh" | "Leather" | "Synthetic" | "Other",
                     description: formData.description,
                     price: formData.price as number,
@@ -328,7 +329,7 @@ const AdminProductManagement = () => {
                 const createData = {
                     name: formData.name,
                     title: formData.title,
-                    category: formData.category as "Men" | "Women" | "Kids",
+                    gender: formData.gender as "Men" | "Women" | "Kids",
                     material: formData.material as "Mesh" | "Leather" | "Synthetic" | "Other",
                     description: formData.description,
                     price: formData.price as number,
@@ -356,7 +357,7 @@ const AdminProductManagement = () => {
             setFormData({
                 name: "",
                 title: "",
-                category: "",
+                gender: "",
                 material: "",
                 description: "",
                 price: "",
@@ -400,7 +401,7 @@ const AdminProductManagement = () => {
         setFormData({
             name: "",
             title: "",
-            category: "",
+            gender: "",
             material: "",
             description: "",
             price: "",
@@ -519,15 +520,15 @@ const AdminProductManagement = () => {
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                     <div className="md:col-span-4 bg-white p-1 rounded-2xl border border-[#f3e7e9] shadow-sm flex flex-col md:flex-row items-center justify-between gap-2">
                         <div className="flex-1 flex items-center w-full p-2 gap-2">
-                            {/* Category Filter */}
+                            {/* gender Filter */}
                             <div className="relative">
-                                <MdCategory className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary text-lg pointer-events-none" />
+                                <FaTransgender className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary text-lg pointer-events-none" />
                                 <select
                                     className="pl-10 pr-4 py-2 bg-[#f8f6f6] border-none rounded-xl text-sm text-text-main focus:ring-2 focus:ring-[#ee2b4b]/20"
-                                    value={categoryFilter}
-                                    onChange={(e) => setCategoryFilter(e.target.value)}
+                                    value={genderFilter}
+                                    onChange={(e) => setgenderFilter(e.target.value)}
                                 >
-                                    <option value="All">All Categories</option>
+                                    <option value="All">All Gender</option>
                                     <option value="Men">Men</option>
                                     <option value="Women">Women</option>
                                     <option value="Kids">Kids</option>
@@ -612,7 +613,7 @@ const AdminProductManagement = () => {
                                         />
                                     </th>
                                     <th className="px-6 py-4 font-semibold">Product</th>
-                                    <th className="px-6 py-4 font-semibold">Category</th>
+                                    <th className="px-6 py-4 font-semibold">gender</th>
                                     <th className="px-6 py-4 font-semibold">Material</th>
                                     <th className="px-6 py-4 font-semibold">Price</th>
                                     <th className="px-6 py-4 font-semibold">Stock</th>
@@ -662,7 +663,7 @@ const AdminProductManagement = () => {
                                                 </td>
                                                 <td className="px-6 py-4">
                                                     <span className="text-sm text-text-main font-medium bg-[#f8f6f6] px-2.5 py-1 rounded-lg">
-                                                        {product.category}
+                                                        {product.gender}
                                                     </span>
                                                 </td>
                                                 <td className="px-6 py-4">
@@ -808,16 +809,16 @@ const AdminProductManagement = () => {
                                 </div>
                                 <div className="space-y-2">
                                     <label className="text-sm font-medium text-text-main block">
-                                        Category *
+                                        gender *
                                     </label>
                                     <select
-                                        name="category"
-                                        value={formData.category}
+                                        name="gender"
+                                        value={formData.gender}
                                         onChange={handleInputChange}
                                         className="w-full px-4 py-2.5 bg-[#f8f6f6] border-none rounded-xl text-sm focus:ring-2 focus:ring-[#ee2b4b]/20"
                                         required
                                     >
-                                        <option value="">Select Category</option>
+                                        <option value="">Select gender</option>
                                         <option value="Men">Men</option>
                                         <option value="Women">Women</option>
                                         <option value="Kids">Kids</option>

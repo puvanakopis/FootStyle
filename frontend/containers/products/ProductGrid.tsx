@@ -8,7 +8,7 @@ import Pagination from "@/components/Pagination";
 interface Product {
   id: string;
   name: string;
-  category: string;
+  gender : string;
   price: number;
   oldPrice?: number;
   badge?: string;
@@ -39,8 +39,8 @@ const ProductGrid = ({ products }: { products: Product[] }) => {
             <ProductCard
               id={product.id}
               name={product.name}
-              category={product.category}
-              price={`Rs${product.price.toFixed(2)}`}
+              gender ={product.gender }
+              price={`Rs ${product.price.toFixed(2)}`}
               rating={product.rating}
               imageUrl={product.images[0]}
               badge={product.badge}
