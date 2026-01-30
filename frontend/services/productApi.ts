@@ -9,7 +9,7 @@ import {
     ProductResponse
 } from '@/interfaces/productInterface';
 
-const API_BASE_URL = process.env.API_URL || 'http://localhost:4000';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 
 const api = axios.create({
     baseURL: API_BASE_URL,
@@ -26,6 +26,7 @@ api.interceptors.request.use((config) => {
 });
 
 export const productApi = {
+
     // ----------------- GET ALL PRODUCTS -----------------
     getProducts: async (): Promise<Product[]> => {
         const response = await api.get<ProductsResponse>('/api/products');
@@ -41,47 +42,52 @@ export const productApi = {
     // ----------------- CREATE PRODUCT -----------------
     createProduct: async (data: CreateProductRequest, images: File[]): Promise<Product> => {
         const formData = new FormData();
-        
-        // Append JSON data
-        const productData = {
-            ...data,
-            sizes: data.sizes || [],
-            isActive: data.isActive !== undefined ? data.isActive : true
-        };
-        formData.append('data', JSON.stringify(productData));
-        
+
+        // Append fields individually
+        Object.entries(data).forEach(([key, value]) => {
+            if (Array.isArray(value)) {
+                formData.append(key, JSON.stringify(value));
+            } else {
+                formData.append(key, value as any);
+            }
+        });
+
         // Append images
-        images.forEach((image, index) => {
-            formData.append('images', image);
+        images.forEach((image) => {
+            formData.append("images", image);
         });
 
         const response = await api.post<ProductResponse>('/api/products', formData, {
-            headers: {
-                'Content-Type': 'multipart/form-data',
-            },
+            headers: { "Content-Type": "multipart/form-data" },
         });
+
         return response.data.data;
     },
 
     // ----------------- UPDATE PRODUCT -----------------
     updateProduct: async (id: string, data: UpdateProductRequest, images?: File[]): Promise<Product> => {
         const formData = new FormData();
-        
-        // Append JSON data
-        formData.append('data', JSON.stringify(data));
-        
-        // Append images if provided
+
+        // Append fields individually
+        Object.entries(data).forEach(([key, value]) => {
+            if (Array.isArray(value)) {
+                formData.append(key, JSON.stringify(value));
+            } else {
+                formData.append(key, value as any);
+            }
+        });
+
+        // Append new images if provided
         if (images && images.length > 0) {
             images.forEach((image) => {
-                formData.append('images', image);
+                formData.append("images", image);
             });
         }
 
         const response = await api.put<ProductResponse>(`/api/products/${id}`, formData, {
-            headers: {
-                'Content-Type': images && images.length > 0 ? 'multipart/form-data' : 'application/json',
-            },
+            headers: { "Content-Type": "multipart/form-data" },
         });
+
         return response.data.data;
     },
 
@@ -108,10 +114,9 @@ export const productApi = {
         });
 
         const response = await api.post('/api/products/upload', formData, {
-            headers: {
-                'Content-Type': 'multipart/form-data',
-            },
+            headers: { 'Content-Type': 'multipart/form-data' },
         });
+
         return response.data;
     },
 };

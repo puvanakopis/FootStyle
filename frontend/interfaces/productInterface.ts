@@ -25,7 +25,7 @@ export interface Product {
     isActive: boolean;
     createdAt?: string;
     updatedAt?: string;
-    rating?: number; 
+    rating?: number;
 }
 
 export interface CreateProductRequest {

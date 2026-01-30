@@ -1,21 +1,9 @@
 "use client";
 
-import React, {
-    createContext,
-    useContext,
-    useEffect,
-    useState,
-    ReactNode,
-} from "react";
+import React, { createContext, useContext, useEffect, useState, ReactNode, } from "react";
 import { AxiosError } from "axios";
 import { productApi } from "@/services/productApi";
-import {
-    ProductContextType,
-    Product,
-    CreateProductRequest,
-    UpdateProductRequest,
-    AddReviewRequest,
-} from "@/interfaces/productInterface";
+import { ProductContextType, Product, CreateProductRequest, UpdateProductRequest, AddReviewRequest, } from "@/interfaces/productInterface";
 
 const ProductContext = createContext<ProductContextType | undefined>(undefined);
 
@@ -60,7 +48,6 @@ export const ProductProvider: React.FC<ProductProviderProps> = ({ children }) =>
             const fetchedProducts = await productApi.getProducts();
             setProducts(fetchedProducts);
             setTotalCount(fetchedProducts.length);
-            console.log("Fetched products:", fetchedProducts);
         } catch (err) {
             handleError(err);
         } finally {

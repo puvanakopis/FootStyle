@@ -81,10 +81,6 @@ const AdminUsersManagement: React.FC = () => {
                         </p>
                     </div>
                     <div className="flex items-center gap-3">
-                        <button className="flex items-center gap-2 bg-white hover:bg-gray-50 text-text-main px-4 py-2.5 rounded-xl border border-[#f3e7e9] font-bold transition-all shadow-sm">
-                            <MdOutlineFileDownload size={20} />
-                            <span>Export CSV</span>
-                        </button>
                         <button className="flex items-center gap-2 bg-[#ee2b4b] hover:bg-[#d0223f] text-white px-4 py-2.5 rounded-xl font-bold transition-all shadow-sm">
                             <MdPersonAdd size={20} />
                             <span>Add User</span>

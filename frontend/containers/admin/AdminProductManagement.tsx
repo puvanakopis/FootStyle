@@ -2,100 +2,33 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { IoSearch } from "react-icons/io5";
-import { MdOutlineFileDownload, MdOutlineEdit, MdOutlineAdd, MdDeleteOutline, MdClose } from "react-icons/md";
+import { MdOutlineEdit, MdOutlineAdd, MdDeleteOutline, MdClose } from "react-icons/md";
 import { LuChevronLeft, LuChevronRight } from "react-icons/lu";
 import { MdCategory, MdInventory, MdAttachMoney } from "react-icons/md";
+import { Size, Product } from "@/interfaces/productInterface";
+import { useProduct } from "@/context/ProductContext";
 
-type Size = {
-    size: string;
-    stock: number;
-};
-
-type Review = {
-    user: string;
-    rating: number;
-    comment: string;
-    createdAt?: Date;
-    updatedAt?: Date;
-};
-
-type Product = {
-    _id: string;
-    id: string;
-    title: string;
-    name: string;
-    category: "Men" | "Women" | "Kids";
-    description: string;
-    price: number;
-    images: string[];
-    sizes: Size[];
-    reviews: Review[];
-    isActive: boolean;
-    createdAt?: Date;
-    updatedAt?: Date;
-};
-
-// Extended type for form data
 type ProductFormData = {
     name: string;
     title: string;
     category: "Men" | "Women" | "Kids" | "";
     description: string;
     price: number | "";
-    images: string[]; 
     sizes: Size[];
     isActive: boolean;
 };
 
-// Type for image files with preview
 type ImageFile = {
-    file: File;
+    file: File | null;
     preview: string;
+    isExisting?: boolean;
+    existingUrl?: string;
 };
 
-const sampleProducts: Product[] = [
-    {
-        _id: "Product_01",
-        id: "Product_01",
-        title: "Premium Running Shoes",
-        name: "Nike Air Max 270",
-        category: "Men",
-        description: "Comfortable running shoes with air cushioning",
-        price: 150,
-        images: [
-            "https://lh3.googleusercontent.com/aida-public/AB6AXuC8nutm2JDkOOAyiY_GBY4PdfQPqA9L6hIer-JXCvWfOFz5TY4CcjpNFylQQQAI54jGD2WA7HM0z5yYh1gJJQlqEhOYia4q4rGUFzel8usfjxSZq0Xe98UoeTRf4NILpWzT8gzntCS4nnBYufhTYttxLNokOlTxc-3GvYtrEOE0C7jbHFP7-n0fD0mZzO5abz-6DRnOYfsLY-4nS_GC4dNcav258cvSqTJqODb8UwdetldoJTCvoKvgPpbmDYacperkYkhOYhsHWpxX",
-        ],
-        sizes: [
-            { size: "S", stock: 10 },
-            { size: "M", stock: 15 },
-            { size: "L", stock: 8 },
-        ],
-        reviews: [],
-        isActive: true,
-    },
-    {
-        _id: "Product_02",
-        id: "Product_02",
-        title: "Sports Performance Shoes",
-        name: "Adidas Ultraboost 22",
-        category: "Men",
-        description: "High-performance sports shoes with boost technology",
-        price: 190,
-        images: [
-            "https://lh3.googleusercontent.com/aida-public/AB6AXuBqzGpfPxe0XUK_7q3m7gUxpsinido-lSciLBe2EhYwRTvf9Jl22BChLHGsO-7d2wMeK0rVNN2xRu1oT5Nm3NtuBXiAbSp2JEmgrNVJifjvJom2jsjR158gAM3AB0Rd7CvTtcxgegXYuOHa4jdRECo7IjvCw7YQRtwfTyn2Drpzq-OETvDVVk3F93ASuaqZIOBbuNVndwQaENo6TB1xxFpDTO_3kvrxRPbXxcP120xoQTxSwDDvrEr1aZX8RpvjMO9STTO5SlVoL6vy",
-        ],
-        sizes: [
-            { size: "S", stock: 5 },
-            { size: "M", stock: 12 },
-            { size: "L", stock: 7 },
-        ],
-        reviews: [],
-        isActive: true,
-    },
-];
+const AdminProductManagement = () => {
+    const { products, fetchProducts, createProduct, updateProduct, deleteProduct, isLoading, } = useProduct();
 
-const AdminProductManagement: React.FC = () => {
-    const [products, setProducts] = useState<Product[]>(sampleProducts);
+    // State for filters
     const [searchQuery, setSearchQuery] = useState("");
     const [categoryFilter, setCategoryFilter] = useState("All");
     const [stockFilter, setStockFilter] = useState("All");
@@ -106,6 +39,20 @@ const AdminProductManagement: React.FC = () => {
     const [showEditModal, setShowEditModal] = useState(false);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
 
+    // State for image files
+    const [imageFiles, setImageFiles] = useState<ImageFile[]>([]);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+
+    // Other states
+    const [editingProductId, setEditingProductId] = useState<string | null>(null);
+    const [deletingProductId, setDeletingProductId] = useState<string | null>(null);
+    const [isUploading, setIsUploading] = useState(false);
+    const [notification, setNotification] = useState<{ type: 'success' | 'error', message: string } | null>(null);
+
+    // Pagination state
+    const [currentPage, setCurrentPage] = useState(1);
+    const productsPerPage = 15;
+
     // State for form data
     const [formData, setFormData] = useState<ProductFormData>({
         name: "",
@@ -113,34 +60,21 @@ const AdminProductManagement: React.FC = () => {
         category: "",
         description: "",
         price: "",
-        images: [],
         sizes: [{ size: "S", stock: 0 }],
         isActive: true,
     });
 
-    // State for image files
-    const [imageFiles, setImageFiles] = useState<ImageFile[]>([]);
-    const fileInputRef = useRef<HTMLInputElement>(null);
+    useEffect(() => {
+        fetchProducts();
+    }, []);
 
-    const [editingProductId, setEditingProductId] = useState<string | null>(null);
-    const [deletingProductId, setDeletingProductId] = useState<string | null>(null);
-    const [isUploading, setIsUploading] = useState(false);
+    // Show notification
+    const showNotification = (type: 'success' | 'error', message: string) => {
+        setNotification({ type, message });
+        setTimeout(() => setNotification(null), 3000);
+    };
 
-    // Filter products based on search and filters
-    const filteredProducts = products.filter((product) => {
-        const matchesSearch =
-            product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            product.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            product.id.toLowerCase().includes(searchQuery.toLowerCase());
-
-        const matchesCategory =
-            categoryFilter === "All" ||
-            product.category === categoryFilter;
-
-        return matchesSearch && matchesCategory;
-    });
-
-    // Calculate total stock for stock status
+    // Calculate total stock
     const getStockStatus = (product: Product) => {
         const totalStock = product.sizes.reduce((sum, size) => sum + size.stock, 0);
         if (totalStock === 0) return "Out";
@@ -149,7 +83,36 @@ const AdminProductManagement: React.FC = () => {
         return "High";
     };
 
-    // Handle file selection
+    // Add this helper function
+    const getImageUrl = (imageName: string) => {
+        const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+        return `${API_BASE_URL}/uploads/product/${imageName}`;
+    };
+
+    // Filter products based on search and filters
+    const filteredProducts = products.filter((product) => {
+        const matchesSearch =
+            product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            product.title?.toLowerCase().includes(searchQuery.toLowerCase())
+
+        const matchesCategory =
+            categoryFilter === "All" ||
+            product.category === categoryFilter;
+
+        const matchesStock =
+            stockFilter === "All" ||
+            getStockStatus(product) === stockFilter;
+
+        return matchesSearch && matchesCategory && matchesStock;
+    });
+
+    // Calculate pagination values
+    const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
+    const indexOfLastProduct = currentPage * productsPerPage;
+    const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
+    const currentProducts = filteredProducts.slice(indexOfFirstProduct, indexOfLastProduct);
+
+    // Handle file selection with 4 image limit
     const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
         const files = e.target.files;
         if (!files) return;
@@ -157,33 +120,36 @@ const AdminProductManagement: React.FC = () => {
         const newImageFiles: ImageFile[] = [];
 
         Array.from(files).forEach(file => {
+            // Check if we already have 4 images
+            const totalImages = imageFiles.filter(img => !img.isExisting).length + newImageFiles.length;
+            if (totalImages >= 4) {
+                showNotification('error', "Maximum 4 images allowed");
+                return;
+            }
+
             // Check file type
             if (!file.type.match('image.*')) {
-                alert(`File ${file.name} is not an image`);
+                showNotification('error', `File ${file.name} is not an image`);
                 return;
             }
 
-            // Check file size (max 10MB)
+            // Check file size 
             if (file.size > 10 * 1024 * 1024) {
-                alert(`File ${file.name} is too large. Max size is 10MB`);
+                showNotification('error', `File ${file.name} is too large. Max size is 10MB`);
                 return;
             }
 
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const result = e.target?.result as string;
-                newImageFiles.push({
-                    file,
-                    preview: result
-                });
-
-                // When all files are processed
-                if (newImageFiles.length === Array.from(files).length) {
-                    setImageFiles(prev => [...prev, ...newImageFiles]);
-                }
-            };
-            reader.readAsDataURL(file);
+            // Create object URL for preview
+            const objectUrl = URL.createObjectURL(file);
+            newImageFiles.push({
+                file,
+                preview: objectUrl,
+                isExisting: false
+            });
         });
+
+        // Add new files to existing ones
+        setImageFiles(prev => [...prev, ...newImageFiles]);
 
         // Reset file input
         if (fileInputRef.current) {
@@ -193,18 +159,14 @@ const AdminProductManagement: React.FC = () => {
 
     // Remove image
     const removeImage = (index: number) => {
-        setImageFiles(prev => prev.filter((_, i) => i !== index));
-    };
+        const imageToRemove = imageFiles[index];
 
-    // Convert image files to base64 strings
-    const getImageBase64Strings = async (): Promise<string[]> => {
-        const base64Strings: string[] = [];
-
-        for (const imageFile of imageFiles) {
-            base64Strings.push(imageFile.preview);
+        // Revoke object URL to prevent memory leaks
+        if (imageToRemove.preview.startsWith('blob:')) {
+            URL.revokeObjectURL(imageToRemove.preview);
         }
 
-        return base64Strings;
+        setImageFiles(prev => prev.filter((_, i) => i !== index));
     };
 
     // Initialize form for adding new product
@@ -215,11 +177,11 @@ const AdminProductManagement: React.FC = () => {
             category: "",
             description: "",
             price: "",
-            images: [],
             sizes: [{ size: "S", stock: 0 }],
             isActive: true,
         });
         setImageFiles([]);
+        setCurrentPage(1);
         setShowAddModal(true);
     };
 
@@ -231,19 +193,20 @@ const AdminProductManagement: React.FC = () => {
             category: product.category,
             description: product.description || "",
             price: product.price,
-            images: product.images,
             sizes: [...product.sizes],
             isActive: product.isActive,
         });
 
-        // Convert existing base64 images to ImageFile objects
-        const existingImageFiles: ImageFile[] = product.images.map((img, index) => ({
-            file: new File([], `image_${index}.jpg`),
-            preview: img
+        // Load existing product images
+        const existingImages: ImageFile[] = product.images.map((imageName, index) => ({
+            file: null,
+            preview: getImageUrl(imageName),
+            isExisting: true,
+            existingUrl: getImageUrl(imageName)
         }));
-        setImageFiles(existingImageFiles);
 
-        setEditingProductId(product._id);
+        setImageFiles(existingImages);
+        setEditingProductId(product.id || product._id || "");
         setShowEditModal(true);
     };
 
@@ -254,11 +217,21 @@ const AdminProductManagement: React.FC = () => {
     };
 
     // Confirm delete
-    const handleConfirmDelete = () => {
+    const handleConfirmDelete = async () => {
         if (deletingProductId) {
-            setProducts(products.filter(product => product._id !== deletingProductId));
-            setShowDeleteModal(false);
-            setDeletingProductId(null);
+            try {
+                await deleteProduct(deletingProductId);
+                showNotification('success', "Product deleted successfully");
+                setShowDeleteModal(false);
+                setDeletingProductId(null);
+
+                // Reset to first page if current page becomes empty
+                if (currentProducts.length === 1 && currentPage > 1) {
+                    setCurrentPage(currentPage - 1);
+                }
+            } catch (error) {
+                showNotification('error', "Failed to delete product");
+            }
         }
     };
 
@@ -299,86 +272,103 @@ const AdminProductManagement: React.FC = () => {
         }
     };
 
-    // Handle form submission for adding/editing
+    // Handle form submission for adding
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
         // Validate required fields
         if (!formData.name || !formData.category || formData.price === "") {
-            alert("Please fill in all required fields (Name, Category, Price)");
+            showNotification('error', "Please fill in all required fields (Name, Category, Price)");
             return;
         }
 
-        if (imageFiles.length === 0) {
-            alert("Please upload at least one image");
+        // Validate images - ensure exactly 4 images
+        const totalImages = imageFiles.length;
+        if (totalImages !== 4) {
+            showNotification('error', `Please upload exactly 4 images. Currently: ${totalImages}/4`);
             return;
         }
 
         setIsUploading(true);
 
         try {
-            // Convert image files to base64 strings
-            const imageBase64Strings = await getImageBase64Strings();
-
             if (showEditModal && editingProductId) {
                 // Update existing product
-                setProducts(prev => prev.map(product =>
-                    product._id === editingProductId
-                        ? {
-                            ...product,
-                            ...formData,
-                            price: formData.price as number,
-                            images: imageBase64Strings,
-                            _id: product._id,
-                            id: product.id,
-                            createdAt: product.createdAt,
-                            updatedAt: new Date()
-                        }
-                        : product
-                ));
-                setShowEditModal(false);
-            } else {
-                // Add new product
-                const newProduct: Product = {
-                    _id: `Product_${String(products.length + 1).padStart(2, "0")}`,
-                    id: `Product_${String(products.length + 1).padStart(2, "0")}`,
+                const updateData = {
                     name: formData.name,
                     title: formData.title,
                     category: formData.category as "Men" | "Women" | "Kids",
                     description: formData.description,
                     price: formData.price as number,
-                    images: imageBase64Strings,
                     sizes: formData.sizes,
-                    reviews: [],
                     isActive: formData.isActive,
-                    createdAt: new Date(),
-                    updatedAt: new Date()
                 };
 
-                setProducts(prev => [...prev, newProduct]);
+                // Get only newly uploaded files 
+                const imagesToUpload = imageFiles
+                    .filter(img => !img.isExisting && img.file)
+                    .map(img => img.file as File);
+
+                await updateProduct(
+                    editingProductId,
+                    updateData,
+                    imagesToUpload.length > 0 ? imagesToUpload : undefined
+                );
+
+                showNotification('success', "Product updated successfully");
+                setShowEditModal(false);
+            } else {
+                // Add new product
+                const createData = {
+                    name: formData.name,
+                    title: formData.title,
+                    category: formData.category as "Men" | "Women" | "Kids",
+                    description: formData.description,
+                    price: formData.price as number,
+                    sizes: formData.sizes,
+                    isActive: formData.isActive,
+                };
+
+                const images = imageFiles
+                    .filter(img => img.file)
+                    .map(img => img.file as File);
+
+                await createProduct(createData, images);
+
+                showNotification('success', "Product created successfully");
                 setShowAddModal(false);
             }
 
-            // Reset form
+            // Clean up and reset form
+            imageFiles.forEach(imageFile => {
+                if (imageFile.preview.startsWith('blob:')) {
+                    URL.revokeObjectURL(imageFile.preview);
+                }
+            });
+
             setFormData({
                 name: "",
                 title: "",
                 category: "",
                 description: "",
                 price: "",
-                images: [],
                 sizes: [{ size: "S", stock: 0 }],
                 isActive: true,
             });
             setImageFiles([]);
+
+            // Refresh product list
+            fetchProducts();
+
         } catch (error) {
-            console.error("Error processing images:", error);
-            alert("Error processing images. Please try again.");
+            console.error("Error processing product:", error);
+            showNotification('error', "Error processing product. Please try again.");
         } finally {
             setIsUploading(false);
         }
     };
 
+    // Clean up object URLs when component unmounts
     useEffect(() => {
         return () => {
             imageFiles.forEach(imageFile => {
@@ -387,10 +377,107 @@ const AdminProductManagement: React.FC = () => {
                 }
             });
         };
-    }, []);
+    }, [imageFiles]);
+
+    // Clean up object URLs when modal closes
+    const handleCloseModal = () => {
+        imageFiles.forEach(imageFile => {
+            if (imageFile.preview.startsWith('blob:')) {
+                URL.revokeObjectURL(imageFile.preview);
+            }
+        });
+
+        setShowAddModal(false);
+        setShowEditModal(false);
+        setFormData({
+            name: "",
+            title: "",
+            category: "",
+            description: "",
+            price: "",
+            sizes: [{ size: "S", stock: 0 }],
+            isActive: true,
+        });
+        setImageFiles([]);
+    };
+
+    // Calculate remaining slots for new images
+    const getRemainingImageSlots = () => {
+        const existingImagesCount = imageFiles.filter(img => img.isExisting).length;
+        const newImagesCount = imageFiles.filter(img => !img.isExisting).length;
+        return 4 - existingImagesCount - newImagesCount;
+    };
+
+    // Handle page change
+    const handlePageChange = (pageNumber: number) => {
+        setCurrentPage(pageNumber);
+    };
+
+    // Handle next page
+    const handleNextPage = () => {
+        if (currentPage < totalPages) {
+            setCurrentPage(currentPage + 1);
+        }
+    };
+
+    // Handle previous page
+    const handlePrevPage = () => {
+        if (currentPage > 1) {
+            setCurrentPage(currentPage - 1);
+        }
+    };
+
+    // Generate page numbers for pagination
+    const getPageNumbers = () => {
+        const pageNumbers = [];
+        const maxPageButtons = 5;
+
+        if (totalPages <= maxPageButtons) {
+            for (let i = 1; i <= totalPages; i++) {
+                pageNumbers.push(i);
+            }
+        } else {
+            pageNumbers.push(1);
+
+            let start = Math.max(2, currentPage - 1);
+            let end = Math.min(totalPages - 1, currentPage + 1);
+
+            if (currentPage <= 2) {
+                end = 4;
+            }
+
+            if (currentPage >= totalPages - 1) {
+                start = totalPages - 3;
+            }
+
+            if (start > 2) {
+                pageNumbers.push('...');
+            }
+
+            for (let i = start; i <= end; i++) {
+                pageNumbers.push(i);
+            }
+
+            if (end < totalPages - 1) {
+                pageNumbers.push('...');
+            }
+
+            if (totalPages > 1) {
+                pageNumbers.push(totalPages);
+            }
+        }
+
+        return pageNumbers;
+    };
 
     return (
         <div className="flex-1 overflow-y-auto p-6 lg:p-10 scroll-smooth">
+            {notification && (
+                <div className={`fixed top-4 right-4 z-50 px-4 py-2 rounded-xl shadow-lg ${notification.type === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                    {notification.message}
+                </div>
+            )}
+
             <div className="max-w-7xl mx-auto flex flex-col gap-8">
                 {/* Header */}
                 <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
@@ -403,10 +490,6 @@ const AdminProductManagement: React.FC = () => {
                         </p>
                     </div>
                     <div className="flex items-center gap-3">
-                        <button className="flex items-center gap-2 bg-white hover:bg-gray-50 text-text-main px-4 py-2.5 rounded-xl border border-[#f3e7e9] font-bold transition-all shadow-sm">
-                            <MdOutlineFileDownload className="text-xl" />
-                            <span>Export CSV</span>
-                        </button>
                         <button
                             onClick={handleAddNewProduct}
                             className="flex items-center gap-2 bg-[#ee2b4b] text-white px-5 py-2.5 rounded-xl font-bold shadow-sm transition-all active:scale-95"
@@ -461,10 +544,10 @@ const AdminProductManagement: React.FC = () => {
                                     onChange={(e) => setPriceFilter(e.target.value)}
                                 >
                                     <option value="All">Price Range</option>
-                                    <option value="0-50">$0 - $50</option>
-                                    <option value="50-100">$50 - $100</option>
-                                    <option value="100-200">$100 - $200</option>
-                                    <option value="200+">$200+</option>
+                                    <option value="0-500">Rs. 0 - Rs. 500</option>
+                                    <option value="500-1000">Rs. 500 - Rs. 1,000</option>
+                                    <option value="1000-5000">Rs. 1,000 - Rs. 5,000</option>
+                                    <option value="5000+">Rs. 5,000+</option>
                                 </select>
                             </div>
                         </div>
@@ -506,110 +589,145 @@ const AdminProductManagement: React.FC = () => {
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-[#f3e7e9]">
-                                {filteredProducts.map((product) => {
-                                    const stockStatus = getStockStatus(product);
-                                    return (
-                                        <tr key={product._id} className="hover:bg-gray-50 transition-colors group">
-                                            <td className="px-6 py-4">
-                                                <input
-                                                    type="checkbox"
-                                                    className="rounded border-gray-300 text-[#ee2b4b] focus:ring-[#ee2b4b]/20 bg-white"
-                                                />
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                <div className="flex items-center gap-3">
-                                                    <div
-                                                        className="w-12 h-12 rounded-xl bg-gray-100 bg-cover bg-center border border-gray-200"
-                                                        style={{ backgroundImage: `url(${product.images[0]})` }}
+                                {isLoading ? (
+                                    <tr>
+                                        <td colSpan={7} className="px-6 py-8 text-center">
+                                            <div className="flex justify-center">
+                                                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#ee2b4b]"></div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ) : currentProducts.length === 0 ? (
+                                    <tr>
+                                        <td colSpan={7} className="px-6 py-8 text-center text-text-secondary">
+                                            No products found
+                                        </td>
+                                    </tr>
+                                ) : (
+                                    currentProducts.map((product) => {
+                                        const stockStatus = getStockStatus(product);
+                                        return (
+                                            <tr key={product.id || product._id} className="hover:bg-gray-50 transition-colors group">
+                                                <td className="px-6 py-4">
+                                                    <input
+                                                        type="checkbox"
+                                                        className="rounded border-gray-300 text-[#ee2b4b] focus:ring-[#ee2b4b]/20 bg-white"
                                                     />
-                                                    <div className="flex flex-col">
-                                                        <span className="text-sm font-bold text-text-main">{product.name}</span>
-                                                        <span className="text-xs text-text-secondary">{product.id}</span>
+                                                </td>
+                                                <td className="px-6 py-4">
+                                                    <div className="flex items-center gap-3">
+                                                        <div
+                                                            className="w-12 h-12 rounded-xl bg-gray-100 bg-cover bg-center border border-gray-200"
+                                                            style={{
+                                                                backgroundImage: `url(${getImageUrl(product.images[0])})`
+                                                            }}
+                                                        />
+                                                        <div className="flex flex-col">
+                                                            <span className="text-sm font-bold text-text-main">{product.name}</span>
+                                                            <span className="text-xs text-text-secondary">{product.id}</span>
+                                                        </div>
                                                     </div>
-                                                </div>
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                <span className="text-sm text-text-main font-medium bg-[#f8f6f6] px-2.5 py-1 rounded-lg">
-                                                    {product.category}
-                                                </span>
-                                            </td>
-                                            <td className="px-6 py-4 text-sm font-bold text-text-main">
-                                                ${product.price}
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                <span
-                                                    className={`inline-flex items-center gap-1 px-2 py-0.5 text-xs font-bold rounded-full border ${stockStatus === "Low"
-                                                        ? "bg-red-100 text-red-800 border-red-200"
-                                                        : stockStatus === "Med"
-                                                            ? "bg-yellow-100 text-yellow-800 border-yellow-200"
-                                                            : stockStatus === "High"
-                                                                ? "bg-green-100 text-green-800 border-green-200"
-                                                                : "bg-gray-100 text-gray-800 border-gray-200"
-                                                        }`}
-                                                >
-                                                    {product.sizes.reduce((sum, size) => sum + size.stock, 0)} left
-                                                </span>
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                <span
-                                                    className={`inline-flex items-center gap-1 px-2 py-0.5 text-xs font-bold rounded-full border ${product.isActive
-                                                        ? "bg-green-100 text-green-800 border-green-200"
-                                                        : "bg-gray-100 text-gray-800 border-gray-200"
-                                                        }`}
-                                                >
-                                                    {product.isActive ? "Active" : "Inactive"}
-                                                </span>
-                                            </td>
-                                            <td className="px-6 py-4 text-right">
-                                                <div className="flex items-center justify-end gap-2 transition-opacity">
-                                                    <button
-                                                        onClick={() => handleEditProduct(product)}
-                                                        className="size-8 flex items-center justify-center rounded-lg text-text-secondary hover:text-[#ee2b4b] hover:bg-[#ee2b4b]/5 transition-colors"
-                                                        title="Edit Product"
+                                                </td>
+                                                <td className="px-6 py-4">
+                                                    <span className="text-sm text-text-main font-medium bg-[#f8f6f6] px-2.5 py-1 rounded-lg">
+                                                        {product.category}
+                                                    </span>
+                                                </td>
+                                                <td className="px-6 py-4 text-sm font-bold text-text-main">
+                                                    Rs. {product.price.toLocaleString()}
+                                                </td>
+                                                <td className="px-6 py-4">
+                                                    <span
+                                                        className={`inline-flex items-center gap-1 px-2 py-0.5 text-xs font-bold rounded-full border ${stockStatus === "Low"
+                                                            ? "bg-red-100 text-red-800 border-red-200"
+                                                            : stockStatus === "Med"
+                                                                ? "bg-yellow-100 text-yellow-800 border-yellow-200"
+                                                                : stockStatus === "High"
+                                                                    ? "bg-green-100 text-green-800 border-green-200"
+                                                                    : "bg-gray-100 text-gray-800 border-gray-200"
+                                                            }`}
                                                     >
-                                                        <MdOutlineEdit className="text-lg" />
-                                                    </button>
-                                                    <button
-                                                        onClick={() => handleDeleteClick(product._id)}
-                                                        className="size-8 flex items-center justify-center rounded-lg text-text-secondary hover:text-red-600 hover:bg-red-50 transition-colors"
-                                                        title="Delete Product"
+                                                        {product.sizes.reduce((sum, size) => sum + size.stock, 0)}
+                                                    </span>
+                                                </td>
+                                                <td className="px-6 py-4">
+                                                    <span
+                                                        className={`inline-flex items-center gap-1 px-2 py-0.5 text-xs font-bold rounded-full border ${product.isActive
+                                                            ? "bg-green-100 text-green-800 border-green-200"
+                                                            : "bg-gray-100 text-gray-800 border-gray-200"
+                                                            }`}
                                                     >
-                                                        <MdDeleteOutline className="text-lg" />
-                                                    </button>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    );
-                                })}
+                                                        {product.isActive ? "Active" : "Inactive"}
+                                                    </span>
+                                                </td>
+                                                <td className="px-6 py-4 text-right">
+                                                    <div className="flex items-center justify-end gap-2 transition-opacity">
+                                                        <button
+                                                            onClick={() => handleEditProduct(product)}
+                                                            className="size-8 flex items-center justify-center rounded-lg text-text-secondary hover:text-[#ee2b4b] hover:bg-[#ee2b4b]/5 transition-colors"
+                                                            title="Edit Product"
+                                                        >
+                                                            <MdOutlineEdit className="text-lg" />
+                                                        </button>
+                                                        <button
+                                                            onClick={() => handleDeleteClick(product.id || product._id || "")}
+                                                            className="size-8 flex items-center justify-center rounded-lg text-text-secondary hover:text-red-600 hover:bg-red-50 transition-colors"
+                                                            title="Delete Product"
+                                                        >
+                                                            <MdDeleteOutline className="text-lg" />
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        );
+                                    })
+                                )}
                             </tbody>
                         </table>
                     </div>
 
                     {/* Pagination */}
-                    <div className="px-6 py-4 border-t border-[#f3e7e9] flex flex-col sm:flex-row items-center justify-between gap-4">
-                        <p className="text-sm text-text-secondary">
-                            Showing <span className="font-bold text-text-main">1-{filteredProducts.length}</span> of{" "}
-                            <span className="font-bold text-text-main">{filteredProducts.length}</span> products
-                        </p>
-                        <div className="flex items-center gap-2">
-                            <button className="size-8 flex items-center justify-center rounded-lg border border-[#f3e7e9] text-text-secondary hover:bg-gray-50 hover:text-text-main disabled:opacity-50">
-                                <LuChevronLeft className="text-lg" />
-                            </button>
-                            <button className="size-8 flex items-center justify-center rounded-lg bg-[#ee2b4b] text-white font-bold text-sm">
-                                1
-                            </button>
-                            <button className="size-8 flex items-center justify-center rounded-lg border border-[#f3e7e9] text-text-secondary hover:bg-gray-50 hover:text-text-main text-sm font-medium">
-                                2
-                            </button>
-                            <span className="text-text-secondary">...</span>
-                            <button className="size-8 flex items-center justify-center rounded-lg border border-[#f3e7e9] text-text-secondary hover:bg-gray-50 hover:text-text-main text-sm font-medium">
-                                12
-                            </button>
-                            <button className="size-8 flex items-center justify-center rounded-lg border border-[#f3e7e9] text-text-secondary hover:bg-gray-50 hover:text-text-main">
-                                <LuChevronRight className="text-lg" />
-                            </button>
+                    {filteredProducts.length > 0 && (
+                        <div className="px-6 py-4 border-t border-[#f3e7e9] flex flex-col sm:flex-row items-center justify-between gap-4">
+                            <p className="text-sm text-text-secondary">
+                                Showing <span className="font-bold text-text-main">{indexOfFirstProduct + 1}-{Math.min(indexOfLastProduct, filteredProducts.length)}</span> of{" "}
+                                <span className="font-bold text-text-main">{filteredProducts.length}</span> products
+                            </p>
+                            <div className="flex items-center gap-2">
+                                <button
+                                    onClick={handlePrevPage}
+                                    disabled={currentPage === 1}
+                                    className="size-8 flex items-center justify-center rounded-lg border border-[#f3e7e9] text-text-secondary hover:bg-gray-50 hover:text-text-main disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                >
+                                    <LuChevronLeft className="text-lg" />
+                                </button>
+
+                                {getPageNumbers().map((pageNumber, index) => (
+                                    <button
+                                        key={index}
+                                        onClick={() => pageNumber !== '...' && handlePageChange(pageNumber as number)}
+                                        className={`size-8 flex items-center justify-center rounded-lg text-sm font-medium transition-colors ${pageNumber === currentPage
+                                            ? "bg-[#ee2b4b] text-white"
+                                            : pageNumber === '...'
+                                                ? "text-text-secondary cursor-default"
+                                                : "border border-[#f3e7e9] text-text-secondary hover:bg-gray-50 hover:text-text-main"
+                                            }`}
+                                        disabled={pageNumber === '...'}
+                                    >
+                                        {pageNumber}
+                                    </button>
+                                ))}
+
+                                <button
+                                    onClick={handleNextPage}
+                                    disabled={currentPage === totalPages}
+                                    className="size-8 flex items-center justify-center rounded-lg border border-[#f3e7e9] text-text-secondary hover:bg-gray-50 hover:text-text-main disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                >
+                                    <LuChevronRight className="text-lg" />
+                                </button>
+                            </div>
                         </div>
-                    </div>
+                    )}
                 </div>
             </div>
 
@@ -670,7 +788,7 @@ const AdminProductManagement: React.FC = () => {
                                 </div>
                                 <div className="space-y-2">
                                     <label className="text-sm font-medium text-text-main block">
-                                        Price ($) *
+                                        Price (Rs.) *
                                     </label>
                                     <input
                                         type="number"
@@ -678,9 +796,9 @@ const AdminProductManagement: React.FC = () => {
                                         value={formData.price}
                                         onChange={handleInputChange}
                                         className="w-full px-4 py-2.5 bg-[#f8f6f6] border-none rounded-xl text-sm focus:ring-2 focus:ring-[#ee2b4b]/20"
-                                        placeholder="Enter price"
+                                        placeholder="Enter price in rupees"
                                         min="0"
-                                        step="0.01"
+                                        step="1"
                                         required
                                     />
                                 </div>
@@ -699,13 +817,20 @@ const AdminProductManagement: React.FC = () => {
                                 </div>
                                 <div className="md:col-span-2 space-y-2">
                                     <label className="text-sm font-medium text-text-main block">
-                                        Images *
+                                        Images * (Exactly 4 images required)
                                     </label>
                                     <div className="space-y-4">
                                         {/* Image upload area */}
                                         <div
-                                            className="border-2 border-dashed border-gray-300 rounded-2xl p-6 text-center hover:border-[#ee2b4b] transition-colors cursor-pointer"
-                                            onClick={() => fileInputRef.current?.click()}
+                                            className={`border-2 border-dashed rounded-2xl p-6 text-center transition-colors ${getRemainingImageSlots() === 0
+                                                ? 'border-gray-300 bg-gray-50 cursor-not-allowed'
+                                                : 'border-gray-300 hover:border-[#ee2b4b] cursor-pointer'
+                                                }`}
+                                            onClick={() => {
+                                                if (getRemainingImageSlots() > 0) {
+                                                    fileInputRef.current?.click();
+                                                }
+                                            }}
                                         >
                                             <input
                                                 ref={fileInputRef}
@@ -721,10 +846,17 @@ const AdminProductManagement: React.FC = () => {
                                                 </div>
                                                 <div>
                                                     <p className="text-text-main font-medium">
-                                                        Click to upload images
+                                                        {getRemainingImageSlots() === 0
+                                                            ? 'Maximum 4 images reached'
+                                                            : 'Click to upload images'}
                                                     </p>
                                                     <p className="text-text-secondary text-sm">
-                                                        PNG, JPG, GIF up to 10MB each
+                                                        PNG, JPG, GIF up to 10MB each ({imageFiles.length}/4)
+                                                        {showEditModal && imageFiles.some(img => img.isExisting) && (
+                                                            <span className="text-blue-600 ml-2">
+                                                                ({imageFiles.filter(img => img.isExisting).length} existing)
+                                                            </span>
+                                                        )}
                                                     </p>
                                                 </div>
                                             </div>
@@ -742,6 +874,11 @@ const AdminProductManagement: React.FC = () => {
                                                                 className="w-full h-full object-cover"
                                                             />
                                                         </div>
+                                                        {imageFile.isExisting && (
+                                                            <div className="absolute top-2 left-2 px-2 py-1 bg-blue-600 text-white text-xs rounded-md">
+                                                                Existing
+                                                            </div>
+                                                        )}
                                                         <button
                                                             type="button"
                                                             onClick={() => removeImage(index)}
@@ -750,7 +887,9 @@ const AdminProductManagement: React.FC = () => {
                                                             <MdClose className="text-sm" />
                                                         </button>
                                                         <div className="mt-1 text-xs text-text-secondary truncate">
-                                                            {imageFile.file.name || `Image ${index + 1}`}
+                                                            {imageFile.isExisting
+                                                                ? `Image ${index + 1}`
+                                                                : imageFile.file?.name || `Image ${index + 1}`}
                                                         </div>
                                                     </div>
                                                 ))}
@@ -819,21 +958,7 @@ const AdminProductManagement: React.FC = () => {
                             <div className="flex justify-end gap-3">
                                 <button
                                     type="button"
-                                    onClick={() => {
-                                        setShowAddModal(false);
-                                        setShowEditModal(false);
-                                        setFormData({
-                                            name: "",
-                                            title: "",
-                                            category: "",
-                                            description: "",
-                                            price: "",
-                                            images: [],
-                                            sizes: [{ size: "S", stock: 0 }],
-                                            isActive: true,
-                                        });
-                                        setImageFiles([]);
-                                    }}
+                                    onClick={handleCloseModal}
                                     className="px-5 py-2.5 text-text-main hover:bg-gray-50 rounded-xl font-medium transition-colors"
                                 >
                                     Cancel

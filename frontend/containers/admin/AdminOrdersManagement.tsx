@@ -122,12 +122,6 @@ const AdminOrdersManagement: React.FC = () => {
                             View and manage all customer orders and their status.
                         </p>
                     </div>
-                    <div className="flex items-center gap-3">
-                        <button className="flex items-center gap-2 bg-white hover:bg-gray-50 text-text-main px-4 py-2.5 rounded-xl border border-[#f3e7e9] font-bold transition-all shadow-sm">
-                            <span className="material-symbols-outlined text-xl"><MdOutlineFileDownload /></span>
-                            <span>Export CSV</span>
-                        </button>
-                    </div>
                 </div>
 
                 {/* Filters */}

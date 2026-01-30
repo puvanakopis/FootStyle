@@ -8,7 +8,7 @@ exports.createProduct = async (req, res) => {
         const { title, name, category, description, price, sizes, isActive } = req.body;
 
         // Validate required fields
-        if (!name || !category || price === undefined) {
+        if (!name || !category || !price === undefined) {
             return res.status(400).json({
                 success: false,
                 message: "Name, category, and price are required"
