@@ -70,7 +70,7 @@ const ProductSchema = new mongoose.Schema(
             type: [String],
             required: true
         },
-        SizeSchema: {
+        sizes: {
             type: [SizeSchema],
             default: []
         },
