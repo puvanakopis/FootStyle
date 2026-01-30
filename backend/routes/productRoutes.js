@@ -1,8 +1,8 @@
 const express = require("express");
 const router = express.Router();
-const { createProduct } = require("../controller/productController");
-const { authorize, protect } = require("../middleware/authMiddleware");
+const productController = require("../controller/productController");
+const uploadProductImages = require("../middleware/uploadProductImages");
 
-router.post("/", protect, authorize('admin'), createProduct);
+router.post("/", uploadProductImages, productController.createProduct);
 
 module.exports = router;

@@ -1,62 +1,80 @@
 const Product = require("../model/productModel");
-
+const fs = require("fs");
+const path = require("path");
 
 exports.createProduct = async (req, res) => {
     try {
-        const {
-            name,
-            category,
-            description,
-            price,
-            stock,
-            images,
-            colors,
-            sizes,
-            isActive
-        } = req.body;
+        const { title, name, category, description, price, sizes, isActive } = req.body;
 
-        // Basic validation
-        if (!name || !category || price === undefined || stock === undefined) {
+        // Required fields
+        if (!name || !category || price === undefined) {
             return res.status(400).json({
                 success: false,
-                message: "Name, category, price, and stock are required"
+                message: "Name, category, and price are required"
             });
         }
 
-        if (!images || !Array.isArray(images) || images.length === 0) {
+        if (!["Men", "Women", "Kids"].includes(category)) {
             return res.status(400).json({
                 success: false,
-                message: "At least one product image is required"
+                message: `${category} is not a valid category`
             });
         }
+
+        if (!req.files || req.files.length !== 4) {
+            return res.status(400).json({
+                success: false,
+                message: "Product must contain exactly 4 images"
+            });
+        }
+
+        // Format size array
+        const formattedSizes = Array.isArray(sizes)
+            ? JSON.parse(sizes).map(s => ({
+                size: s.size,
+                stock: s.stock || 0
+            }))
+            : [];
 
         // Create product
-        const product = await Product.create({
+        const product = new Product({
+            title: title || "",
             name,
             category,
-            description,
+            description: description || "",
             price,
-            stock,
-            images,
-            colors: colors || [],
-            sizes: sizes || [],
-            isActive: isActive !== undefined ? isActive : true,
-            rating: 0,
-            reviewsCount: 0
+            SizeSchema: formattedSizes,
+            isActive: isActive !== undefined ? isActive : true
         });
 
-        return res.status(201).json({
+        await product.save();
+
+        // Rename uploaded images
+        const uploadDir = path.join(__dirname, "../uploads/product");
+        const newImageNames = req.files.map((file, i) => {
+            const ext = path.extname(file.originalname);
+            const num = String(i + 1).padStart(2, "0");
+            const newName = `${product._id}_${num}${ext}`;
+            const oldPath = file.path;
+            const newPath = path.join(uploadDir, newName);
+            fs.renameSync(oldPath, newPath);
+            return newName;
+        });
+
+        product.images = newImageNames;
+        await product.save();
+
+        res.status(201).json({
             success: true,
             message: "Product created successfully",
             data: product
         });
 
     } catch (error) {
-        console.error("Create Product Error:", error);
-
-        return res.status(500).json({
+        console.error(error);
+        res.status(500).json({
             success: false,
-            message: "Server error while creating product",
+            message: "Server error",
             error: error.message
         });
     }

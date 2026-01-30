@@ -1,36 +1,53 @@
 const mongoose = require("mongoose");
 const Counter = require("./counterModel");
+const path = require("path");
 
-// Subschemas
-const ColorSchema = new mongoose.Schema(
-    {
-        name: { type: String, required: true },
-        colorClass: { type: String, required: true }
-    },
-    { _id: false }
-);
-
+// Size Schema
 const SizeSchema = new mongoose.Schema(
     {
-        size: { type: String, required: true },
-        available: { type: Boolean, default: true }
+        size: {
+            type: String,
+            required: true
+        },
+        stock: {
+            type: Number,
+            required: true,
+            default: 0,
+            min: 0
+        }
     },
     { _id: false }
 );
 
+// Review Schema
 const ReviewSchema = new mongoose.Schema(
     {
-        user: { type: String, ref: "User", required: true },
-        rating: { type: Number, required: true, min: 0, max: 5 },
-        comment: { type: String, required: true }
+        user: {
+            type: String,
+            ref: "User",
+            required: true
+        },
+        rating: {
+            type: Number,
+            required: true,
+            min: 0,
+            max: 5
+        },
+        comment: {
+            type: String,
+            required: true
+        }
     },
     { timestamps: true }
 );
 
-// Main Product Schema
+// Product Schema
 const ProductSchema = new mongoose.Schema(
     {
         _id: {
+            type: String
+        },
+        title: {
             type: String
         },
         name: {
@@ -39,7 +56,8 @@ const ProductSchema = new mongoose.Schema(
         },
         category: {
             type: String,
-            required: true
+            required: true,
+            enum: ["Men", "Women", "Kids"]
         },
         description: {
             type: String
@@ -48,37 +66,17 @@ const ProductSchema = new mongoose.Schema(
             type: Number,
             required: true
         },
-        stock: {
-            type: Number,
-            required: true,
-            min: 0,
-            default: 0
-        },
         images: {
             type: [String],
-            validate: v => v.length > 0
+            required: true
         },
-        colors: {
-            type: [ColorSchema],
-            default: []
-        },
-        sizes: {
+        SizeSchema: {
             type: [SizeSchema],
             default: []
         },
         reviews: {
             type: [ReviewSchema],
             default: []
-        },
-        rating: {
-            type: Number,
-            default: 0,
-            min: 0,
-            max: 5
-        },
-        reviewsCount: {
-            type: Number,
-            default: 0
         },
         isActive: {
             type: Boolean,
@@ -105,5 +103,4 @@ ProductSchema.pre("save", async function () {
 });
 
 const Product = mongoose.model("Product", ProductSchema);
-
 module.exports = Product;
