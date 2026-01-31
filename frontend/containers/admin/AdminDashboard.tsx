@@ -58,11 +58,6 @@ export default function AdminDashboard() {
                             Welcome back, Alex. Here&#39;s what&#39;s happening with your store today.
                         </p>
                     </div>
-
-                    <button className="flex items-center gap-2 bg-[#ee2b4b] hover:bg-[#ee2b4b]/90 text-white px-5 py-2.5 rounded-xl font-bold shadow-lg shadow-[#ee2b4b]/20 transition-all active:scale-95">
-                        <span className="text-xl"><IoMdAdd /></span>
-                        <span>Add New Product</span>
-                    </button>
                 </div>
 
                 {/* Stats Cards */}

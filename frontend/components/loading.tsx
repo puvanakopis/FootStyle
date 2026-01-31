@@ -1,4 +1,12 @@
-export default function Loading() {
+interface LoadingProps {
+    title?: string;
+    message?: string;
+}
+
+export default function Loading({ title, message }: LoadingProps) {
+    const displayTitle = title || "Loading";
+    const displayMessage = message || "Please wait while we prepare your page";
+
     return (
         <main className="flex min-h-screen items-center justify-center">
             <div className="w-full max-w-[480px] rounded-2xl">
@@ -9,10 +17,10 @@ export default function Loading() {
                     {/* Text */}
                     <div className="text-center">
                         <h2 className="text-lg font-bold text-gray-800">
-                            Loading
+                            {displayTitle}
                         </h2>
                         <p className="text-sm text-gray-400 mt-1">
-                            Please wait while we prepare your page
+                            {displayMessage}
                         </p>
                     </div>
                 </div>

@@ -2,7 +2,9 @@ import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
 import { AuthProvider } from '@/context/AuthContext';
+import { ProductProvider } from '@/context/ProductContext';
 import ProtectedRoute from '@/route/ProtectedRoute';
+import { Toaster } from 'react-hot-toast';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -15,10 +17,25 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body className={`${inter.className} bg-background font-display text-foreground antialiased`}>
+        <Toaster
+          position="top-center"
+          toastOptions={{
+            duration: 3000,
+            style: {
+              borderRadius: '0.75rem',
+              padding: '0.75rem 1rem',
+              fontSize: '0.875rem',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+            },
+          }}
+        />
+
         <AuthProvider>
-          <ProtectedRoute>
-            {children}
-          </ProtectedRoute>
+          <ProductProvider>
+            <ProtectedRoute>
+              {children}
+            </ProtectedRoute>
+          </ProductProvider>
         </AuthProvider>
       </body>
     </html>
