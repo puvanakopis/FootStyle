@@ -4,5 +4,6 @@ const userController = require('../controller/userController');
 const { authorize, protect } = require("../middleware/authMiddleware");
 
 router.get('/', protect, authorize('admin'), userController.getAllUsers);
+router.get('/:id', protect, authorize('admin'), userController.getUserById);
 
 module.exports = router;
