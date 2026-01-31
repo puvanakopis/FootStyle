@@ -13,7 +13,10 @@ const defaultOptions: ToastOptions = {
   },
 };
 
-export const showToast = (type: 'success' | 'error', message: string) => {
+export const showToast = (
+  type: 'success' | 'error' | 'info',
+  message: string
+) => {
   if (type === 'success') {
     toast.success(message, {
       ...defaultOptions,
@@ -24,7 +27,7 @@ export const showToast = (type: 'success' | 'error', message: string) => {
         border: '1px solid #bbf7d0',
       },
     });
-  } else {
+  } else if (type === 'error') {
     toast.error(message, {
       ...defaultOptions,
       style: {
@@ -32,6 +35,16 @@ export const showToast = (type: 'success' | 'error', message: string) => {
         background: '#fef2f2',
         color: '#991b1b',
         border: '1px solid #fecaca',
+      },
+    });
+  } else if (type === 'info') {
+    toast(message, {
+      ...defaultOptions,
+      style: {
+        ...defaultOptions.style,
+        background: '#eff6ff',
+        color: '#1e3a8a',
+        border: '1px solid #bfdbfe',
       },
     });
   }

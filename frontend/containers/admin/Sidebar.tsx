@@ -24,17 +24,17 @@ export default function Sidebar() {
     const pathname = usePathname();
     const [open, setOpen] = useState(false);
 
-    const { logout } = useAuth(); 
+    const { logout } = useAuth();
 
     const handleLogout = () => {
         logout();
-        router.push("/login"); 
+        router.push("/login");
     };
 
     return (
         <>
             {/* Mobile top bar */}
-            <div className="lg:hidden w-16 h-16 flex items-center px-4 border-b border-[#f3e7e9] bg-white">
+            <div className="lg:hidden h-16 flex items-center px-4 border-b border-[#f3e7e9] ">
                 <button onClick={() => setOpen(true)} className="text-2xl text-text-main">
                     <MdMenu />
                 </button>
@@ -47,7 +47,7 @@ export default function Sidebar() {
             <aside
                 className={`
                     fixed lg:static top-0 left-0 z-50
-                    w-64 bg-white border-r border-[#f3e7e9]
+                    bg-white border-r border-[#f3e7e9]
                     flex flex-col
                     h-full lg:h-screen
                     transition-transform duration-300

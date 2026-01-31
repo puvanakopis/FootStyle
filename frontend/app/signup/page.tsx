@@ -5,6 +5,7 @@ import { useState } from "react";
 import { FcGoogle } from "react-icons/fc";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
+import { showToast } from '@/lib/toast';
 
 export default function Signup() {
     const { requestSignupOtp } = useAuth();
@@ -21,24 +22,47 @@ export default function Signup() {
 
     const handleSignup = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        // Validate passwords match
         if (password !== confirmPassword) {
-            alert("Passwords do not match");
+            showToast('error', "Passwords do not match");
+            return;
+        }
+
+        // Validate password length
+        if (password.length < 6) {
+            showToast('error', "Password must be at least 6 characters long");
+            return;
+        }
+
+        // Validate email format
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            showToast('error', "Please enter a valid email address");
             return;
         }
 
         setLoading(true);
         try {
             await requestSignupOtp({ firstName, lastName, email, password });
+            showToast('success', 'OTP sent successfully! Please check your email');
             router.push(`/signup-verify?email=${encodeURIComponent(email)}`);
-        } catch (error: any) {
-            alert(error?.response?.data?.message || "Failed to send OTP");
+        } catch (error) {
+            showToast('error', "Failed to send OTP");
+            console.error('Signup error:', error);
         } finally {
             setLoading(false);
         }
     };
 
+    const handleGoogleSignup = () => {
+        // Google signup implementation
+        showToast('error', 'Google signup is not implemented yet');
+    };
+
     return (
         <main className="min-h-screen bg-background text-foreground">
+
             {/* Signup Content */}
             <div className="flex-1 min-h-[calc(100vh-140px)] flex flex-col items-center justify-center p-4 sm:p-6 relative bg-['#dcb8be'] overflow-hidden">
                 {/* Background effects (same as login) */}
@@ -75,6 +99,7 @@ export default function Signup() {
                                     onChange={(e) => setFirstName(e.target.value)}
                                     className="h-12 px-4 rounded-lg border border-[#e7cfd3] focus:ring-2 focus:ring-[#ee2b4b]/20 focus:border-[#ee2b4b] outline-none transition"
                                     required
+                                    disabled={loading}
                                 />
                             </label>
                             <label className="flex flex-col gap-2">
@@ -86,6 +111,7 @@ export default function Signup() {
                                     onChange={(e) => setLastName(e.target.value)}
                                     className="h-12 px-4 rounded-lg border border-[#e7cfd3] focus:ring-2 focus:ring-[#ee2b4b]/20 focus:border-[#ee2b4b] outline-none transition"
                                     required
+                                    disabled={loading}
                                 />
                             </label>
                         </div>
@@ -99,6 +125,7 @@ export default function Signup() {
                                 onChange={(e) => setEmail(e.target.value)}
                                 className="h-12 px-4 rounded-lg border border-[#e7cfd3] focus:ring-2 focus:ring-[#ee2b4b]/20 focus:border-[#ee2b4b] outline-none transition"
                                 required
+                                disabled={loading}
                             />
                         </label>
 
@@ -113,11 +140,13 @@ export default function Signup() {
                                     className="h-12 w-full px-4 pr-12 rounded-lg border border-[#e7cfd3] focus:ring-2 focus:ring-[#ee2b4b]/20 focus:border-[#ee2b4b] outline-none transition"
                                     required
                                     minLength={6}
+                                    disabled={loading}
                                 />
                                 <button
                                     type="button"
                                     onClick={() => setShowPassword(!showPassword)}
                                     className="absolute right-4 top-1/2 -translate-y-1/2 text-text-muted hover:text-text-dark"
+                                    disabled={loading}
                                 >
                                     {showPassword ? "🙈" : "👁️"}
                                 </button>
@@ -135,11 +164,13 @@ export default function Signup() {
                                     className="h-12 w-full px-4 pr-12 rounded-lg border border-[#e7cfd3] focus:ring-2 focus:ring-[#ee2b4b]/20 focus:border-[#ee2b4b] outline-none transition"
                                     required
                                     minLength={6}
+                                    disabled={loading}
                                 />
                                 <button
                                     type="button"
                                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                                     className="absolute right-4 top-1/2 -translate-y-1/2 text-text-muted hover:text-text-dark"
+                                    disabled={loading}
                                 >
                                     {showConfirmPassword ? "🙈" : "👁️"}
                                 </button>
@@ -170,14 +201,27 @@ export default function Signup() {
                         <div className="flex-grow border-t border-[#e7cfd3]" />
                     </div>
 
-                    <button className="h-11 flex items-center justify-center gap-2 rounded-lg border border-[#e7cfd3] bg-white font-bold hover:bg-gray-50 transition">
+                    <button
+                        onClick={handleGoogleSignup}
+                        className="h-11 flex items-center justify-center gap-2 rounded-lg border border-[#e7cfd3] bg-white font-bold hover:bg-gray-50 transition"
+                        disabled={loading}
+                    >
                         <FcGoogle className="text-xl" />
                         Continue with Google
                     </button>
 
                     <p className="text-center text-sm text-text-muted">
                         Already have an account?
-                        <Link href="/login" className="text-[#ee2b4b] font-bold ml-1 hover:underline">
+                        <Link
+                            href="/login"
+                            className="text-[#ee2b4b] font-bold ml-1 hover:underline"
+                            onClick={(e) => {
+                                if (loading) {
+                                    e.preventDefault();
+                                    showToast('info', 'Please wait for the current operation to complete');
+                                }
+                            }}
+                        >
                             Log in
                         </Link>
                     </p>

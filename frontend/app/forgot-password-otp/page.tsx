@@ -3,9 +3,10 @@
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
+import { showToast } from "@/lib/toast";
 
 export default function ForgotPasswordOtp() {
-    const { verifyPasswordResetOtp, isLoading, error, clearError } = useAuth();
+    const { verifyPasswordResetOtp, isLoading, clearError } = useAuth();
     const router = useRouter();
     const searchParams = useSearchParams();
 
@@ -15,8 +16,24 @@ export default function ForgotPasswordOtp() {
     const handleVerifyOtp = async (e: React.FormEvent) => {
         e.preventDefault();
         clearError();
-        await verifyPasswordResetOtp({ email, otp });
-        router.push(`/forgot-password-verify?email=${encodeURIComponent(email)}&otp=${otp}`);
+
+        if (!otp.trim()) {
+            showToast("error", "OTP is required");
+            return;
+        }
+
+        try {
+            await verifyPasswordResetOtp({ email, otp });
+
+            showToast("success", "OTP verified successfully!");
+
+            router.push(
+                `/forgot-password-verify?email=${encodeURIComponent(email)}&otp=${otp}`
+            );
+        } catch (err) {
+            showToast("error", "Invalid OTP. Please try again.");
+            console.error("Verify Password Reset OTP Error:", err);
+        }
     };
 
     return (
@@ -25,10 +42,6 @@ export default function ForgotPasswordOtp() {
                 <h1 className="text-3xl font-black text-center mb-6">
                     Verify OTP
                 </h1>
-
-                {error && (
-                    <p className="text-red-600 text-sm mb-4 text-center">{error}</p>
-                )}
 
                 <form onSubmit={handleVerifyOtp} className="flex flex-col gap-4">
                     <input

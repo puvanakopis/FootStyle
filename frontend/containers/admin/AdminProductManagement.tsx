@@ -1,15 +1,11 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { IoSearch } from "react-icons/io5";
 import { MdOutlineEdit, MdOutlineAdd, MdDeleteOutline, MdClose } from "react-icons/md";
 import { LuChevronLeft, LuChevronRight } from "react-icons/lu";
-import { MdInventory, MdAttachMoney, MdBuild } from "react-icons/md";
 import { Size, Product } from "@/interfaces/productInterface";
 import { useProduct } from "@/context/ProductContext";
-import { Toaster } from "react-hot-toast";
 import { showToast } from "@/lib/toast";
-import { FaTransgender } from "react-icons/fa";
 
 type ProductFormData = {
     name: string;
@@ -482,18 +478,6 @@ const AdminProductManagement = () => {
 
     return (
         <div className="flex-1 overflow-y-auto p-6 lg:p-10 scroll-smooth">
-            {/* Toaster Component */}
-            <Toaster
-                position="top-right"
-                toastOptions={{
-                    duration: 3000,
-                    style: {
-                        maxWidth: '400px',
-                        fontFamily: 'inherit',
-                    },
-                }}
-            />
-
             <div className="max-w-7xl mx-auto flex flex-col gap-8">
                 {/* Header */}
                 <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
@@ -521,8 +505,7 @@ const AdminProductManagement = () => {
                     <div className="md:col-span-4 bg-white p-1 rounded-2xl border border-[#f3e7e9] shadow-sm flex flex-col md:flex-row items-center justify-between gap-2">
                         <div className="flex-1 flex items-center w-full p-2 gap-2">
                             {/* gender Filter */}
-                            <div className="relative">
-                                <FaTransgender className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary text-lg pointer-events-none" />
+                            <div >
                                 <select
                                     className="pl-10 pr-4 py-2 bg-[#f8f6f6] border-none rounded-xl text-sm text-text-main focus:ring-2 focus:ring-[#ee2b4b]/20"
                                     value={genderFilter}
@@ -536,8 +519,7 @@ const AdminProductManagement = () => {
                             </div>
 
                             {/* Material Filter */}
-                            <div className="relative">
-                                <MdBuild className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary text-lg pointer-events-none" />
+                            <div>
                                 <select
                                     className="pl-10 pr-4 py-2 bg-[#f8f6f6] border-none rounded-xl text-sm text-text-main focus:ring-2 focus:ring-[#ee2b4b]/20"
                                     value={materialFilter}
@@ -552,8 +534,7 @@ const AdminProductManagement = () => {
                             </div>
 
                             {/* Stock Filter */}
-                            <div className="relative">
-                                <MdInventory className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary text-lg pointer-events-none" />
+                            <div>
                                 <select
                                     className="pl-10 pr-4 py-2 bg-[#f8f6f6] border-none rounded-xl text-sm text-text-main focus:ring-2 focus:ring-[#ee2b4b]/20"
                                     value={stockFilter}
@@ -568,8 +549,7 @@ const AdminProductManagement = () => {
                             </div>
 
                             {/* Price Filter */}
-                            <div className="relative">
-                                <MdAttachMoney className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary text-lg pointer-events-none" />
+                            <div>
                                 <select
                                     className="pl-10 pr-4 py-2 bg-[#f8f6f6] border-none rounded-xl text-sm text-text-main focus:ring-2 focus:ring-[#ee2b4b]/20"
                                     value={priceFilter}
@@ -586,8 +566,7 @@ const AdminProductManagement = () => {
 
                         {/* Search */}
                         <div className="w-full md:w-auto p-2 flex items-center gap-2">
-                            <div className="relative flex-1">
-                                <IoSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary text-lg" />
+                            <div className="flex-1">
                                 <input
                                     type="text"
                                     placeholder="Search by name, title, material or ID..."

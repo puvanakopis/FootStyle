@@ -3,9 +3,10 @@
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
+import { showToast } from "@/lib/toast";
 
 export default function ForgotPasswordVerify() {
-    const { resetPassword, isLoading, error, clearError } = useAuth();
+    const { resetPassword, isLoading, clearError } = useAuth();
     const router = useRouter();
     const searchParams = useSearchParams();
 
@@ -18,8 +19,22 @@ export default function ForgotPasswordVerify() {
     const handleResetPassword = async (e: React.FormEvent) => {
         e.preventDefault();
         clearError();
-        await resetPassword({ email, otp, newPassword });
-        router.push("/login");
+
+        if (!newPassword.trim()) {
+            showToast("error", "Password cannot be empty");
+            return;
+        }
+
+        try {
+            await resetPassword({ email, otp, newPassword });
+
+            showToast("success", "Password updated successfully!");
+
+            router.push("/login");
+        } catch (err) {
+            showToast("error", "Failed to update password.");
+            console.error("update password Error:", err);
+        }
     };
 
     return (
@@ -28,10 +43,6 @@ export default function ForgotPasswordVerify() {
                 <h1 className="text-3xl font-black text-center mb-6">
                     Reset Password
                 </h1>
-
-                {error && (
-                    <p className="text-red-600 text-sm mb-4 text-center">{error}</p>
-                )}
 
                 <form onSubmit={handleResetPassword} className="flex flex-col gap-4">
                     <div className="relative">

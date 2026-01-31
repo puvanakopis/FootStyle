@@ -4,9 +4,10 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
+import { showToast } from "@/lib/toast";
 
 export default function ForgotPassword() {
-    const { requestPasswordResetOtp, isLoading, error, clearError } = useAuth();
+    const { requestPasswordResetOtp, isLoading, clearError } = useAuth();
     const router = useRouter();
 
     const [email, setEmail] = useState("");
@@ -14,8 +15,22 @@ export default function ForgotPassword() {
     const handleSendOtp = async (e: React.FormEvent) => {
         e.preventDefault();
         clearError();
-        await requestPasswordResetOtp(email);
-        router.push(`/forgot-password-otp?email=${encodeURIComponent(email)}`);
+
+        if (!email.trim()) {
+            showToast("error", "Email is required");
+            return;
+        }
+
+        try {
+            await requestPasswordResetOtp(email);
+
+            showToast("success", "OTP sent successfully!");
+
+            router.push(`/forgot-password-otp?email=${encodeURIComponent(email)}`);
+        } catch (error) {
+            showToast("error", "Failed to send OTP. Try again.");
+            console.error("Request Password Reset OTP Error:", error);
+        }
     };
 
     return (
@@ -24,10 +39,6 @@ export default function ForgotPassword() {
                 <h1 className="text-3xl font-black text-center mb-6">
                     Forgot Password
                 </h1>
-
-                {error && (
-                    <p className="text-red-600 text-sm mb-4 text-center">{error}</p>
-                )}
 
                 <form onSubmit={handleSendOtp} className="flex flex-col gap-4">
                     <input

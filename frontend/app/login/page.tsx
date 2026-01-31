@@ -4,25 +4,28 @@ import Link from "next/link";
 import { useState } from "react";
 import { FcGoogle } from "react-icons/fc";
 import { useAuth } from '@/context/AuthContext';
+import { showToast } from '@/lib/toast';
 
 export default function Login() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
-    const { login, isLoading, error } = useAuth();
+    const { login, isLoading } = useAuth();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
         try {
             await login(email, password);
+            showToast('success', 'Login successful!');
         } catch (err) {
             console.error('Login failed:', err);
+            showToast('error', 'Login failed. Please check your credentials.');
         }
     };
 
     const handleGoogleLogin = () => {
-        // Google login implementation
+        showToast('error', 'Google login is not implemented yet');
     };
 
     return (
@@ -37,8 +40,7 @@ export default function Login() {
                     <div
                         className="absolute inset-0"
                         style={{
-                            backgroundImage:
-                                "radial-gradient(#ee2b4b 0.5px, transparent 0.5px)",
+                            backgroundImage: "radial-gradient(#ee2b4b 0.5px, transparent 0.5px)",
                             backgroundSize: "32px 32px",
                             opacity: 0.1,
                         }}
@@ -53,25 +55,16 @@ export default function Login() {
                             <h1 className="text-3xl font-black text-text-dark">
                                 Welcome back
                             </h1>
-                            <p className="text-text-muted mt-1 text-gray-400 ">
+                            <p className="text-text-muted mt-1 text-gray-400">
                                 Enter your details to access your account
                             </p>
                         </div>
-
-                        {/* Error Message */}
-                        {error && (
-                            <div className="p-3 bg-red-50 border border-red-200 text-red-600 rounded-lg text-sm">
-                                {error}
-                            </div>
-                        )}
 
                         {/* Form */}
                         <form className="flex flex-col gap-5" onSubmit={handleSubmit}>
                             {/* Email */}
                             <label className="flex flex-col gap-2">
-                                <span className="text-sm font-bold text-text-dark">
-                                    Email Address
-                                </span>
+                                <span className="text-sm font-bold text-text-dark">Email Address</span>
                                 <input
                                     type="email"
                                     placeholder="example@gmail.com"
@@ -85,9 +78,7 @@ export default function Login() {
 
                             {/* Password */}
                             <label className="flex flex-col gap-2">
-                                <span className="text-sm font-bold text-text-dark">
-                                    Password
-                                </span>
+                                <span className="text-sm font-bold text-text-dark">Password</span>
                                 <div className="relative">
                                     <input
                                         type={showPassword ? "text" : "password"}
@@ -108,7 +99,6 @@ export default function Login() {
                                         {showPassword ? "🙈" : "👁️"}
                                     </button>
                                 </div>
-
                                 <div className="flex justify-end">
                                     <Link href="/forgot-password" className="text-[#ee2b4b] text-sm font-bold hover:underline">
                                         Forgot Password?
@@ -136,9 +126,7 @@ export default function Login() {
                         {/* Divider */}
                         <div className="flex items-center gap-4">
                             <div className="flex-grow border-t border-[#e7cfd3]" />
-                            <span className="text-xs uppercase tracking-wider text-text-muted">
-                                Or continue with
-                            </span>
+                            <span className="text-xs uppercase tracking-wider text-text-muted">Or continue with</span>
                             <div className="flex-grow border-t border-[#e7cfd3]" />
                         </div>
 
@@ -158,10 +146,7 @@ export default function Login() {
                         {/* Footer */}
                         <p className="text-center text-sm text-text-muted">
                             Don&apos;t have an account?
-                            <Link
-                                href="/signup"
-                                className="text-[#ee2b4b] font-bold ml-1 hover:underline"
-                            >
+                            <Link href="/signup" className="text-[#ee2b4b] font-bold ml-1 hover:underline">
                                 Sign Up
                             </Link>
                         </p>
