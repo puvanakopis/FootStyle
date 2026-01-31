@@ -6,7 +6,7 @@ import ProductCard from "@/components/ProductCard";
 
 interface Product {
     name: string;
-    category: string;
+    gender: string;
     price: string;
     oldPrice?: string;
     rating: string;
@@ -36,9 +36,8 @@ const RelatedProducts: React.FC<RelatedProductsProps> = ({ products }) => {
                         key={idx}
                         id={idx}
                         name={product.name}
-                        category={product.category}
+                        gender={product.gender}
                         price={product.price}
-                        oldPrice={product.oldPrice}
                         rating={product.rating}
                         imageUrl={product.imageUrl}
                         badge={product.badge}

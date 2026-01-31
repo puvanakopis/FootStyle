@@ -2,17 +2,25 @@
 
 import { useState, useEffect } from "react";
 import { BiShoppingBag } from "react-icons/bi";
-import { FaStar } from "react-icons/fa6";
-import { MdFavoriteBorder, MdOutlineAssignmentReturn, MdOutlineLocalShipping, } from "react-icons/md";
-import { FaUserCircle, FaChevronDown, FaChevronUp } from "react-icons/fa";
-import { Product, Review as ProductReview, } from "@/interfaces/productInterface";
+import { FaStar, FaUserCircle, FaChevronDown, FaChevronUp } from "react-icons/fa";
+import {
+    MdFavoriteBorder,
+    MdOutlineAssignmentReturn,
+    MdOutlineLocalShipping,
+} from "react-icons/md";
+import {
+    Product,
+    Review as ProductReview,
+} from "@/interfaces/productInterface";
 
 interface ProductDetailProps {
     product: Product;
 }
 
 const ProductDetail: React.FC<ProductDetailProps> = ({ product }) => {
-    const [productImages, setProductImages] = useState<string[]>([]);
+    const [productImages, setProductImages] = useState<string[]>([
+        "https://via.placeholder.com/600x400"
+    ]);
     const [selectedImage, setSelectedImage] = useState<string>("");
     const [selectedSize, setSelectedSize] = useState<string | null>(null);
     const [showAllReviews, setShowAllReviews] = useState(false);
@@ -26,8 +34,8 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product }) => {
                 (img) =>
                     `${process.env.NEXT_PUBLIC_API_URL}/uploads/product/${img}`
             );
-            setSelectedImage(processedImages[0]);
             setProductImages(processedImages);
+            setSelectedImage(processedImages[0]);
         } else {
             const placeholder = ["https://via.placeholder.com/600x400"];
             setProductImages(placeholder);
@@ -534,7 +542,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product }) => {
 
                         {product.createdAt && (
                             <div className="text-xs text-slate-500 mt-4">
-                                Product added on:{" "}
+                                Product added on: {" "}
                                 {new Date(
                                     product.createdAt
                                 ).toLocaleDateString()}
