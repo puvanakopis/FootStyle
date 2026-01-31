@@ -3,25 +3,32 @@
 import { FaStar } from "react-icons/fa";
 import { FiShoppingCart } from "react-icons/fi";
 import { MdFavoriteBorder } from "react-icons/md";
+import { useRouter } from "next/navigation";
 
 interface ProductCardProps {
   id: string | number;
   name: string;
   gender: string;
   price: string;
-  rating: string;
+  averageRating: string;
   imageUrl: string;
   badge?: string;
 }
 
 const ProductCard: React.FC<ProductCardProps> = ({
+  id,
   name,
   gender,
   price,
-  rating,
+  averageRating,
   imageUrl,
   badge,
 }) => {
+  const router = useRouter();
+
+  const handleProductClick = (Productid: string) => {
+    router.push(`/products/${Productid}`);
+  };
 
   const getImageUrl = (imageName: string) => {
     const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -29,7 +36,10 @@ const ProductCard: React.FC<ProductCardProps> = ({
   };
 
   return (
-    <div className="group flex flex-col gap-4 rounded-xl bg-white shadow-sm transition-all duration-300 hover:-translate-y-2 hover:shadow-xl">
+    <div
+      onClick={() => handleProductClick(id)}
+      className="group flex flex-col gap-4 rounded-xl bg-white shadow-sm transition-all duration-300 hover:-translate-y-2 hover:shadow-xl"
+    >
       <div className="relative aspect-square w-full overflow-hidden rounded-lg bg-gray-100">
         <div
           className="h-full w-full bg-cover bg-center transition-transform duration-500 group-hover:scale-110"
@@ -56,7 +66,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
             <span className="material-symbols-outlined text-[16px] text-yellow-400 fill-current">
               <FaStar />
             </span>
-            <span className="text-xs font-bold text-gray-500">{rating}</span>
+            <span className="text-xs font-bold text-gray-500">{averageRating}</span>
           </div>
         </div>
         <p className="text-sm text-text-sec-light">{gender}</p>
