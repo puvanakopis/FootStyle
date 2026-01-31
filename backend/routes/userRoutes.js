@@ -5,5 +5,7 @@ const { authorize, protect } = require("../middleware/authMiddleware");
 
 router.get('/', protect, authorize('admin'), userController.getAllUsers);
 router.get('/:id', protect, authorize('admin'), userController.getUserById);
+router.delete('/:id', protect, authorize('admin'), userController.deleteUser);
+router.patch('/:id/toggle-active', protect, authorize('admin'), userController.toggleUserActive);
 
 module.exports = router;
