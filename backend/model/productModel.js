@@ -22,6 +22,9 @@ const SizeSchema = new mongoose.Schema(
 // Review Schema
 const ReviewSchema = new mongoose.Schema(
     {
+        _id: {
+            type: String
+        },
         user: {
             type: String,
             ref: "User",

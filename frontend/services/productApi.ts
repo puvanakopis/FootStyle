@@ -43,7 +43,6 @@ export const productApi = {
     createProduct: async (data: CreateProductRequest, images: File[]): Promise<Product> => {
         const formData = new FormData();
 
-        // Append fields individually
         Object.entries(data).forEach(([key, value]) => {
             if (Array.isArray(value)) {
                 formData.append(key, JSON.stringify(value));
@@ -52,7 +51,6 @@ export const productApi = {
             }
         });
 
-        // Append images
         images.forEach((image) => {
             formData.append("images", image);
         });
@@ -68,7 +66,6 @@ export const productApi = {
     updateProduct: async (id: string, data: UpdateProductRequest, images?: File[]): Promise<Product> => {
         const formData = new FormData();
 
-        // Append fields individually
         Object.entries(data).forEach(([key, value]) => {
             if (Array.isArray(value)) {
                 formData.append(key, JSON.stringify(value));
@@ -77,7 +74,6 @@ export const productApi = {
             }
         });
 
-        // Append new images if provided
         if (images && images.length > 0) {
             images.forEach((image) => {
                 formData.append("images", image);

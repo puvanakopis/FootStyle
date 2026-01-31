@@ -1,23 +1,10 @@
 "use client";
 
-import React, {
-    createContext,
-    useContext,
-    useEffect,
-    useState,
-    ReactNode,
-} from "react";
+import React, { createContext, useContext, useEffect, useState, ReactNode, } from "react";
 import Cookies from "js-cookie";
 import { AxiosError } from "axios";
 import { authApi } from "@/services/authApi";
-import {
-    AuthContextType,
-    User,
-    SignupRequest,
-    OTPRequest,
-    PasswordResetRequest,
-    UpdateUserRequest,
-} from "@/interfaces/authInterface";
+import { AuthContextType, User, SignupRequest, OTPRequest, PasswordResetRequest, UpdateUserRequest, } from "@/interfaces/authInterface";
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
