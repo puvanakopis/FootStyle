@@ -3,15 +3,21 @@
 import React from "react";
 import { AiOutlineDelete } from "react-icons/ai";
 import { CiStar } from "react-icons/ci";
-import { MdBlock, MdOutlineShoppingCart } from "react-icons/md";
+import { MdBlock, MdOutlineShoppingCart, MdOutlineRemoveRedEye } from "react-icons/md";
 import { TbShoppingCartOff } from "react-icons/tb";
 import { Product } from "@/interfaces/productInterface";
+import { useWishlist } from "@/context/WishlistContext";
+import { useRouter } from "next/navigation";
+import { showToast } from "@/lib/toast";
 
 interface ProductListProps {
   products: Product[];
 }
 
 const ProductList: React.FC<ProductListProps> = ({ products }) => {
+  const { removeFromWishlist, isLoading } = useWishlist();
+  const router = useRouter();
+
   // calculate stock status
   const getStockStatus = (product: Product) => {
     const totalStock = product.sizes.reduce((sum, size) => sum + size.stock, 0);
@@ -20,7 +26,8 @@ const ProductList: React.FC<ProductListProps> = ({ products }) => {
 
   // get primary image
   const getPrimaryImage = (product: Product) => {
-    return product.images.length > 0 ? product.images[0] : "/placeholder-image.jpg";
+    const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+    return `${API_BASE_URL}/uploads/product/${product.images[0]}`;
   };
 
   // get most recent review count
@@ -48,6 +55,44 @@ const ProductList: React.FC<ProductListProps> = ({ products }) => {
     return product.sizes.length > 0 ? product.sizes[0].size : "N/A";
   };
 
+  // Handle remove from wishlist
+  const handleRemoveFromWishlist = async (productId: string, productName: string) => {
+    try {
+      await removeFromWishlist(productId);
+      showToast('success', `"${productName}" removed from wishlist`);
+    } catch (error) {
+      console.error("Failed to remove from wishlist:", error);
+      showToast('error', "Failed to remove item from wishlist. Please try again.");
+    }
+  };
+
+  // Handle add to cart
+  const handleAddToCart = (product: Product) => {
+    const stockStatus = getStockStatus(product);
+    const isDisabled = !product.isActive || stockStatus === "out-of-stock";
+    
+    if (isDisabled) {
+      showToast('error', "This product is currently unavailable");
+      return;
+    }
+    
+    console.log("Add to cart:", product);
+    showToast('success', `"${product.title || product.name}" added to cart`);
+  };
+
+  // Handle view product
+  const handleViewProduct = (productId: string, productName: string) => {
+    showToast('info', `Viewing "${productName}"`);
+    router.push(`/products/${productId}`);
+  };
+
+  // Calculate average rating
+  const calculateAverageRating = (product: Product) => {
+    if (product.reviews.length === 0) return 0;
+    const sum = product.reviews.reduce((acc, review) => acc + review.rating, 0);
+    return sum / product.reviews.length;
+  };
+
   return (
     <div className="space-y-6">
       {products.map((product) => {
@@ -57,10 +102,13 @@ const ProductList: React.FC<ProductListProps> = ({ products }) => {
         const reviewCount = getReviewCount(product);
         const addedDate = formatDate(product.createdAt);
         const lastSavedSize = getLastSavedSize(product);
+        const averageRating = calculateAverageRating(product);
+        const productId = product.id || product._id || '';
+        const productName = product.title || product.name;
 
         return (
           <div
-            key={product.id}
+            key={productId}
             className="group bg-white rounded-2xl shadow-sm border border-neutral-100 hover:border-[#ee2b4b]/20 transition-all duration-300 overflow-hidden"
           >
             {/* Header */}
@@ -96,24 +144,25 @@ const ProductList: React.FC<ProductListProps> = ({ products }) => {
             {/* Body */}
             <div className="p-5 sm:p-6 flex flex-col sm:flex-row gap-6">
               {/* Image */}
-              <div
-                className={`shrink-0 relative overflow-hidden rounded-lg w-32 h-32 sm:w-40 sm:h-40 ${isDisabled ? "grayscale opacity-80" : ""
-                  }`}
-              >
-                <div
-                  className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110"
-                  style={{ backgroundImage: `url(${imageUrl})` }}
-                />
+              <div className={`shrink-0 relative overflow-hidden rounded-lg w-32 h-32 sm:w-40 sm:h-40 ${isDisabled ? "grayscale opacity-80" : ""}`}>
+                <a href={`/products/${productId}`}>
+                  <div
+                    className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110 cursor-pointer"
+                    style={{ backgroundImage: `url(${imageUrl})` }}
+                  />
+                </a>
               </div>
 
               {/* Details */}
               <div className={`flex-1 flex flex-col justify-center ${isDisabled ? "opacity-80" : ""}`}>
                 <div className="flex justify-between items-start">
                   <div>
-                    <h3 className="text-xl font-bold text-neutral-900 mb-1">
-                      {product.title || product.name}
-                    </h3>
-                    <p className="text-sm text-neutral-500 mb-2">
+                    <a href={`/products/${productId}`} className="hover:text-[#ee2b4b] transition-colors">
+                      <h3 className="text-xl font-bold text-neutral-900 mb-1">
+                        {productName}
+                      </h3>
+                    </a>
+                    <p className="text-sm text-neutral-500 mb-2 line-clamp-2">
                       {product.description || `${product.gender}'s ${product.material} Shoe`}
                     </p>
                   </div>
@@ -129,25 +178,28 @@ const ProductList: React.FC<ProductListProps> = ({ products }) => {
                     Size: {lastSavedSize}
                   </span>
                 </div>
-                {product.rating && product.rating > 0 ? (
-                  <div className="flex items-center gap-1 text-yellow-500 text-sm font-medium">
-                    {Array.from({ length: 5 }).map((_, i) => (
-                      <span key={i} className="text-yellow-500 text-[16px]">
+                {reviewCount > 0 ? (
+                  <div className="flex items-center gap-1">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <span
+                        key={star}
+                        className={`text-[16px] ${star <= Math.round(averageRating) ? "text-yellow-500" : "text-neutral-300"}`}
+                      >
                         <CiStar />
                       </span>
                     ))}
-                    <span className="text-neutral-400 text-xs ml-1">
-                      ({reviewCount} {reviewCount === 1 ? 'review' : 'reviews'})
+                    <span className="text-neutral-600 text-xs ml-2">
+                      {averageRating.toFixed(1)} ({reviewCount} {reviewCount === 1 ? 'review' : 'reviews'})
                     </span>
                   </div>
                 ) : (
                   <div className="flex items-center gap-1 text-neutral-300 text-sm font-medium">
-                    {Array.from({ length: 5 }).map((_, i) => (
-                      <span key={i} className="text-neutral-300 text-[16px]">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <span key={star} className="text-neutral-300 text-[16px]">
                         <CiStar />
                       </span>
                     ))}
-                    <span className="text-neutral-400 text-xs ml-1">(No reviews yet)</span>
+                    <span className="text-neutral-400 text-xs ml-2">(No reviews yet)</span>
                   </div>
                 )}
                 {isDisabled && (
@@ -160,20 +212,42 @@ const ProductList: React.FC<ProductListProps> = ({ products }) => {
               {/* Actions */}
               <div className="flex flex-col justify-end gap-3 mt-4 sm:mt-0 min-w-[160px]">
                 <button
+                  onClick={() => handleAddToCart(product)}
                   className={`w-full flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-bold rounded-lg shadow-lg transition-colors ${isDisabled
                     ? "bg-neutral-200 text-neutral-400 cursor-not-allowed"
                     : "bg-[#ee2b4b] text-white hover:bg-[#d4203e] shadow-[#ee2b4b]/20"
                     }`}
-                  disabled={isDisabled}
+                  disabled={isLoading}
                 >
-                  {isDisabled ?
-                    <TbShoppingCartOff className="text-[20px]" /> :
+                  {isLoading ? (
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                  ) : isDisabled ? (
+                    <TbShoppingCartOff className="text-[20px]" />
+                  ) : (
                     <MdOutlineShoppingCart className="text-[20px]" />
-                  }
+                  )}
                   Add to Cart
                 </button>
-                <button className="w-full flex items-center justify-center gap-2 px-5 py-2.5 border border-neutral-200 text-neutral-600 text-sm font-medium rounded-lg hover:bg-red-50 hover:text-red-600 hover:border-red-200 transition-colors">
-                  <AiOutlineDelete className="text-[20px]" />
+                
+                <button
+                  onClick={() => handleViewProduct(productId, productName)}
+                  className="w-full flex items-center justify-center gap-2 px-5 py-2.5 border border-neutral-300 text-neutral-700 text-sm font-medium rounded-lg hover:bg-blue-50 hover:text-blue-600 hover:border-blue-300 transition-colors"
+                  disabled={isLoading}
+                >
+                  <MdOutlineRemoveRedEye className="text-[20px]" />
+                  View Product
+                </button>
+                
+                <button
+                  onClick={() => handleRemoveFromWishlist(productId, productName)}
+                  disabled={isLoading}
+                  className="w-full flex items-center justify-center gap-2 px-5 py-2.5 border border-neutral-200 text-neutral-600 text-sm font-medium rounded-lg hover:bg-red-50 hover:text-red-600 hover:border-red-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isLoading ? (
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-red-600"></div>
+                  ) : (
+                    <AiOutlineDelete className="text-[20px]" />
+                  )}
                   Remove
                 </button>
               </div>
