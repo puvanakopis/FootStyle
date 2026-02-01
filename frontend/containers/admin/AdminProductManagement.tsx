@@ -507,7 +507,7 @@ const AdminProductManagement = () => {
                             {/* gender Filter */}
                             <div >
                                 <select
-                                    className="pl-10 pr-4 py-2 bg-[#f8f6f6] border-none rounded-xl text-sm text-text-main focus:ring-2 focus:ring-[#ee2b4b]/20"
+                                    className="pl-4 pr-4 py-2 bg-[#f8f6f6] border-none rounded-xl text-sm text-text-main focus:ring-2 focus:ring-[#ee2b4b]/20"
                                     value={genderFilter}
                                     onChange={(e) => setgenderFilter(e.target.value)}
                                 >
@@ -521,7 +521,7 @@ const AdminProductManagement = () => {
                             {/* Material Filter */}
                             <div>
                                 <select
-                                    className="pl-10 pr-4 py-2 bg-[#f8f6f6] border-none rounded-xl text-sm text-text-main focus:ring-2 focus:ring-[#ee2b4b]/20"
+                                    className="pl-4 pr-4 py-2 bg-[#f8f6f6] border-none rounded-xl text-sm text-text-main focus:ring-2 focus:ring-[#ee2b4b]/20"
                                     value={materialFilter}
                                     onChange={(e) => setMaterialFilter(e.target.value)}
                                 >
@@ -536,7 +536,7 @@ const AdminProductManagement = () => {
                             {/* Stock Filter */}
                             <div>
                                 <select
-                                    className="pl-10 pr-4 py-2 bg-[#f8f6f6] border-none rounded-xl text-sm text-text-main focus:ring-2 focus:ring-[#ee2b4b]/20"
+                                    className="pl-4 pr-4 py-2 bg-[#f8f6f6] border-none rounded-xl text-sm text-text-main focus:ring-2 focus:ring-[#ee2b4b]/20"
                                     value={stockFilter}
                                     onChange={(e) => setStockFilter(e.target.value)}
                                 >
@@ -551,7 +551,7 @@ const AdminProductManagement = () => {
                             {/* Price Filter */}
                             <div>
                                 <select
-                                    className="pl-10 pr-4 py-2 bg-[#f8f6f6] border-none rounded-xl text-sm text-text-main focus:ring-2 focus:ring-[#ee2b4b]/20"
+                                    className="pl-4 pr-4 py-2 bg-[#f8f6f6] border-none rounded-xl text-sm text-text-main focus:ring-2 focus:ring-[#ee2b4b]/20"
                                     value={priceFilter}
                                     onChange={(e) => setPriceFilter(e.target.value)}
                                 >
@@ -570,7 +570,7 @@ const AdminProductManagement = () => {
                                 <input
                                     type="text"
                                     placeholder="Search by name, title, material or ID..."
-                                    className="w-full pl-9 pr-4 py-2 bg-[#f8f6f6] border-none rounded-xl text-sm focus:ring-2 focus:ring-[#ee2b4b]/20 placeholder-text-secondary/70"
+                                    className="w-full pl-4 pr-4 py-2 bg-[#f8f6f6] border-none rounded-xl text-sm focus:ring-2 focus:ring-[#ee2b4b]/20 placeholder-text-secondary/70"
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
                                 />

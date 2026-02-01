@@ -32,9 +32,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
         <AuthProvider>
           <ProductProvider>
-            <ProtectedRoute>
-              {children}
-            </ProtectedRoute>
+              <ProtectedRoute>
+                {children}
+              </ProtectedRoute>
           </ProductProvider>
         </AuthProvider>
       </body>
