@@ -1,8 +1,9 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { MdOutlineEdit, MdOutlineAdd, MdDeleteOutline, MdClose } from "react-icons/md";
+import { MdOutlineEdit, MdOutlineAdd, MdDeleteOutline, MdClose, MdOutlineVisibility } from "react-icons/md";
 import { LuChevronLeft, LuChevronRight } from "react-icons/lu";
+import { IoSearch } from "react-icons/io5";
 import { Size, Product } from "@/interfaces/productInterface";
 import { useProduct } from "@/context/ProductContext";
 import { showToast } from "@/lib/toast";
@@ -30,15 +31,16 @@ const AdminProductManagement = () => {
 
     // State for filters
     const [searchQuery, setSearchQuery] = useState("");
-    const [genderFilter, setgenderFilter] = useState("All");
+    const [genderFilter, setGenderFilter] = useState("All");
     const [materialFilter, setMaterialFilter] = useState("All");
     const [stockFilter, setStockFilter] = useState("All");
-    const [priceFilter, setPriceFilter] = useState("All");
+    const [statusFilter, setStatusFilter] = useState("All");
 
     // State for modals
     const [showAddModal, setShowAddModal] = useState(false);
     const [showEditModal, setShowEditModal] = useState(false);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [showViewModal, setShowViewModal] = useState(false);
 
     // State for image files
     const [imageFiles, setImageFiles] = useState<ImageFile[]>([]);
@@ -47,11 +49,12 @@ const AdminProductManagement = () => {
     // Other states
     const [editingProductId, setEditingProductId] = useState<string | null>(null);
     const [deletingProductId, setDeletingProductId] = useState<string | null>(null);
-    const [isUploading, setIsUploading] = useState(false);
+    const [viewingProduct, setViewingProduct] = useState<Product | null>(null);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     // Pagination state
     const [currentPage, setCurrentPage] = useState(1);
-    const productsPerPage = 15;
+    const productsPerPage = 10;
 
     // State for form data
     const [formData, setFormData] = useState<ProductFormData>({
@@ -65,23 +68,43 @@ const AdminProductManagement = () => {
         isActive: true,
     });
 
+    // Fetch products on component mount
     useEffect(() => {
         fetchProducts();
     }, []);
 
-    // Calculate total stock
+    // Calculate total stock and get stock status
     const getStockStatus = (product: Product) => {
         const totalStock = product.sizes.reduce((sum, size) => sum + size.stock, 0);
-        if (totalStock === 0) return "Out";
-        if (totalStock <= 5) return "Low";
-        if (totalStock <= 15) return "Med";
-        return "High";
+        if (totalStock === 0) return "Out of Stock";
+        if (totalStock <= 5) return "Low Stock";
+        if (totalStock <= 15) return "Medium Stock";
+        return "High Stock";
     };
 
-    // Add this helper function
+    // Get stock status color
+    const getStockStatusColor = (status: string) => {
+        switch (status) {
+            case "High Stock": return "bg-green-100 text-green-800 border-green-200";
+            case "Medium Stock": return "bg-yellow-100 text-yellow-800 border-yellow-200";
+            case "Low Stock": return "bg-orange-100 text-orange-800 border-orange-200";
+            default: return "bg-gray-100 text-gray-800 border-gray-200";
+        }
+    };
+
+    // Helper function to get image URL
     const getImageUrl = (imageName: string) => {
         const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
         return `${API_BASE_URL}/uploads/product/${imageName}`;
+    };
+
+    // Format date for display
+    const formatDateForDisplay = (dateString: string) => {
+        const date = new Date(dateString);
+        return {
+            date: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+            time: date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
+        };
     };
 
     // Filter products based on search and filters
@@ -89,9 +112,11 @@ const AdminProductManagement = () => {
         const matchesSearch =
             product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
             product.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            product.material?.toLowerCase().includes(searchQuery.toLowerCase());
+            product.material?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            product.id?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            product._id?.toLowerCase().includes(searchQuery.toLowerCase());
 
-        const matchesgender =
+        const matchesGender =
             genderFilter === "All" ||
             product.gender === genderFilter;
 
@@ -103,7 +128,12 @@ const AdminProductManagement = () => {
             stockFilter === "All" ||
             getStockStatus(product) === stockFilter;
 
-        return matchesSearch && matchesgender && matchesMaterial && matchesStock;
+        const matchesStatus =
+            statusFilter === "All" ||
+            (statusFilter === "Active" && product.isActive) ||
+            (statusFilter === "Inactive" && !product.isActive);
+
+        return matchesSearch && matchesGender && matchesMaterial && matchesStock && matchesStatus;
     });
 
     // Calculate pagination values
@@ -191,8 +221,8 @@ const AdminProductManagement = () => {
         setFormData({
             name: product.name,
             title: product.title || "",
-            gender: product.gender,
-            material: product.material || "",
+            gender: product.gender as "Men" | "Women" | "Kids",
+            material: product.material as "Mesh" | "Leather" | "Synthetic" | "Other",
             description: product.description || "",
             price: product.price,
             sizes: [...product.sizes],
@@ -212,6 +242,12 @@ const AdminProductManagement = () => {
         setShowEditModal(true);
     };
 
+    // Handle view product details
+    const handleViewProduct = (product: Product) => {
+        setViewingProduct(product);
+        setShowViewModal(true);
+    };
+
     // Handle delete click
     const handleDeleteClick = (productId: string) => {
         setDeletingProductId(productId);
@@ -222,6 +258,7 @@ const AdminProductManagement = () => {
     const handleConfirmDelete = async () => {
         if (deletingProductId) {
             try {
+                setIsSubmitting(true);
                 await deleteProduct(deletingProductId);
                 showToast('success', "Product deleted successfully");
                 setShowDeleteModal(false);
@@ -232,7 +269,10 @@ const AdminProductManagement = () => {
                     setCurrentPage(currentPage - 1);
                 }
             } catch (error) {
+                console.error("Error deleting product:", error);
                 showToast('error', "Failed to delete product");
+            } finally {
+                setIsSubmitting(false);
             }
         }
     };
@@ -274,13 +314,13 @@ const AdminProductManagement = () => {
         }
     };
 
-    // Handle form submission for adding
+    // Handle form submission for adding/editing
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
         // Validate required fields
         if (!formData.name || !formData.gender || !formData.material || formData.price === "") {
-            showToast('error', "Please fill in all required fields (Name, gender, Material, Price)");
+            showToast('error', "Please fill in all required fields (Name, Gender, Material, Price)");
             return;
         }
 
@@ -291,7 +331,7 @@ const AdminProductManagement = () => {
             return;
         }
 
-        setIsUploading(true);
+        setIsSubmitting(true);
 
         try {
             if (showEditModal && editingProductId) {
@@ -369,7 +409,7 @@ const AdminProductManagement = () => {
             console.error("Error processing product:", error);
             showToast('error', "Error processing product. Please try again.");
         } finally {
-            setIsUploading(false);
+            setIsSubmitting(false);
         }
     };
 
@@ -489,10 +529,10 @@ const AdminProductManagement = () => {
                             Manage your store&apos;s products, stock levels, and pricing.
                         </p>
                     </div>
-                    <div className="flex items-center gap-3">
+                    <div className="flex gap-2">
                         <button
                             onClick={handleAddNewProduct}
-                            className="flex items-center gap-2 bg-[#ee2b4b] text-white px-5 py-2.5 rounded-xl font-bold shadow-sm transition-all active:scale-95"
+                            className="flex items-center gap-2 px-5 py-2.5 text-white rounded-xl font-bold shadow-sm transition-all active:scale-95 bg-red-600 hover:bg-red-700"
                         >
                             <MdOutlineAdd className="text-xl" />
                             <span>Add New Product</span>
@@ -500,16 +540,16 @@ const AdminProductManagement = () => {
                     </div>
                 </div>
 
-                {/* Filters */}
+                {/* Filters & Search */}
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                     <div className="md:col-span-4 bg-white p-1 rounded-2xl border border-[#f3e7e9] shadow-sm flex flex-col md:flex-row items-center justify-between gap-2">
                         <div className="flex-1 flex items-center w-full p-2 gap-2">
-                            {/* gender Filter */}
-                            <div >
+                            {/* Gender Filter */}
+                            <div>
                                 <select
-                                    className="pl-4 pr-4 py-2 bg-[#f8f6f6] border-none rounded-xl text-sm text-text-main focus:ring-2 focus:ring-[#ee2b4b]/20"
+                                    className="pl-4 pr-10 py-2 bg-[#f8f6f6] border-none rounded-xl text-sm text-text-main focus:ring-2 focus:ring-[#ee2b4b]/20"
                                     value={genderFilter}
-                                    onChange={(e) => setgenderFilter(e.target.value)}
+                                    onChange={(e) => setGenderFilter(e.target.value)}
                                 >
                                     <option value="All">All Gender</option>
                                     <option value="Men">Men</option>
@@ -521,7 +561,7 @@ const AdminProductManagement = () => {
                             {/* Material Filter */}
                             <div>
                                 <select
-                                    className="pl-4 pr-4 py-2 bg-[#f8f6f6] border-none rounded-xl text-sm text-text-main focus:ring-2 focus:ring-[#ee2b4b]/20"
+                                    className="pl-4 pr-10 py-2 bg-[#f8f6f6] border-none rounded-xl text-sm text-text-main focus:ring-2 focus:ring-[#ee2b4b]/20"
                                     value={materialFilter}
                                     onChange={(e) => setMaterialFilter(e.target.value)}
                                 >
@@ -536,41 +576,40 @@ const AdminProductManagement = () => {
                             {/* Stock Filter */}
                             <div>
                                 <select
-                                    className="pl-4 pr-4 py-2 bg-[#f8f6f6] border-none rounded-xl text-sm text-text-main focus:ring-2 focus:ring-[#ee2b4b]/20"
+                                    className="pl-4 pr-10 py-2 bg-[#f8f6f6] border-none rounded-xl text-sm text-text-main focus:ring-2 focus:ring-[#ee2b4b]/20"
                                     value={stockFilter}
                                     onChange={(e) => setStockFilter(e.target.value)}
                                 >
-                                    <option value="All">Stock Status</option>
-                                    <option value="Low">Low</option>
-                                    <option value="Med">Med</option>
-                                    <option value="High">High</option>
-                                    <option value="Out">Out</option>
+                                    <option value="All">All Stock</option>
+                                    <option value="High Stock">High Stock</option>
+                                    <option value="Medium Stock">Medium Stock</option>
+                                    <option value="Low Stock">Low Stock</option>
+                                    <option value="Out of Stock">Out of Stock</option>
                                 </select>
                             </div>
 
-                            {/* Price Filter */}
+                            {/* Status Filter */}
                             <div>
                                 <select
-                                    className="pl-4 pr-4 py-2 bg-[#f8f6f6] border-none rounded-xl text-sm text-text-main focus:ring-2 focus:ring-[#ee2b4b]/20"
-                                    value={priceFilter}
-                                    onChange={(e) => setPriceFilter(e.target.value)}
+                                    className="pl-4 pr-10 py-2 bg-[#f8f6f6] border-none rounded-xl text-sm text-text-main focus:ring-2 focus:ring-[#ee2b4b]/20"
+                                    value={statusFilter}
+                                    onChange={(e) => setStatusFilter(e.target.value)}
                                 >
-                                    <option value="All">Price Range</option>
-                                    <option value="0-500">Rs. 0 - Rs. 500</option>
-                                    <option value="500-1000">Rs. 500 - Rs. 1,000</option>
-                                    <option value="1000-5000">Rs. 1,000 - Rs. 5,000</option>
-                                    <option value="5000+">Rs. 5,000+</option>
+                                    <option value="All">All Status</option>
+                                    <option value="Active">Active</option>
+                                    <option value="Inactive">Inactive</option>
                                 </select>
                             </div>
                         </div>
-
-                        {/* Search */}
-                        <div className="w-full md:w-auto p-2 flex items-center gap-2">
-                            <div className="flex-1">
+                        <div className="w-full md:w-auto p-2">
+                            <div className="relative">
+                                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary material-symbols-outlined text-lg">
+                                    <IoSearch />
+                                </span>
                                 <input
                                     type="text"
-                                    placeholder="Search by name, title, material or ID..."
-                                    className="w-full pl-4 pr-4 py-2 bg-[#f8f6f6] border-none rounded-xl text-sm focus:ring-2 focus:ring-[#ee2b4b]/20 placeholder-text-secondary/70"
+                                    placeholder="Search by name, title, material, or ID..."
+                                    className="w-full md:w-64 pl-9 pr-4 py-2 bg-[#f8f6f6] border-none rounded-xl text-sm focus:ring-2 focus:ring-[#ee2b4b]/20 focus:outline-none placeholder-text-secondary/70"
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
                                 />
@@ -579,173 +618,228 @@ const AdminProductManagement = () => {
                     </div>
                 </div>
 
-                {/* Product Table */}
-                <div className="bg-white rounded-2xl border border-[#f3e7e9] shadow-sm overflow-hidden flex flex-col">
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-left border-collapse">
-                            <thead>
-                                <tr className="bg-[#f8f6f6] text-text-secondary text-xs uppercase tracking-wider border-b border-[#f3e7e9]">
-                                    <th className="px-6 py-4 font-semibold w-10">
-                                        <input
-                                            type="checkbox"
-                                            className="rounded border-gray-300 text-[#ee2b4b] focus:ring-[#ee2b4b]/20 bg-white"
-                                        />
-                                    </th>
-                                    <th className="px-6 py-4 font-semibold">Product</th>
-                                    <th className="px-6 py-4 font-semibold">gender</th>
-                                    <th className="px-6 py-4 font-semibold">Material</th>
-                                    <th className="px-6 py-4 font-semibold">Price</th>
-                                    <th className="px-6 py-4 font-semibold">Stock</th>
-                                    <th className="px-6 py-4 font-semibold">Status</th>
-                                    <th className="px-6 py-4 font-semibold text-right">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-[#f3e7e9]">
-                                {isLoading ? (
-                                    <tr>
-                                        <td colSpan={8} className="px-6 py-8 text-center">
-                                            <div className="flex justify-center">
-                                                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#ee2b4b]"></div>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ) : currentProducts.length === 0 ? (
-                                    <tr>
-                                        <td colSpan={8} className="px-6 py-8 text-center text-text-secondary">
-                                            No products found
-                                        </td>
-                                    </tr>
-                                ) : (
-                                    currentProducts.map((product) => {
-                                        const stockStatus = getStockStatus(product);
-                                        return (
-                                            <tr key={product.id || product._id} className="hover:bg-gray-50 transition-colors group">
-                                                <td className="px-6 py-4">
-                                                    <input
-                                                        type="checkbox"
-                                                        className="rounded border-gray-300 text-[#ee2b4b] focus:ring-[#ee2b4b]/20 bg-white"
-                                                    />
-                                                </td>
-                                                <td className="px-6 py-4">
-                                                    <div className="flex items-center gap-3">
-                                                        <div
-                                                            className="w-12 h-12 rounded-xl bg-gray-100 bg-cover bg-center border border-gray-200"
-                                                            style={{
-                                                                backgroundImage: `url(${getImageUrl(product.images[0])})`
-                                                            }}
-                                                        />
-                                                        <div className="flex flex-col">
-                                                            <span className="text-sm font-bold text-text-main">{product.name}</span>
-                                                            <span className="text-xs text-text-secondary">{product.id}</span>
-                                                        </div>
-                                                    </div>
-                                                </td>
-                                                <td className="px-6 py-4">
-                                                    <span className="text-sm text-text-main font-medium bg-[#f8f6f6] px-2.5 py-1 rounded-lg">
-                                                        {product.gender}
-                                                    </span>
-                                                </td>
-                                                <td className="px-6 py-4">
-                                                    <span className="text-sm text-text-main font-medium bg-blue-50 px-2.5 py-1 rounded-lg border border-blue-100">
-                                                        {product.material}
-                                                    </span>
-                                                </td>
-                                                <td className="px-6 py-4 text-sm font-bold text-text-main">
-                                                    Rs. {product.price.toLocaleString()}
-                                                </td>
-                                                <td className="px-6 py-4">
-                                                    <span
-                                                        className={`inline-flex items-center gap-1 px-2 py-0.5 text-xs font-bold rounded-full border ${stockStatus === "Low"
-                                                            ? "bg-red-100 text-red-800 border-red-200"
-                                                            : stockStatus === "Med"
-                                                                ? "bg-yellow-100 text-yellow-800 border-yellow-200"
-                                                                : stockStatus === "High"
-                                                                    ? "bg-green-100 text-green-800 border-green-200"
-                                                                    : "bg-gray-100 text-gray-800 border-gray-200"
-                                                            }`}
-                                                    >
-                                                        {product.sizes.reduce((sum, size) => sum + size.stock, 0)}
-                                                    </span>
-                                                </td>
-                                                <td className="px-6 py-4">
-                                                    <span
-                                                        className={`inline-flex items-center gap-1 px-2 py-0.5 text-xs font-bold rounded-full border ${product.isActive
-                                                            ? "bg-green-100 text-green-800 border-green-200"
-                                                            : "bg-gray-100 text-gray-800 border-gray-200"
-                                                            }`}
-                                                    >
-                                                        {product.isActive ? "Active" : "Inactive"}
-                                                    </span>
-                                                </td>
-                                                <td className="px-6 py-4 text-right">
-                                                    <div className="flex items-center justify-end gap-2 transition-opacity">
-                                                        <button
-                                                            onClick={() => handleEditProduct(product)}
-                                                            className="size-8 flex items-center justify-center rounded-lg text-text-secondary hover:text-[#ee2b4b] hover:bg-[#ee2b4b]/5 transition-colors"
-                                                            title="Edit Product"
-                                                        >
-                                                            <MdOutlineEdit className="text-lg" />
-                                                        </button>
-                                                        <button
-                                                            onClick={() => handleDeleteClick(product.id || product._id || "")}
-                                                            className="size-8 flex items-center justify-center rounded-lg text-text-secondary hover:text-red-600 hover:bg-red-50 transition-colors"
-                                                            title="Delete Product"
-                                                        >
-                                                            <MdDeleteOutline className="text-lg" />
-                                                        </button>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        );
-                                    })
-                                )}
-                            </tbody>
-                        </table>
-                    </div>
-
-                    {/* Pagination */}
-                    {filteredProducts.length > 0 && (
-                        <div className="px-6 py-4 border-t border-[#f3e7e9] flex flex-col sm:flex-row items-center justify-between gap-4">
-                            <p className="text-sm text-text-secondary">
-                                Showing <span className="font-bold text-text-main">{indexOfFirstProduct + 1}-{Math.min(indexOfLastProduct, filteredProducts.length)}</span> of{" "}
-                                <span className="font-bold text-text-main">{filteredProducts.length}</span> products
-                            </p>
-                            <div className="flex items-center gap-2">
-                                <button
-                                    onClick={handlePrevPage}
-                                    disabled={currentPage === 1}
-                                    className="size-8 flex items-center justify-center rounded-lg border border-[#f3e7e9] text-text-secondary hover:bg-gray-50 hover:text-text-main disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                                >
-                                    <LuChevronLeft className="text-lg" />
-                                </button>
-
-                                {getPageNumbers().map((pageNumber, index) => (
-                                    <button
-                                        key={index}
-                                        onClick={() => pageNumber !== '...' && handlePageChange(pageNumber as number)}
-                                        className={`size-8 flex items-center justify-center rounded-lg text-sm font-medium transition-colors ${pageNumber === currentPage
-                                            ? "bg-[#ee2b4b] text-white"
-                                            : pageNumber === '...'
-                                                ? "text-text-secondary cursor-default"
-                                                : "border border-[#f3e7e9] text-text-secondary hover:bg-gray-50 hover:text-text-main"
-                                            }`}
-                                        disabled={pageNumber === '...'}
-                                    >
-                                        {pageNumber}
-                                    </button>
-                                ))}
-
-                                <button
-                                    onClick={handleNextPage}
-                                    disabled={currentPage === totalPages}
-                                    className="size-8 flex items-center justify-center rounded-lg border border-[#f3e7e9] text-text-secondary hover:bg-gray-50 hover:text-text-main disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                                >
-                                    <LuChevronRight className="text-lg" />
-                                </button>
-                            </div>
+                {/* Loading State */}
+                {isLoading && (
+                    <div className="bg-white rounded-2xl border border-[#f3e7e9] shadow-sm p-8 text-center">
+                        <div className="flex flex-col items-center justify-center gap-4">
+                            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#ee2b4b]"></div>
+                            <p className="text-text-main">Loading products...</p>
                         </div>
-                    )}
-                </div>
+                    </div>
+                )}
+
+                {/* Products Table */}
+                {!isLoading && (
+                    <div className="bg-white rounded-2xl border border-[#f3e7e9] shadow-sm overflow-hidden flex flex-col">
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-left border-collapse">
+                                <thead>
+                                    <tr className="bg-[#f8f6f6] text-text-secondary text-xs uppercase tracking-wider border-b border-[#f3e7e9]">
+                                        <th className="px-6 py-4 font-semibold w-10">
+                                            <input
+                                                type="checkbox"
+                                                className="rounded border-gray-300 text-[#ee2b4b] focus:ring-[#ee2b4b]/20 bg-white"
+                                            />
+                                        </th>
+                                        <th className="px-6 py-4 font-semibold">Product</th>
+                                        <th className="px-6 py-4 font-semibold">Product ID</th>
+                                        <th className="px-6 py-4 font-semibold">Gender</th>
+                                        <th className="px-6 py-4 font-semibold">Material</th>
+                                        <th className="px-6 py-4 font-semibold">Price</th>
+                                        <th className="px-6 py-4 font-semibold">Stock</th>
+                                        <th className="px-6 py-4 font-semibold">Status</th>
+                                        <th className="px-6 py-4 font-semibold text-right">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-[#f3e7e9]">
+                                    {currentProducts.length === 0 ? (
+                                        <tr>
+                                            <td colSpan={9} className="px-6 py-8 text-center text-text-secondary">
+                                                {products.length === 0 ? "No products found" : "No products match your filters"}
+                                            </td>
+                                        </tr>
+                                    ) : (
+                                        currentProducts.map((product) => {
+                                            const stockStatus = getStockStatus(product);
+                                            const totalStock = product.sizes.reduce((sum, size) => sum + size.stock, 0);
+                                            const productId = product.id || product._id;
+                                            
+                                            return (
+                                                <tr
+                                                    key={productId}
+                                                    className="hover:bg-gray-50 transition-colors group"
+                                                >
+                                                    <td className="px-6 py-4">
+                                                        <input
+                                                            type="checkbox"
+                                                            className="rounded border-gray-300 text-[#ee2b4b] focus:ring-[#ee2b4b]/20 bg-white"
+                                                        />
+                                                    </td>
+                                                    <td className="px-6 py-4">
+                                                        <div className="flex items-center gap-3">
+                                                            <div
+                                                                className="w-12 h-12 rounded-xl bg-cover bg-center border border-gray-200"
+                                                                style={{
+                                                                    backgroundImage: product.images && product.images.length > 0 
+                                                                        ? `url(${getImageUrl(product.images[0])})`
+                                                                        : 'none',
+                                                                    backgroundColor: product.images && product.images.length > 0 
+                                                                        ? 'transparent' 
+                                                                        : '#f8f6f6'
+                                                                }}
+                                                            />
+                                                            <div className="flex flex-col">
+                                                                <span className="text-sm font-bold text-text-main">
+                                                                    {product.name}
+                                                                </span>
+                                                                <span className="text-xs text-text-secondary">
+                                                                    {product.title || "No title"}
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td className="px-6 py-4 text-sm font-bold text-[#ee2b4b]">
+                                                        {productId}
+                                                    </td>
+                                                    <td className="px-6 py-4">
+                                                        <span
+                                                            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold border ${product.gender === "Men"
+                                                                ? "bg-blue-100 text-blue-800 border-blue-200"
+                                                                : product.gender === "Women"
+                                                                ? "bg-pink-100 text-pink-800 border-pink-200"
+                                                                : "bg-green-100 text-green-800 border-green-200"
+                                                                }`}
+                                                        >
+                                                            {product.gender}
+                                                        </span>
+                                                    </td>
+                                                    <td className="px-6 py-4">
+                                                        <span
+                                                            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold border ${product.material === "Leather"
+                                                                ? "bg-amber-100 text-amber-800 border-amber-200"
+                                                                : product.material === "Mesh"
+                                                                ? "bg-gray-100 text-gray-800 border-gray-200"
+                                                                : product.material === "Synthetic"
+                                                                ? "bg-purple-100 text-purple-800 border-purple-200"
+                                                                : "bg-gray-100 text-gray-800 border-gray-200"
+                                                                }`}
+                                                        >
+                                                            {product.material}
+                                                        </span>
+                                                    </td>
+                                                    <td className="px-6 py-4 text-sm font-bold text-text-main">
+                                                        Rs. {product.price.toLocaleString()}
+                                                    </td>
+                                                    <td className="px-6 py-4">
+                                                        <span
+                                                            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold border ${getStockStatusColor(stockStatus)}`}
+                                                        >
+                                                            <span
+                                                                className={`w-2 h-2 rounded-full mr-1 ${stockStatus === "High Stock"
+                                                                    ? "bg-green-500"
+                                                                    : stockStatus === "Medium Stock"
+                                                                    ? "bg-yellow-500"
+                                                                    : stockStatus === "Low Stock"
+                                                                    ? "bg-orange-500"
+                                                                    : "bg-gray-500"
+                                                                    }`}
+                                                            ></span>
+                                                            {totalStock} units
+                                                        </span>
+                                                    </td>
+                                                    <td className="px-6 py-4">
+                                                        <span
+                                                            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold border ${product.isActive
+                                                                ? "bg-green-100 text-green-800 border-green-200"
+                                                                : "bg-gray-100 text-gray-800 border-gray-200"
+                                                                }`}
+                                                        >
+                                                            <span
+                                                                className={`w-2 h-2 rounded-full mr-1 ${product.isActive
+                                                                    ? "bg-green-500"
+                                                                    : "bg-gray-500"
+                                                                    }`}
+                                                            ></span>
+                                                            {product.isActive ? "Active" : "Inactive"}
+                                                        </span>
+                                                    </td>
+                                                    <td className="px-6 py-4 text-right">
+                                                        <div className="flex items-center justify-end gap-2">
+                                                            <button
+                                                                onClick={() => handleViewProduct(product)}
+                                                                className="size-8 flex items-center justify-center rounded-lg text-text-secondary hover:text-blue-600 hover:bg-blue-50 transition-colors"
+                                                                title="View Details"
+                                                            >
+                                                                <MdOutlineVisibility size={18} />
+                                                            </button>
+                                                            <button
+                                                                onClick={() => handleEditProduct(product)}
+                                                                className="size-8 flex items-center justify-center rounded-lg text-text-secondary hover:text-[#ee2b4b] hover:bg-[#ee2b4b]/5 transition-colors"
+                                                                title="Edit Product"
+                                                            >
+                                                                <MdOutlineEdit size={18} />
+                                                            </button>
+                                                            <button
+                                                                onClick={() => handleDeleteClick(productId || "")}
+                                                                className="size-8 flex items-center justify-center rounded-lg text-text-secondary hover:text-red-600 hover:bg-red-50 transition-colors"
+                                                                title="Delete Product"
+                                                            >
+                                                                <MdDeleteOutline size={18} />
+                                                            </button>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            );
+                                        })
+                                    )}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        {/* Pagination */}
+                        {filteredProducts.length > 0 && (
+                            <div className="px-6 py-4 border-t border-[#f3e7e9] flex flex-col sm:flex-row items-center justify-between gap-4">
+                                <p className="text-sm text-text-secondary">
+                                    Showing <span className="font-bold text-text-main">{indexOfFirstProduct + 1}-{Math.min(indexOfLastProduct, filteredProducts.length)}</span> of{" "}
+                                    <span className="font-bold text-text-main">{filteredProducts.length}</span> products
+                                </p>
+                                <div className="flex items-center gap-2">
+                                    <button
+                                        onClick={handlePrevPage}
+                                        disabled={currentPage === 1}
+                                        className="size-8 flex items-center justify-center rounded-lg border border-[#f3e7e9] text-text-secondary hover:bg-gray-50 hover:text-text-main disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                    >
+                                        <LuChevronLeft />
+                                    </button>
+
+                                    {getPageNumbers().map((pageNumber, index) => (
+                                        <button
+                                            key={index}
+                                            onClick={() => pageNumber !== '...' && handlePageChange(pageNumber as number)}
+                                            className={`size-8 flex items-center justify-center rounded-lg text-sm font-medium transition-colors ${pageNumber === currentPage
+                                                ? "bg-[#ee2b4b] text-white"
+                                                : pageNumber === '...'
+                                                    ? "text-text-secondary cursor-default"
+                                                    : "border border-[#f3e7e9] text-text-secondary hover:bg-gray-50 hover:text-text-main"
+                                                }`}
+                                            disabled={pageNumber === '...'}
+                                        >
+                                            {pageNumber}
+                                        </button>
+                                    ))}
+
+                                    <button
+                                        onClick={handleNextPage}
+                                        disabled={currentPage === totalPages}
+                                        className="size-8 flex items-center justify-center rounded-lg border border-[#f3e7e9] text-text-secondary hover:bg-gray-50 hover:text-text-main disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                    >
+                                        <LuChevronRight />
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                )}
             </div>
 
             {/* Add/Edit Product Modal */}
@@ -788,7 +882,7 @@ const AdminProductManagement = () => {
                                 </div>
                                 <div className="space-y-2">
                                     <label className="text-sm font-medium text-text-main block">
-                                        gender *
+                                        Gender *
                                     </label>
                                     <select
                                         name="gender"
@@ -1000,13 +1094,219 @@ const AdminProductManagement = () => {
                                 </button>
                                 <button
                                     type="submit"
-                                    disabled={isUploading}
-                                    className="px-5 py-2.5 bg-[#ee2b4b] text-white rounded-xl font-medium shadow-sm transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    disabled={isSubmitting}
+                                    className="px-5 py-2.5 bg-red-600 text-white rounded-xl font-medium shadow-sm transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-red-700"
                                 >
-                                    {isUploading ? "Processing..." : showEditModal ? "Update Product" : "Add Product"}
+                                    {isSubmitting ? "Processing..." : showEditModal ? "Update Product" : "Add Product"}
                                 </button>
                             </div>
                         </form>
+                    </div>
+                </div>
+            )}
+
+            {/* Product Details Modal */}
+            {showViewModal && viewingProduct && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                    <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+                        <div className="p-6 border-b border-[#f3e7e9] flex justify-between items-center">
+                            <h3 className="text-xl font-bold text-text-main">Product Details</h3>
+                            <button
+                                onClick={() => setShowViewModal(false)}
+                                className="text-text-secondary hover:text-text-main"
+                            >
+                                <MdClose size={24} />
+                            </button>
+                        </div>
+                        <div className="p-6">
+                            {/* Product Header with Main Image */}
+                            <div className="flex flex-col md:flex-row gap-6 mb-6">
+                                <div className="flex flex-col items-center">
+                                    {viewingProduct.images && viewingProduct.images.length > 0 ? (
+                                        <div className="w-32 h-32 rounded-xl bg-gray-100 overflow-hidden mb-4">
+                                            <img
+                                                src={getImageUrl(viewingProduct.images[0])}
+                                                alt={viewingProduct.name}
+                                                className="w-full h-full object-cover"
+                                            />
+                                        </div>
+                                    ) : (
+                                        <div className="w-32 h-32 rounded-xl bg-[#f8f6f6] flex items-center justify-center mb-4">
+                                            <span className="text-4xl font-bold text-text-secondary">P</span>
+                                        </div>
+                                    )}
+                                    <div className="text-center">
+                                        <h4 className="text-lg font-bold text-text-main">
+                                            {viewingProduct.name}
+                                        </h4>
+                                        <p className="text-text-secondary">{viewingProduct.title || "No title"}</p>
+                                    </div>
+                                </div>
+                                <div className="flex-1">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div className="space-y-1">
+                                            <p className="text-sm text-text-secondary">Product ID</p>
+                                            <p className="font-medium text-[#ee2b4b]">{viewingProduct.id || viewingProduct._id || 'N/A'}</p>
+                                        </div>
+                                        <div className="space-y-1">
+                                            <p className="text-sm text-text-secondary">Gender</p>
+                                            <span
+                                                className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold border ${viewingProduct.gender === "Men"
+                                                    ? "bg-blue-100 text-blue-800 border-blue-200"
+                                                    : viewingProduct.gender === "Women"
+                                                    ? "bg-pink-100 text-pink-800 border-pink-200"
+                                                    : "bg-green-100 text-green-800 border-green-200"
+                                                    }`}
+                                            >
+                                                {viewingProduct.gender}
+                                            </span>
+                                        </div>
+                                        <div className="space-y-1">
+                                            <p className="text-sm text-text-secondary">Material</p>
+                                            <span
+                                                className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold border ${viewingProduct.material === "Leather"
+                                                    ? "bg-amber-100 text-amber-800 border-amber-200"
+                                                    : viewingProduct.material === "Mesh"
+                                                    ? "bg-gray-100 text-gray-800 border-gray-200"
+                                                    : viewingProduct.material === "Synthetic"
+                                                    ? "bg-purple-100 text-purple-800 border-purple-200"
+                                                    : "bg-gray-100 text-gray-800 border-gray-200"
+                                                    }`}
+                                            >
+                                                {viewingProduct.material}
+                                            </span>
+                                        </div>
+                                        <div className="space-y-1">
+                                            <p className="text-sm text-text-secondary">Status</p>
+                                            <span
+                                                className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold border ${viewingProduct.isActive
+                                                    ? "bg-green-100 text-green-800 border-green-200"
+                                                    : "bg-gray-100 text-gray-800 border-gray-200"
+                                                    }`}
+                                            >
+                                                <span
+                                                    className={`w-2 h-2 rounded-full mr-1 ${viewingProduct.isActive
+                                                        ? "bg-green-500"
+                                                        : "bg-gray-500"
+                                                        }`}
+                                                ></span>
+                                                {viewingProduct.isActive ? "Active" : "Inactive"}
+                                            </span>
+                                        </div>
+                                        <div className="space-y-1">
+                                            <p className="text-sm text-text-secondary">Price</p>
+                                            <p className="font-bold text-text-main">Rs. {viewingProduct.price.toLocaleString()}</p>
+                                        </div>
+                                        <div className="space-y-1">
+                                            <p className="text-sm text-text-secondary">Total Stock</p>
+                                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold border ${getStockStatusColor(getStockStatus(viewingProduct))}`}>
+                                                <span
+                                                    className={`w-2 h-2 rounded-full mr-1 ${getStockStatus(viewingProduct) === "High Stock"
+                                                        ? "bg-green-500"
+                                                        : getStockStatus(viewingProduct) === "Medium Stock"
+                                                        ? "bg-yellow-500"
+                                                        : getStockStatus(viewingProduct) === "Low Stock"
+                                                        ? "bg-orange-500"
+                                                        : "bg-gray-500"
+                                                        }`}
+                                                ></span>
+                                                {viewingProduct.sizes.reduce((sum, size) => sum + size.stock, 0)} units
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Description Section */}
+                            {viewingProduct.description && (
+                                <div className="border-t border-[#f3e7e9] pt-6">
+                                    <h4 className="font-bold text-text-main mb-4">Description</h4>
+                                    <p className="text-text-secondary">{viewingProduct.description}</p>
+                                </div>
+                            )}
+
+                            {/* Images Section */}
+                            {viewingProduct.images && viewingProduct.images.length > 0 && (
+                                <div className="border-t border-[#f3e7e9] pt-6">
+                                    <h4 className="font-bold text-text-main mb-4">Product Images ({viewingProduct.images.length})</h4>
+                                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                                        {viewingProduct.images.map((imageName, index) => (
+                                            <div key={index} className="relative group">
+                                                <div className="aspect-square rounded-xl overflow-hidden bg-gray-100">
+                                                    <img
+                                                        src={getImageUrl(imageName)}
+                                                        alt={`Product Image ${index + 1}`}
+                                                        className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                                                    />
+                                                </div>
+                                                <div className="mt-1 text-xs text-text-secondary text-center">
+                                                    Image {index + 1}
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Sizes & Stock Section */}
+                            <div className="border-t border-[#f3e7e9] pt-6">
+                                <h4 className="font-bold text-text-main mb-4">Size & Stock Details</h4>
+                                <div className="bg-gray-50 rounded-xl p-4">
+                                    <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
+                                        {viewingProduct.sizes.map((size, index) => (
+                                            <div key={index} className="text-center">
+                                                <div className="font-bold text-lg text-text-main mb-1">{size.size}</div>
+                                                <div className={`px-3 py-1 rounded-full text-sm font-bold ${size.stock === 0
+                                                    ? "bg-red-100 text-red-800"
+                                                    : size.stock <= 5
+                                                    ? "bg-orange-100 text-orange-800"
+                                                    : size.stock <= 15
+                                                    ? "bg-yellow-100 text-yellow-800"
+                                                    : "bg-green-100 text-green-800"
+                                                    }`}>
+                                                    {size.stock} units
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Product Dates */}
+                            <div className="border-t border-[#f3e7e9] pt-6 mt-6">
+                                <h4 className="font-bold text-text-main mb-4">Product Dates</h4>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div className="space-y-1">
+                                        <p className="text-sm text-text-secondary">Created At</p>
+                                        <p className="font-medium">
+                                            {viewingProduct.createdAt ? formatDateForDisplay(viewingProduct.createdAt).date : 'N/A'}
+                                            <br />
+                                            <span className="text-xs opacity-70">
+                                                {viewingProduct.createdAt ? formatDateForDisplay(viewingProduct.createdAt).time : ''}
+                                            </span>
+                                        </p>
+                                    </div>
+                                    <div className="space-y-1">
+                                        <p className="text-sm text-text-secondary">Last Updated</p>
+                                        <p className="font-medium">
+                                            {viewingProduct.updatedAt ? formatDateForDisplay(viewingProduct.updatedAt).date : 'N/A'}
+                                            <br />
+                                            <span className="text-xs opacity-70">
+                                                {viewingProduct.updatedAt ? formatDateForDisplay(viewingProduct.updatedAt).time : ''}
+                                            </span>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="p-6 border-t border-[#f3e7e9] flex justify-end">
+                            <button
+                                onClick={() => setShowViewModal(false)}
+                                className="px-5 py-2.5 bg-[#ee2b4b] text-white rounded-xl font-medium shadow-sm transition-all active:scale-95"
+                            >
+                                Close
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}
@@ -1034,9 +1334,10 @@ const AdminProductManagement = () => {
                                 </button>
                                 <button
                                     onClick={handleConfirmDelete}
-                                    className="px-5 py-2.5 bg-red-600 text-white rounded-xl font-medium shadow-sm transition-all active:scale-95"
+                                    disabled={isSubmitting}
+                                    className="px-5 py-2.5 bg-red-600 text-white rounded-xl font-medium shadow-sm transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-red-700"
                                 >
-                                    Delete Product
+                                    {isSubmitting ? "Deleting..." : "Delete Product"}
                                 </button>
                             </div>
                         </div>
