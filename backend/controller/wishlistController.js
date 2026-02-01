@@ -1,6 +1,26 @@
-const Wishlist = require("../model/wishlistModel");
 const Product = require("../model/productModel");
-const User = require("../model/userModel");
+const Wishlist = require("../model/wishlistModel");
+
+exports.getWishlistProducts = async (req, res) => {
+    try {
+        const userId = req.user._id;
+
+        const wishlist = await Wishlist.findOne({ user: userId }).populate("products");
+
+        if (!wishlist) {
+            return res.status(404).json({ message: "Wishlist not found" });
+        }
+
+        res.json({
+            message: "Wishlist retrieved successfully",
+            products: wishlist.products
+        });
+
+    } catch (error) {
+        console.error("Get Wishlist Error:", error);
+        res.status(500).json({ message: "Server error" });
+    }
+};
 
 exports.addToWishlist = async (req, res) => {
     try {
