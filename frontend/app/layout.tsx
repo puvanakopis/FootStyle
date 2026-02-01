@@ -19,7 +19,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en">
       <body className={`${inter.className} bg-background font-display text-foreground antialiased`}>
         <Toaster
-          position="top-center"
+          position="top-right"
           toastOptions={{
             duration: 3000,
             style: {

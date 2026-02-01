@@ -5,7 +5,6 @@ import { useState } from "react";
 import { FcGoogle } from "react-icons/fc";
 import { useAuth } from '@/context/AuthContext';
 import { showToast } from '@/lib/toast';
-import { error } from "console";
 
 export default function Login() {
     const [email, setEmail] = useState("");
