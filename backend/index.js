@@ -7,6 +7,7 @@ const path = require("path");
 const authRoutes = require("./routes/authRoutes");
 const productRoutes = require("./routes/productRoutes");
 const userRoutes = require("./routes/userRoutes");
+const wishlistRoutes = require("./routes/wishlistRoutes");
 const googleAuthRoutes = require("./routes/googleAuthRoutes");
 
 dotenv.config();
@@ -44,6 +45,7 @@ app.use("/api/authGoogle", googleAuthRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/products", productRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/wishlist', wishlistRoutes);
 
 app.get("/", (req, res) => {
   res.send("Hello World from Express!");
