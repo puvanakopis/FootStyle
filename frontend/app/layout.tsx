@@ -3,6 +3,7 @@ import { Inter } from 'next/font/google';
 import './globals.css';
 import { AuthProvider } from '@/context/AuthContext';
 import { ProductProvider } from '@/context/ProductContext';
+import { UserProvider } from '@/context/UserContext';
 import ProtectedRoute from '@/route/ProtectedRoute';
 import { Toaster } from 'react-hot-toast';
 
@@ -18,7 +19,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en">
       <body className={`${inter.className} bg-background font-display text-foreground antialiased`}>
         <Toaster
-          position="top-center"
+          position="top-right"
           toastOptions={{
             duration: 3000,
             style: {
@@ -32,9 +33,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
         <AuthProvider>
           <ProductProvider>
-            <ProtectedRoute>
-              {children}
-            </ProtectedRoute>
+            <UserProvider>
+              <ProtectedRoute>
+                {children}
+              </ProtectedRoute>
+            </UserProvider>
           </ProductProvider>
         </AuthProvider>
       </body>

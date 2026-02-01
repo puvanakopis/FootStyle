@@ -18,9 +18,16 @@ export default function Login() {
         try {
             await login(email, password);
             showToast('success', 'Login successful!');
-        } catch (err) {
-            console.error('Login failed:', err);
-            showToast('error', 'Login failed. Please check your credentials.');
+        } catch (error: any) {
+            console.error('Login failed:', error);
+
+            const errorMsg =
+                error?.response?.data?.message ||
+                error?.message ||
+                'Login failed. Please check your credentials.';
+
+            showToast('error', errorMsg);
+
         }
     };
 

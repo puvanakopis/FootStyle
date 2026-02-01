@@ -21,10 +21,9 @@ interface ProductProviderProps {
 
 export const ProductProvider: React.FC<ProductProviderProps> = ({ children }) => {
     const [products, setProducts] = useState<Product[]>([]);
-    const [currentProduct, setCurrentProduct] = useState<Product | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [totalCount, setTotalCount] = useState(0);
+    const [currentProduct, setCurrentProduct] = useState<Product | null>(null);
 
     useEffect(() => {
         fetchProducts();
@@ -47,7 +46,7 @@ export const ProductProvider: React.FC<ProductProviderProps> = ({ children }) =>
             setIsLoading(true);
             const fetchedProducts = await productApi.getProducts();
             setProducts(fetchedProducts);
-            setTotalCount(fetchedProducts.length);
+            fetchProducts();
         } catch (err) {
             handleError(err);
         } finally {
@@ -61,6 +60,7 @@ export const ProductProvider: React.FC<ProductProviderProps> = ({ children }) =>
             setIsLoading(true);
             const product = await productApi.getProductById(id);
             setCurrentProduct(product);
+            fetchProducts();
         } catch (err) {
             handleError(err);
             throw err;
@@ -68,6 +68,7 @@ export const ProductProvider: React.FC<ProductProviderProps> = ({ children }) =>
             setIsLoading(false);
         }
     };
+
 
     // ---------------- CREATE PRODUCT ----------------
     const createProduct = async (data: CreateProductRequest, images: File[]) => {
@@ -78,11 +79,9 @@ export const ProductProvider: React.FC<ProductProviderProps> = ({ children }) =>
             if (images.length !== 4) {
                 throw new Error("Product must contain exactly 4 images");
             }
+            await productApi.createProduct(data, images);
+            fetchProducts();
 
-            const newProduct = await productApi.createProduct(data, images);
-            setProducts(prev => [...prev, newProduct]);
-            setTotalCount(prev => prev + 1);
-            setCurrentProduct(newProduct);
         } catch (err) {
             handleError(err);
             throw err;
@@ -95,19 +94,10 @@ export const ProductProvider: React.FC<ProductProviderProps> = ({ children }) =>
     const updateProduct = async (id: string, data: UpdateProductRequest, images?: File[]) => {
         try {
             setIsLoading(true);
-            const updatedProduct = await productApi.updateProduct(id, data, images);
 
-            // Update products list
-            setProducts(prev =>
-                prev.map(product =>
-                    product.id === id ? updatedProduct : product
-                )
-            );
+            await productApi.updateProduct(id, data, images);
+            fetchProducts();
 
-            // Update current product if it's the one being edited
-            if (currentProduct?.id === id) {
-                setCurrentProduct(updatedProduct);
-            }
         } catch (err) {
             handleError(err);
             throw err;
@@ -122,14 +112,8 @@ export const ProductProvider: React.FC<ProductProviderProps> = ({ children }) =>
             setIsLoading(true);
             await productApi.deleteProduct(id);
 
-            // Remove from products list
-            setProducts(prev => prev.filter(product => product.id !== id));
-            setTotalCount(prev => prev - 1);
+            fetchProducts();
 
-            // Clear current product if it's the one being deleted
-            if (currentProduct?.id === id) {
-                setCurrentProduct(null);
-            }
         } catch (err) {
             handleError(err);
             throw err;
@@ -142,19 +126,9 @@ export const ProductProvider: React.FC<ProductProviderProps> = ({ children }) =>
     const addReview = async (productId: string, review: AddReviewRequest) => {
         try {
             setIsLoading(true);
-            const updatedProduct = await productApi.addReview(productId, review);
+            await productApi.addReview(productId, review);
+            fetchProducts();
 
-            // Update products list
-            setProducts(prev =>
-                prev.map(product =>
-                    product.id === productId ? updatedProduct : product
-                )
-            );
-
-            // Update current product if it's the one being reviewed
-            if (currentProduct?.id === productId) {
-                setCurrentProduct(updatedProduct);
-            }
         } catch (err) {
             handleError(err);
             throw err;
@@ -163,32 +137,26 @@ export const ProductProvider: React.FC<ProductProviderProps> = ({ children }) =>
         }
     };
 
-    // ---------------- CLEAR CURRENT PRODUCT ----------------
     const clearCurrentProduct = () => {
         setCurrentProduct(null);
     };
 
-    // ---------------- CLEAR ERROR ----------------
-    const clearError = () => {
-        setError(null);
-    };
+
 
     return (
         <ProductContext.Provider
             value={{
                 products,
-                currentProduct,
                 isLoading,
                 error,
-                totalCount,
+                currentProduct,
                 fetchProducts,
                 fetchProductById,
+                clearCurrentProduct,
                 createProduct,
                 updateProduct,
                 deleteProduct,
                 addReview,
-                clearCurrentProduct,
-                clearError,
             }}
         >
             {children}

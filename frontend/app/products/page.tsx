@@ -32,9 +32,9 @@ export default function Products() {
   }, [error]);
 
   // Handlers
-  const handleGenderChange = (gender : string) => {
+  const handleGenderChange = (gender: string) => {
     setSelectedGender(prev =>
-      prev.includes(gender ) ? prev.filter(g => g !== gender ) : [...prev, gender ]
+      prev.includes(gender) ? prev.filter(g => g !== gender) : [...prev, gender]
     );
   };
 
@@ -57,10 +57,11 @@ export default function Products() {
 
   // Apply filters
   const filteredProducts = products.filter(p => {
+    const isActive = p.isActive === true;
     const genderMatch = selectedGender.length === 0 || selectedGender.includes(p.gender);
     const materialMatch = selectedMaterial.length === 0 || selectedMaterial.includes(p.material);
     const priceMatch = p.price >= priceRange[0] && p.price <= priceRange[1];
-    return genderMatch && materialMatch && priceMatch;
+    return isActive && genderMatch && materialMatch && priceMatch;
   });
 
   return (
