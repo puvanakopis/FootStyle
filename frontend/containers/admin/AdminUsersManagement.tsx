@@ -1,170 +1,51 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import {
-    MdOutlineEdit,
-    MdDeleteOutline,
-    MdOutlineVisibility,
-    MdClose,
-} from "react-icons/md";
+import { MdOutlineEdit, MdDeleteOutline, MdOutlineVisibility, MdClose, } from "react-icons/md";
 import { IoSearch } from "react-icons/io5";
 import { LuChevronLeft, LuChevronRight } from "react-icons/lu";
 import { showToast } from "@/lib/toast";
-
-interface User {
-    _id: string;
-    firstName: string;
-    lastName: string;
-    username: string;
-    email: string;
-    password: string;
-    role: "customer" | "admin";
-    phoneNumber: string;
-    profileImage: string | null;
-    address: {
-        street: string;
-        city: string;
-        state: string;
-        zipCode: string;
-        country: string;
-    };
-    isActive: boolean;
-    createdAt: string;
-    updatedAt: string;
-}
-
-const sampleUsers: User[] = [
-    {
-        _id: "user_01",
-        firstName: "Alex",
-        lastName: "Morgan",
-        username: "alexmorgan",
-        email: "admin@footstyle.com",
-        password: "hashed_password_123",
-        role: "admin",
-        phoneNumber: "+1234567890",
-        profileImage: "https://lh3.googleusercontent.com/a/ACg8ocKx4YgdthHlbzPl2d0RP_lmJ8GU_hv_dYEYj3CPUAZVx=s96-c",
-        address: {
-            street: "123 Main St",
-            city: "New York",
-            state: "NY",
-            zipCode: "10001",
-            country: "USA"
-        },
-        isActive: true,
-        createdAt: "2023-01-12T10:23:00.000Z",
-        updatedAt: "2023-01-12T10:23:00.000Z",
-    },
-    {
-        _id: "user_02",
-        firstName: "Sarah",
-        lastName: "Johnson",
-        username: "sarahj",
-        email: "sarah@example.com",
-        password: "hashed_password_456",
-        role: "customer",
-        phoneNumber: "+9876543210",
-        profileImage: null,
-        address: {
-            street: "456 Oak Ave",
-            city: "Los Angeles",
-            state: "CA",
-            zipCode: "90001",
-            country: "USA"
-        },
-        isActive: true,
-        createdAt: "2023-02-15T14:30:00.000Z",
-        updatedAt: "2023-02-15T14:30:00.000Z",
-    },
-    {
-        _id: "user_03",
-        firstName: "Michael",
-        lastName: "Chen",
-        username: "michaelc",
-        email: "michael@example.com",
-        password: "hashed_password_789",
-        role: "customer",
-        phoneNumber: "+1122334455",
-        profileImage: "https://randomuser.me/api/portraits/men/32.jpg",
-        address: {
-            street: "789 Pine Rd",
-            city: "Chicago",
-            state: "IL",
-            zipCode: "60601",
-            country: "USA"
-        },
-        isActive: false,
-        createdAt: "2023-03-20T09:15:00.000Z",
-        updatedAt: "2023-03-20T09:15:00.000Z",
-    },
-    {
-        _id: "user_04",
-        firstName: "Emma",
-        lastName: "Wilson",
-        username: "emmaw",
-        email: "emma@example.com",
-        password: "hashed_password_101",
-        role: "customer",
-        phoneNumber: "+4455667788",
-        profileImage: null,
-        address: {
-            street: "321 Maple Dr",
-            city: "Houston",
-            state: "TX",
-            zipCode: "77001",
-            country: "USA"
-        },
-        isActive: true,
-        createdAt: "2023-04-10T11:45:00.000Z",
-        updatedAt: "2023-04-10T11:45:00.000Z",
-    },
-    {
-        _id: "user_05",
-        firstName: "David",
-        lastName: "Brown",
-        username: "davidb",
-        email: "david@example.com",
-        password: "hashed_password_112",
-        role: "admin",
-        phoneNumber: "+9988776655",
-        profileImage: "https://randomuser.me/api/portraits/men/45.jpg",
-        address: {
-            street: "654 Cedar Ln",
-            city: "Phoenix",
-            state: "AZ",
-            zipCode: "85001",
-            country: "USA"
-        },
-        isActive: false,
-        createdAt: "2023-05-05T16:20:00.000Z",
-        updatedAt: "2023-05-05T16:20:00.000Z",
-    },
-];
+import { User } from "@/interfaces/userInterface";
+import { useUser } from "@/context/UserContext";
 
 const AdminUsersManagement: React.FC = () => {
+    const { users, isLoading, fetchUsers, deleteUser, toggleActive, clearError, } = useUser();
+
     const [searchQuery, setSearchQuery] = useState("");
     const [statusFilter, setStatusFilter] = useState("All");
     const [roleFilter, setRoleFilter] = useState("All");
-    
+
     // State for modals
     const [showEditActiveModal, setShowEditActiveModal] = useState(false);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [showViewModal, setShowViewModal] = useState(false);
-    
+
     // State for editing active status
     const [editingUser, setEditingUser] = useState<User | null>(null);
     const [newActiveStatus, setNewActiveStatus] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
-    
+
     // State for deleting
     const [deletingUser, setDeletingUser] = useState<User | null>(null);
-    
+
     // State for viewing
     const [viewingUser, setViewingUser] = useState<User | null>(null);
-    
+
     // Pagination state
     const [currentPage, setCurrentPage] = useState(1);
     const usersPerPage = 10;
+
+    // Fetch users on component mount
+    useEffect(() => {
+        fetchUsers();
+    }, []);
+
+    // Clear error when component unmounts
+    useEffect(() => {
+        return () => {
+            clearError();
+        };
+    }, []);
 
     // Format date for display
     const formatDateForDisplay = (dateString: string) => {
@@ -181,8 +62,10 @@ const AdminUsersManagement: React.FC = () => {
     };
 
     // Get initials for avatar
-    const getInitials = (firstName: string, lastName: string) => {
-        return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
+    const getInitials = (firstName: string | undefined, lastName: string | undefined) => {
+        const first = firstName?.charAt(0) ?? 'U';
+        const last = lastName?.charAt(0) ?? 'U';
+        return `${first}${last}`.toUpperCase();
     };
 
     // Get random color for avatar
@@ -199,23 +82,23 @@ const AdminUsersManagement: React.FC = () => {
     };
 
     // Process users for display
-    const processedUsers = sampleUsers.map(user => ({
+    const processedUsers = users.map(user => ({
         ...user,
         status: getUserStatus(user.isActive),
-        registeredDate: formatDateForDisplay(user.createdAt).date,
-        registeredTime: formatDateForDisplay(user.createdAt).time,
         avatarInitials: getInitials(user.firstName, user.lastName),
-        avatarColor: getRandomColor()
+        avatarColor: getRandomColor(),
+        registeredDate: user.createdAt ? new Date(user.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '',
+        registeredTime: user.createdAt ? new Date(user.createdAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) : ''
     }));
 
     // Filter users based on search and filters
     const filteredUsers = processedUsers.filter((user) => {
         const matchesSearch =
-            user.firstName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            user.lastName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            user.username.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            user._id.toLowerCase().includes(searchQuery.toLowerCase());
+            String(user.firstName).toLowerCase().includes(searchQuery.toLowerCase()) ||
+            String(user.lastName).toLowerCase().includes(searchQuery.toLowerCase()) ||
+            String(user.email).toLowerCase().includes(searchQuery.toLowerCase()) ||
+            String(user.username).toLowerCase().includes(searchQuery.toLowerCase()) ||
+            String(user._id).toLowerCase().includes(searchQuery.toLowerCase());
 
         const matchesStatus =
             statusFilter === "All" ||
@@ -255,22 +138,16 @@ const AdminUsersManagement: React.FC = () => {
 
     // Confirm delete
     const handleConfirmDelete = async () => {
-        if (deletingUser) {
+        if (deletingUser && deletingUser._id) {
             try {
                 setIsSubmitting(true);
-                
-                // Simulate API call
-                await new Promise(resolve => setTimeout(resolve, 500));
-                
-                // Here you would make your API call to delete the user
-                console.log("Deleting user:", deletingUser._id);
-                
-                // Show success message
+
+                await deleteUser(deletingUser._id);
+
                 showToast('success', "User deleted successfully");
                 setShowDeleteModal(false);
                 setDeletingUser(null);
 
-                // Reset to first page if current page becomes empty
                 if (currentUsers.length === 1 && currentPage > 1) {
                     setCurrentPage(currentPage - 1);
                 }
@@ -285,20 +162,18 @@ const AdminUsersManagement: React.FC = () => {
 
     // Confirm edit active status
     const handleConfirmEditActive = async () => {
-        if (editingUser) {
+        if (editingUser && editingUser._id) {
             try {
                 setIsSubmitting(true);
-                
-                // Simulate API call
-                await new Promise(resolve => setTimeout(resolve, 500));
-                
-                // Here you would make your API call to update the user's isActive status
-                console.log("Updating user active status:", editingUser._id, newActiveStatus);
-                
-                // Show success message
+                console.log("Toggling active status for user ID:", editingUser._id);
+
+                await toggleActive(editingUser._id);
+
                 showToast('success', `User ${newActiveStatus ? 'activated' : 'deactivated'} successfully`);
                 setShowEditActiveModal(false);
                 setEditingUser(null);
+
+                await fetchUsers();
 
             } catch (error) {
                 console.error("Error updating user status:", error);
@@ -306,6 +181,17 @@ const AdminUsersManagement: React.FC = () => {
             } finally {
                 setIsSubmitting(false);
             }
+        }
+    };
+
+    // Refresh users list
+    const handleRefreshUsers = async () => {
+        try {
+            await fetchUsers();
+            showToast('success', "Users list refreshed");
+        } catch (error) {
+            console.error("Error refreshing users:", error);
+            showToast('error', "Failed to refresh users");
         }
     };
 
@@ -384,6 +270,15 @@ const AdminUsersManagement: React.FC = () => {
                             View and manage all registered users.
                         </p>
                     </div>
+                    <div className="flex gap-2">
+                        <button
+                            onClick={handleRefreshUsers}
+                            disabled={isLoading}
+                            className="px-4 py-2 text-white text-text-main rounded-xl font-medium bg-red-500 disabled:opacity-50 transition-colors"
+                        >
+                            {isLoading ? "Refreshing..." : "Refresh Users"}
+                        </button>
+                    </div>
                 </div>
 
                 {/* Filters & Search */}
@@ -433,179 +328,191 @@ const AdminUsersManagement: React.FC = () => {
                     </div>
                 </div>
 
+                {/* Loading State */}
+                {isLoading && (
+                    <div className="bg-white rounded-2xl border border-[#f3e7e9] shadow-sm p-8 text-center">
+                        <div className="flex flex-col items-center justify-center gap-4">
+                            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#ee2b4b]"></div>
+                            <p className="text-text-main">Loading users...</p>
+                        </div>
+                    </div>
+                )}
+
                 {/* Users Table */}
-                <div className="bg-white rounded-2xl border border-[#f3e7e9] shadow-sm overflow-hidden flex flex-col">
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-left border-collapse">
-                            <thead>
-                                <tr className="bg-[#f8f6f6] text-text-secondary text-xs uppercase tracking-wider border-b border-[#f3e7e9]">
-                                    <th className="px-6 py-4 font-semibold w-10">
-                                        <input
-                                            type="checkbox"
-                                            className="rounded border-gray-300 text-[#ee2b4b] focus:ring-[#ee2b4b]/20 bg-white"
-                                        />
-                                    </th>
-                                    <th className="px-6 py-4 font-semibold">User</th>
-                                    <th className="px-6 py-4 font-semibold">User ID</th>
-                                    <th className="px-6 py-4 font-semibold">Role</th>
-                                    <th className="px-6 py-4 font-semibold">Registered</th>
-                                    <th className="px-6 py-4 font-semibold">Status</th>
-                                    <th className="px-6 py-4 font-semibold text-right">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-[#f3e7e9]">
-                                {currentUsers.length === 0 ? (
-                                    <tr>
-                                        <td colSpan={7} className="px-6 py-8 text-center text-text-secondary">
-                                            No users found
-                                        </td>
+                {!isLoading && (
+                    <div className="bg-white rounded-2xl border border-[#f3e7e9] shadow-sm overflow-hidden flex flex-col">
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-left border-collapse">
+                                <thead>
+                                    <tr className="bg-[#f8f6f6] text-text-secondary text-xs uppercase tracking-wider border-b border-[#f3e7e9]">
+                                        <th className="px-6 py-4 font-semibold w-10">
+                                            <input
+                                                type="checkbox"
+                                                className="rounded border-gray-300 text-[#ee2b4b] focus:ring-[#ee2b4b]/20 bg-white"
+                                            />
+                                        </th>
+                                        <th className="px-6 py-4 font-semibold">User</th>
+                                        <th className="px-6 py-4 font-semibold">User ID</th>
+                                        <th className="px-6 py-4 font-semibold">Role</th>
+                                        <th className="px-6 py-4 font-semibold">Registered</th>
+                                        <th className="px-6 py-4 font-semibold">Status</th>
+                                        <th className="px-6 py-4 font-semibold text-right">Actions</th>
                                     </tr>
-                                ) : (
-                                    currentUsers.map((user) => (
-                                        <tr
-                                            key={user._id}
-                                            className="hover:bg-gray-50 transition-colors group"
-                                        >
-                                            <td className="px-6 py-4">
-                                                <input
-                                                    type="checkbox"
-                                                    className="rounded border-gray-300 text-[#ee2b4b] focus:ring-[#ee2b4b]/20 bg-white"
-                                                />
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                <div className="flex items-center gap-3">
-                                                    {user.profileImage ? (
-                                                        <div
-                                                            className="w-10 h-10 rounded-full bg-cover bg-center"
-                                                            style={{ backgroundImage: `url(${user.profileImage})` }}
-                                                        />
-                                                    ) : (
-                                                        <div
-                                                            className={`w-10 h-10 rounded-full ${user.avatarColor} flex items-center justify-center text-sm font-bold`}
-                                                        >
-                                                            {user.avatarInitials}
-                                                        </div>
-                                                    )}
-                                                    <div className="flex flex-col">
-                                                        <span className="text-sm font-medium text-text-main">
-                                                            {user.firstName} {user.lastName}
-                                                        </span>
-                                                        <span className="text-xs text-text-secondary">
-                                                            {user.email}
-                                                        </span>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td className="px-6 py-4 text-sm font-bold text-[#ee2b4b]">
-                                                {user._id}
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                <span
-                                                    className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold border ${user.role === "admin"
-                                                        ? "bg-purple-100 text-purple-800 border-purple-200"
-                                                        : "bg-blue-100 text-blue-800 border-blue-200"
-                                                        }`}
-                                                >
-                                                    {user.role === "admin" ? "Admin" : "Customer"}
-                                                </span>
-                                            </td>
-                                            <td className="px-6 py-4 text-sm text-text-secondary">
-                                                {user.registeredDate} <br />
-                                                <span className="text-xs opacity-70">
-                                                    {user.registeredTime}
-                                                </span>
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                <span
-                                                    className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold border ${user.isActive
-                                                        ? "bg-green-100 text-green-800 border-green-200"
-                                                        : "bg-gray-100 text-gray-800 border-gray-200"
-                                                        }`}
-                                                >
-                                                    <span
-                                                        className={`w-2 h-2 rounded-full mr-1 ${user.isActive
-                                                            ? "bg-green-500"
-                                                            : "bg-gray-500"
-                                                            }`}
-                                                    ></span>
-                                                    {user.isActive ? "Active" : "Inactive"}
-                                                </span>
-                                            </td>
-                                            <td className="px-6 py-4 text-right">
-                                                <div className="flex items-center justify-end gap-2">
-                                                    <button
-                                                        onClick={() => handleViewUser(user)}
-                                                        className="size-8 flex items-center justify-center rounded-lg text-text-secondary hover:text-blue-600 hover:bg-blue-50 transition-colors"
-                                                        title="View Details"
-                                                    >
-                                                        <MdOutlineVisibility size={18} />
-                                                    </button>
-                                                    <button
-                                                        onClick={() => handleEditActiveStatus(user)}
-                                                        className="size-8 flex items-center justify-center rounded-lg text-text-secondary hover:text-[#ee2b4b] hover:bg-[#ee2b4b]/5 transition-colors"
-                                                        title="Edit Active Status"
-                                                    >
-                                                        <MdOutlineEdit size={18} />
-                                                    </button>
-                                                    <button
-                                                        onClick={() => handleDeleteClick(user)}
-                                                        className="size-8 flex items-center justify-center rounded-lg text-text-secondary hover:text-red-600 hover:bg-red-50 transition-colors"
-                                                        title="Delete User"
-                                                    >
-                                                        <MdDeleteOutline size={18} />
-                                                    </button>
-                                                </div>
+                                </thead>
+                                <tbody className="divide-y divide-[#f3e7e9]">
+                                    {currentUsers.length === 0 ? (
+                                        <tr>
+                                            <td colSpan={7} className="px-6 py-8 text-center text-text-secondary">
+                                                {users.length === 0 ? "No users found" : "No users match your filters"}
                                             </td>
                                         </tr>
-                                    ))
-                                )}
-                            </tbody>
-                        </table>
-                    </div>
-
-                    {/* Pagination */}
-                    {filteredUsers.length > 0 && (
-                        <div className="px-6 py-4 border-t border-[#f3e7e9] flex flex-col sm:flex-row items-center justify-between gap-4">
-                            <p className="text-sm text-text-secondary">
-                                Showing <span className="font-bold text-text-main">{indexOfFirstUser + 1}-{Math.min(indexOfLastUser, filteredUsers.length)}</span> of{" "}
-                                <span className="font-bold text-text-main">{filteredUsers.length}</span> users
-                            </p>
-                            <div className="flex items-center gap-2">
-                                <button
-                                    onClick={handlePrevPage}
-                                    disabled={currentPage === 1}
-                                    className="size-8 flex items-center justify-center rounded-lg border border-[#f3e7e9] text-text-secondary hover:bg-gray-50 hover:text-text-main disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                                >
-                                    <LuChevronLeft />
-                                </button>
-
-                                {getPageNumbers().map((pageNumber, index) => (
-                                    <button
-                                        key={index}
-                                        onClick={() => pageNumber !== '...' && handlePageChange(pageNumber as number)}
-                                        className={`size-8 flex items-center justify-center rounded-lg text-sm font-medium transition-colors ${pageNumber === currentPage
-                                            ? "bg-[#ee2b4b] text-white"
-                                            : pageNumber === '...'
-                                                ? "text-text-secondary cursor-default"
-                                                : "border border-[#f3e7e9] text-text-secondary hover:bg-gray-50 hover:text-text-main"
-                                            }`}
-                                        disabled={pageNumber === '...'}
-                                    >
-                                        {pageNumber}
-                                    </button>
-                                ))}
-
-                                <button
-                                    onClick={handleNextPage}
-                                    disabled={currentPage === totalPages}
-                                    className="size-8 flex items-center justify-center rounded-lg border border-[#f3e7e9] text-text-secondary hover:bg-gray-50 hover:text-text-main disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                                >
-                                    <LuChevronRight />
-                                </button>
-                            </div>
+                                    ) : (
+                                        currentUsers.map((user) => (
+                                            <tr
+                                                key={user._id}
+                                                className="hover:bg-gray-50 transition-colors group"
+                                            >
+                                                <td className="px-6 py-4">
+                                                    <input
+                                                        type="checkbox"
+                                                        className="rounded border-gray-300 text-[#ee2b4b] focus:ring-[#ee2b4b]/20 bg-white"
+                                                    />
+                                                </td>
+                                                <td className="px-6 py-4">
+                                                    <div className="flex items-center gap-3">
+                                                        {user.profileImage ? (
+                                                            <div
+                                                                className="w-10 h-10 rounded-full bg-cover bg-center"
+                                                                style={{ backgroundImage: `url(${user.profileImage})` }}
+                                                            />
+                                                        ) : (
+                                                            <div
+                                                                className={`w-10 h-10 rounded-full ${user.avatarColor} flex items-center justify-center text-sm font-bold`}
+                                                            >
+                                                                {user.avatarInitials}
+                                                            </div>
+                                                        )}
+                                                        <div className="flex flex-col">
+                                                            <span className="text-sm font-medium text-text-main">
+                                                                {user.firstName} {user.lastName}
+                                                            </span>
+                                                            <span className="text-xs text-text-secondary">
+                                                                {user.email}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td className="px-6 py-4 text-sm font-bold text-[#ee2b4b]">
+                                                    {user._id}
+                                                </td>
+                                                <td className="px-6 py-4">
+                                                    <span
+                                                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold border ${user.role === "admin"
+                                                            ? "bg-purple-100 text-purple-800 border-purple-200"
+                                                            : "bg-blue-100 text-blue-800 border-blue-200"
+                                                            }`}
+                                                    >
+                                                        {user.role === "admin" ? "Admin" : "Customer"}
+                                                    </span>
+                                                </td>
+                                                <td className="px-6 py-4 text-sm text-text-secondary">
+                                                    {user.registeredDate} <br />
+                                                    <span className="text-xs opacity-70">
+                                                        {user.registeredTime}
+                                                    </span>
+                                                </td>
+                                                <td className="px-6 py-4">
+                                                    <span
+                                                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold border ${user.isActive
+                                                            ? "bg-green-100 text-green-800 border-green-200"
+                                                            : "bg-gray-100 text-gray-800 border-gray-200"
+                                                            }`}
+                                                    >
+                                                        <span
+                                                            className={`w-2 h-2 rounded-full mr-1 ${user.isActive
+                                                                ? "bg-green-500"
+                                                                : "bg-gray-500"
+                                                                }`}
+                                                        ></span>
+                                                        {user.isActive ? "Active" : "Inactive"}
+                                                    </span>
+                                                </td>
+                                                <td className="px-6 py-4 text-right">
+                                                    <div className="flex items-center justify-end gap-2">
+                                                        <button
+                                                            onClick={() => handleViewUser(user)}
+                                                            className="size-8 flex items-center justify-center rounded-lg text-text-secondary hover:text-blue-600 hover:bg-blue-50 transition-colors"
+                                                            title="View Details"
+                                                        >
+                                                            <MdOutlineVisibility size={18} />
+                                                        </button>
+                                                        <button
+                                                            onClick={() => handleEditActiveStatus(user)}
+                                                            className="size-8 flex items-center justify-center rounded-lg text-text-secondary hover:text-[#ee2b4b] hover:bg-[#ee2b4b]/5 transition-colors"
+                                                            title="Edit Active Status"
+                                                        >
+                                                            <MdOutlineEdit size={18} />
+                                                        </button>
+                                                        <button
+                                                            onClick={() => handleDeleteClick(user)}
+                                                            className="size-8 flex items-center justify-center rounded-lg text-text-secondary hover:text-red-600 hover:bg-red-50 transition-colors"
+                                                            title="Delete User"
+                                                        >
+                                                            <MdDeleteOutline size={18} />
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        ))
+                                    )}
+                                </tbody>
+                            </table>
                         </div>
-                    )}
-                </div>
+
+                        {/* Pagination */}
+                        {filteredUsers.length > 0 && (
+                            <div className="px-6 py-4 border-t border-[#f3e7e9] flex flex-col sm:flex-row items-center justify-between gap-4">
+                                <p className="text-sm text-text-secondary">
+                                    Showing <span className="font-bold text-text-main">{indexOfFirstUser + 1}-{Math.min(indexOfLastUser, filteredUsers.length)}</span> of{" "}
+                                    <span className="font-bold text-text-main">{filteredUsers.length}</span> users
+                                </p>
+                                <div className="flex items-center gap-2">
+                                    <button
+                                        onClick={handlePrevPage}
+                                        disabled={currentPage === 1}
+                                        className="size-8 flex items-center justify-center rounded-lg border border-[#f3e7e9] text-text-secondary hover:bg-gray-50 hover:text-text-main disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                    >
+                                        <LuChevronLeft />
+                                    </button>
+
+                                    {getPageNumbers().map((pageNumber, index) => (
+                                        <button
+                                            key={index}
+                                            onClick={() => pageNumber !== '...' && handlePageChange(pageNumber as number)}
+                                            className={`size-8 flex items-center justify-center rounded-lg text-sm font-medium transition-colors ${pageNumber === currentPage
+                                                ? "bg-[#ee2b4b] text-white"
+                                                : pageNumber === '...'
+                                                    ? "text-text-secondary cursor-default"
+                                                    : "border border-[#f3e7e9] text-text-secondary hover:bg-gray-50 hover:text-text-main"
+                                                }`}
+                                            disabled={pageNumber === '...'}
+                                        >
+                                            {pageNumber}
+                                        </button>
+                                    ))}
+
+                                    <button
+                                        onClick={handleNextPage}
+                                        disabled={currentPage === totalPages}
+                                        className="size-8 flex items-center justify-center rounded-lg border border-[#f3e7e9] text-text-secondary hover:bg-gray-50 hover:text-text-main disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                    >
+                                        <LuChevronRight />
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                )}
             </div>
 
             {/* Edit Active Status Modal */}
@@ -628,18 +535,18 @@ const AdminUsersManagement: React.FC = () => {
                                     <div
                                         className={`w-16 h-16 rounded-full ${getRandomColor()} flex items-center justify-center text-lg font-bold`}
                                     >
-                                        {getInitials(editingUser.firstName, editingUser.lastName)}
+                                        {getInitials(editingUser.firstName ?? '', editingUser.lastName ?? '')}
                                     </div>
                                 )}
                                 <div>
                                     <h4 className="font-bold text-text-main">
-                                        {editingUser.firstName} {editingUser.lastName}
+                                        {editingUser.firstName ?? 'User'} {editingUser.lastName ?? ''}
                                     </h4>
-                                    <p className="text-text-secondary text-sm">{editingUser.email}</p>
-                                    <p className="text-text-secondary text-sm">ID: {editingUser._id}</p>
+                                    <p className="text-text-secondary text-sm">{editingUser.email ?? ''}</p>
+                                    <p className="text-text-secondary text-sm">ID: {editingUser._id ?? ''}</p>
                                 </div>
                             </div>
-                            
+
                             <div className="mb-6 p-4 bg-gray-50 rounded-xl">
                                 <div className="flex items-center justify-between mb-4">
                                     <span className="text-text-main font-medium">Current Status:</span>
@@ -674,7 +581,7 @@ const AdminUsersManagement: React.FC = () => {
                                             onChange={(e) => setNewActiveStatus(e.target.checked)}
                                             className="sr-only"
                                         />
-                                        <div className={`block w-14 h-7 rounded-full transition-colors ${newActiveStatus ? 'bg-green-500' : 'bg-gray-300'}`}></div>
+                                        <div className='block w-14 h-7 rounded-full transition-colors bg-red-500'></div>
                                         <div className={`absolute left-1 top-1 bg-white w-5 h-5 rounded-full transition-transform ${newActiveStatus ? 'transform translate-x-7' : ''}`}></div>
                                     </div>
                                     <span className="text-text-main font-medium">
@@ -682,7 +589,7 @@ const AdminUsersManagement: React.FC = () => {
                                     </span>
                                 </label>
                                 <p className="text-text-secondary text-sm mt-2">
-                                    {newActiveStatus 
+                                    {newActiveStatus
                                         ? "Activating this user will allow them to access the system."
                                         : "Deactivating this user will prevent them from accessing the system."
                                     }
@@ -702,7 +609,7 @@ const AdminUsersManagement: React.FC = () => {
                                 <button
                                     onClick={handleConfirmEditActive}
                                     disabled={isSubmitting}
-                                    className={`px-5 py-2.5 text-white rounded-xl font-medium shadow-sm transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed ${newActiveStatus ? 'bg-green-600 hover:bg-green-700' : 'bg-red-600 hover:bg-red-700'}`}
+                                    className='px-5 py-2.5 text-white rounded-xl font-medium shadow-sm transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed bg-red-600 hover:bg-red-700'
                                 >
                                     {isSubmitting ? "Processing..." : newActiveStatus ? "Activate User" : "Deactivate User"}
                                 </button>
@@ -737,25 +644,25 @@ const AdminUsersManagement: React.FC = () => {
                                         <div
                                             className={`w-24 h-24 rounded-full ${getRandomColor()} flex items-center justify-center text-2xl font-bold mb-4`}
                                         >
-                                            {getInitials(viewingUser.firstName, viewingUser.lastName)}
+                                            {getInitials(viewingUser.firstName ?? '', viewingUser.lastName ?? '')}
                                         </div>
                                     )}
                                     <div className="text-center">
                                         <h4 className="text-lg font-bold text-text-main">
-                                            {viewingUser.firstName} {viewingUser.lastName}
+                                            {viewingUser.firstName ?? 'User'} {viewingUser.lastName ?? ''}
                                         </h4>
-                                        <p className="text-text-secondary">{viewingUser.email}</p>
+                                        <p className="text-text-secondary">{viewingUser.email ?? ''}</p>
                                     </div>
                                 </div>
                                 <div className="flex-1">
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <div className="space-y-1">
                                             <p className="text-sm text-text-secondary">Username</p>
-                                            <p className="font-medium">{viewingUser.username}</p>
+                                            <p className="font-medium">{viewingUser.username ?? 'N/A'}</p>
                                         </div>
                                         <div className="space-y-1">
                                             <p className="text-sm text-text-secondary">User ID</p>
-                                            <p className="font-medium text-[#ee2b4b]">{viewingUser._id}</p>
+                                            <p className="font-medium text-[#ee2b4b]">{viewingUser._id ?? 'N/A'}</p>
                                         </div>
                                         <div className="space-y-1">
                                             <p className="text-sm text-text-secondary">Role</p>
@@ -791,38 +698,40 @@ const AdminUsersManagement: React.FC = () => {
                                         </div>
                                         <div className="space-y-1">
                                             <p className="text-sm text-text-secondary">Account Created</p>
-                                            <p className="font-medium">{formatDateForDisplay(viewingUser.createdAt).date}</p>
+                                            <p className="font-medium">{viewingUser.createdAt ? formatDateForDisplay(viewingUser.createdAt).date : 'N/A'}</p>
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
                             {/* Address Section */}
-                            <div className="border-t border-[#f3e7e9] pt-6">
-                                <h4 className="font-bold text-text-main mb-4">Address Information</h4>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div className="space-y-1">
-                                        <p className="text-sm text-text-secondary">Street</p>
-                                        <p className="font-medium">{viewingUser.address.street || "Not provided"}</p>
-                                    </div>
-                                    <div className="space-y-1">
-                                        <p className="text-sm text-text-secondary">City</p>
-                                        <p className="font-medium">{viewingUser.address.city || "Not provided"}</p>
-                                    </div>
-                                    <div className="space-y-1">
-                                        <p className="text-sm text-text-secondary">State</p>
-                                        <p className="font-medium">{viewingUser.address.state || "Not provided"}</p>
-                                    </div>
-                                    <div className="space-y-1">
-                                        <p className="text-sm text-text-secondary">Zip Code</p>
-                                        <p className="font-medium">{viewingUser.address.zipCode || "Not provided"}</p>
-                                    </div>
-                                    <div className="md:col-span-2 space-y-1">
-                                        <p className="text-sm text-text-secondary">Country</p>
-                                        <p className="font-medium">{viewingUser.address.country || "Not provided"}</p>
+                            {viewingUser.address && (
+                                <div className="border-t border-[#f3e7e9] pt-6">
+                                    <h4 className="font-bold text-text-main mb-4">Address Information</h4>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div className="space-y-1">
+                                            <p className="text-sm text-text-secondary">Street</p>
+                                            <p className="font-medium">{viewingUser.address.street || "Not provided"}</p>
+                                        </div>
+                                        <div className="space-y-1">
+                                            <p className="text-sm text-text-secondary">City</p>
+                                            <p className="font-medium">{viewingUser.address.city || "Not provided"}</p>
+                                        </div>
+                                        <div className="space-y-1">
+                                            <p className="text-sm text-text-secondary">State</p>
+                                            <p className="font-medium">{viewingUser.address.state || "Not provided"}</p>
+                                        </div>
+                                        <div className="space-y-1">
+                                            <p className="text-sm text-text-secondary">Zip Code</p>
+                                            <p className="font-medium">{viewingUser.address.zipCode || "Not provided"}</p>
+                                        </div>
+                                        <div className="md:col-span-2 space-y-1">
+                                            <p className="text-sm text-text-secondary">Country</p>
+                                            <p className="font-medium">{viewingUser.address.country || "Not provided"}</p>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
+                            )}
 
                             {/* Account Dates */}
                             <div className="border-t border-[#f3e7e9] pt-6 mt-6">
@@ -830,11 +739,11 @@ const AdminUsersManagement: React.FC = () => {
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div className="space-y-1">
                                         <p className="text-sm text-text-secondary">Created At</p>
-                                        <p className="font-medium">{new Date(viewingUser.createdAt).toLocaleString()}</p>
+                                        <p className="font-medium">{viewingUser.createdAt ? new Date(viewingUser.createdAt).toLocaleString() : 'N/A'}</p>
                                     </div>
                                     <div className="space-y-1">
                                         <p className="text-sm text-text-secondary">Last Updated</p>
-                                        <p className="font-medium">{new Date(viewingUser.updatedAt).toLocaleString()}</p>
+                                        <p className="font-medium">{viewingUser.updatedAt ? new Date(viewingUser.updatedAt).toLocaleString() : 'N/A'}</p>
                                     </div>
                                 </div>
                             </div>
@@ -869,15 +778,15 @@ const AdminUsersManagement: React.FC = () => {
                                     <div
                                         className={`w-16 h-16 rounded-full ${getRandomColor()} flex items-center justify-center text-lg font-bold`}
                                     >
-                                        {getInitials(deletingUser.firstName, deletingUser.lastName)}
+                                        {getInitials(deletingUser.firstName ?? '', deletingUser.lastName ?? '')}
                                     </div>
                                 )}
                                 <div>
                                     <h4 className="font-bold text-text-main">
-                                        {deletingUser.firstName} {deletingUser.lastName}
+                                        {deletingUser.firstName ?? 'User'} {deletingUser.lastName ?? ''}
                                     </h4>
-                                    <p className="text-text-secondary text-sm">{deletingUser.email}</p>
-                                    <p className="text-text-secondary text-sm">ID: {deletingUser._id}</p>
+                                    <p className="text-text-secondary text-sm">{deletingUser.email ?? ''}</p>
+                                    <p className="text-text-secondary text-sm">ID: {deletingUser._id ?? ''}</p>
                                 </div>
                             </div>
                             <p className="text-text-secondary mb-6">

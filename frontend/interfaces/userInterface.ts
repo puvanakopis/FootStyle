@@ -64,12 +64,10 @@ export interface UserState {
     users: User[];
     isLoading: boolean;
     error: string | null;
-    totalCount: number;
 }
 
 export interface UserContextType extends UserState {
     fetchUsers: () => Promise<void>;
-    fetchUserById: (id: string) => Promise<void>;
     deleteUser: (id: string) => Promise<void>;
     toggleActive: (id: string) => Promise<void>;
     clearError: () => void;
