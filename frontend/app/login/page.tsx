@@ -5,6 +5,7 @@ import { useState } from "react";
 import { FcGoogle } from "react-icons/fc";
 import { useAuth } from '@/context/AuthContext';
 import { showToast } from '@/lib/toast';
+import { error } from "console";
 
 export default function Login() {
     const [email, setEmail] = useState("");
@@ -18,9 +19,16 @@ export default function Login() {
         try {
             await login(email, password);
             showToast('success', 'Login successful!');
-        } catch (err) {
-            console.error('Login failed:', err);
-            showToast('error', 'Login failed. Please check your credentials.');
+        } catch (error: any) {
+            console.error('Login failed:', error);
+
+            const errorMsg =
+                error?.response?.data?.message ||
+                error?.message ||
+                'Login failed. Please check your credentials.';
+
+            showToast('error', errorMsg);
+
         }
     };
 
