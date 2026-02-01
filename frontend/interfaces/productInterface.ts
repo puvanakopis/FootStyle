@@ -73,9 +73,7 @@ export interface ProductState {
     products: Product[];
     currentProduct: Product | null;
     isLoading: boolean;
-    error: string | null;
-    totalCount: number;
-}
+    error: string | null;}
 
 export interface ProductContextType extends ProductState {
     fetchProducts: () => Promise<void>;
@@ -85,5 +83,4 @@ export interface ProductContextType extends ProductState {
     deleteProduct: (id: string) => Promise<void>;
     addReview: (productId: string, review: AddReviewRequest) => Promise<void>;
     clearCurrentProduct: () => void;
-    clearError: () => void;
 }

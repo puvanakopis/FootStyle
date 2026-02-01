@@ -174,13 +174,13 @@ exports.login = async (req, res) => {
         }
 
         const user = await User.findOne({ email: email.toLowerCase() });
-        if (!user) {
-            return res.status(401).json({ message: 'Invalid email' });
+        const isPasswordMatch = await bcrypt.compare(password, user.password);
+        if (!user || !isPasswordMatch) {
+            return res.status(401).json({ message: 'Invalid email or password' });
         }
 
-        const isPasswordMatch = await bcrypt.compare(password, user.password);
-        if (!isPasswordMatch) {
-            return res.status(401).json({ message: 'Invalid password' });
+        if (!user.isActive) {
+            return res.status(403).json({ message: 'Your account is inactive. Contact admin.' });
         }
 
         const token = jwt.sign(

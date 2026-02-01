@@ -1,13 +1,6 @@
 import axios from 'axios';
 import Cookies from 'js-cookie';
-import {
-    Product,
-    CreateProductRequest,
-    UpdateProductRequest,
-    AddReviewRequest,
-    ProductsResponse,
-    ProductResponse
-} from '@/interfaces/productInterface';
+import { Product, CreateProductRequest, UpdateProductRequest, AddReviewRequest, ProductsResponse, ProductResponse } from '@/interfaces/productInterface';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -47,7 +40,7 @@ export const productApi = {
             if (Array.isArray(value)) {
                 formData.append(key, JSON.stringify(value));
             } else {
-                formData.append(key, value as any);
+                formData.append(key, value);
             }
         });
 
@@ -70,7 +63,7 @@ export const productApi = {
             if (Array.isArray(value)) {
                 formData.append(key, JSON.stringify(value));
             } else {
-                formData.append(key, value as any);
+                formData.append(key, value);
             }
         });
 
