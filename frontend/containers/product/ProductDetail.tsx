@@ -7,6 +7,7 @@ import { MdFavoriteBorder, MdOutlineAssignmentReturn, MdOutlineLocalShipping } f
 import { Product, Review as ProductReview } from "@/interfaces/productInterface";
 import { useAuth } from "@/context/AuthContext";
 import { useProduct } from "@/context/ProductContext";
+import { useCart } from "@/context/CartContext";
 import { showToast } from "@/lib/toast";
 
 interface ProductDetailProps {
@@ -21,6 +22,7 @@ interface ReviewFormData {
 const ProductDetail: React.FC<ProductDetailProps> = ({ product }) => {
     const { user, isAuthenticated } = useAuth();
     const { addReview } = useProduct();
+    const { cart, addToCart, isLoading: cartLoading } = useCart();
 
     const [productImages, setProductImages] = useState<string[]>([]);
     const [selectedImage, setSelectedImage] = useState<string>("");
@@ -33,6 +35,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product }) => {
     const [hoveredRating, setHoveredRating] = useState(0);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [userReview, setUserReview] = useState<ProductReview | null>(null);
+    const [isAddingToCart, setIsAddingToCart] = useState(false);
 
     // Process product images
     useEffect(() => {
@@ -59,6 +62,21 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product }) => {
         }
     }, [user, product.reviews]);
 
+    // Check if product is already in cart
+    useEffect(() => {
+        if (cart && cart.items) {
+            const cartItem = cart.items.find(item => item.product._id === product._id);
+            if (cartItem) {
+                const inCartSize = cartItem.variants[0]?.size;
+                if (inCartSize) {
+                    setSelectedSize(inCartSize);
+                    const cartQuantity = cartItem.variants[0]?.quantity || 1;
+                    setQuantity(cartQuantity);
+                }
+            }
+        }
+    }, [cart, product._id]);
+
     // Reviews mapping with user info
     const customerReviews = (product.reviews || []).map((review: ProductReview, index: number) => ({
         id: index + 1,
@@ -72,10 +90,11 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product }) => {
         comment: review.comment || "",
     }));
 
-    // Sizes mapping
+    // Sizes mapping with stock check
     const sizes = (product.sizes || []).map((size) => ({
         size: size.size,
         available: size.stock > 0,
+        stock: size.stock
     }));
 
     // Average rating
@@ -104,17 +123,83 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product }) => {
         setShowAllReviews(!showAllReviews);
     };
 
-    const handleAddToCart = () => {
+    // Modified handleAddToCart function
+    const handleAddToCart = async () => {
         if (!selectedSize) {
             showToast("error", "Please select a size");
             return;
         }
-        showToast("success", `${product.name} (Size: ${selectedSize}) added to cart!`);
+
+        // Check if user is authenticated
+        if (!isAuthenticated) {
+            showToast("error", "Please login to add items to cart");
+            return;
+        }
+
+        // Check if selected size is available
+        const selectedSizeData = sizes.find(s => s.size === selectedSize);
+        if (!selectedSizeData?.available) {
+            showToast("error", "Selected size is out of stock");
+            return;
+        }
+
+        // Check stock availability
+        if (quantity > selectedSizeData.stock) {
+            showToast("error", `Only ${selectedSizeData.stock} items available in this size`);
+            return;
+        }
+
+        try {
+            setIsAddingToCart(true);
+
+            // Prepare data for AddToCartRequest
+            const cartData = {
+                productId: product._id,
+                size: selectedSize,
+                quantity: quantity
+            };
+
+            // Call the cart API via context
+            await addToCart(cartData);
+
+            showToast("success", `${product.name} (Size: ${selectedSize}) added to cart!`);
+
+        } catch (error) {
+            console.error("Add to cart error:", error);
+            showToast("error", "Failed to add item to cart. Please try again.");
+        } finally {
+            setIsAddingToCart(false);
+        }
     };
 
     const handleQuantityChange = (change: number) => {
         const newQty = quantity + change;
-        if (newQty >= 1 && newQty <= 10) setQuantity(newQty);
+
+        // Check stock if size is selected
+        if (selectedSize) {
+            const selectedSizeData = sizes.find(s => s.size === selectedSize);
+            if (selectedSizeData && newQty > selectedSizeData.stock) {
+                showToast("error", `Only ${selectedSizeData.stock} items available`);
+                return;
+            }
+        }
+
+        if (newQty >= 1) setQuantity(newQty);
+    };
+
+    // Handle size selection with stock validation
+    const handleSizeSelect = (size: string) => {
+        const sizeData = sizes.find(s => s.size === size);
+
+        if (!sizeData?.available) {
+            showToast("error", "This size is out of stock");
+            return;
+        }
+
+        setSelectedSize(size);
+
+        // Reset quantity to 1 when size changes
+        setQuantity(1);
     };
 
     const getBadgeType = () => {
@@ -175,6 +260,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product }) => {
             showToast("success", "Thank you for your review!");
             handleReviewModalClose();
         } catch (error) {
+            console.error("Review submission error:", error);
             showToast("error", "Failed to submit review. Please try again.");
         } finally {
             setIsSubmitting(false);
@@ -198,6 +284,9 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product }) => {
 
     const isReviewButtonDisabled = () => !isAuthenticated || userReview !== null;
 
+    // Check if product is in cart
+    const isProductInCart = cart?.items?.some(item => item.product._id === product._id);
+
     return (
         <>
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
@@ -213,6 +302,13 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product }) => {
                             {!product.isActive && (
                                 <span className="bg-gray-500 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
                                     Out of Stock
+                                </span>
+                            )}
+
+                            {/* Show if product is in cart */}
+                            {isProductInCart && (
+                                <span className="bg-green-500 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
+                                    In Cart
                                 </span>
                             )}
                         </div>
@@ -540,7 +636,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product }) => {
                                             ? sizes.find(
                                                 (s) => s.size === selectedSize
                                             )?.available
-                                                ? "In Stock"
+                                                ? `In Stock (${sizes.find(s => s.size === selectedSize)?.stock})`
                                                 : "Out of Stock"
                                             : "Select a size"}
                                     </span>
@@ -553,9 +649,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product }) => {
                                             disabled={
                                                 !size.available || !product.isActive
                                             }
-                                            onClick={() =>
-                                                setSelectedSize(size.size)
-                                            }
+                                            onClick={() => handleSizeSelect(size.size)}
                                             className={`h-12 rounded-lg border transition-all font-medium ${selectedSize === size.size
                                                 ? "bg-[#ee2b4b] text-white font-bold shadow-lg shadow-[#ee2b4b]/30 border-[#ee2b4b]"
                                                 : "border-gray-200 hover:border-[#ee2b4b] hover:text-[#ee2b4b] text-slate-700"
@@ -576,9 +670,11 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product }) => {
                                     <span className="text-sm font-bold text-slate-900">
                                         Quantity
                                     </span>
-                                    <span className="text-xs text-slate-500">
-                                        Max 10 per order
-                                    </span>
+                                    {selectedSize && (
+                                        <span className="text-xs text-slate-500">
+                                            Max: {sizes.find(s => s.size === selectedSize)?.stock || 0}
+                                        </span>
+                                    )}
                                 </div>
 
                                 <div className="flex items-center gap-3">
@@ -596,7 +692,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product }) => {
 
                                     <button
                                         onClick={() => handleQuantityChange(1)}
-                                        disabled={quantity >= 10}
+                                        disabled={selectedSize ? quantity >= (sizes.find(s => s.size === selectedSize)?.stock || 0) : false}
                                         className="w-12 h-12 rounded-lg border border-gray-200 hover:border-[#ee2b4b] hover:text-[#ee2b4b] flex items-center justify-center text-xl font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                                     >
                                         +
@@ -609,18 +705,29 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product }) => {
                         <div className="flex gap-4 mb-8">
                             <button
                                 onClick={handleAddToCart}
-                                disabled={!product.isActive || !selectedSize}
-                                className={`flex-1 text-white text-lg font-bold py-4 px-8 rounded-xl shadow-lg transition-all duration-300 flex items-center justify-center gap-2 ${!product.isActive || !selectedSize
+                                disabled={!product.isActive || !selectedSize || cartLoading || isAddingToCart}
+                                className={`flex-1 text-white text-lg font-bold py-4 px-8 rounded-xl shadow-lg transition-all duration-300 flex items-center justify-center gap-2 ${!product.isActive || !selectedSize || cartLoading || isAddingToCart
                                     ? "bg-gray-400 cursor-not-allowed"
                                     : "bg-[#ee2b4b] hover:bg-[#d62545] shadow-[#ee2b4b]/20 hover:shadow-[#ee2b4b]/40"
                                     }`}
                             >
-                                <BiShoppingBag className="w-6 h-6" />
-                                {!product.isActive
-                                    ? "Out of Stock"
-                                    : !selectedSize
-                                        ? "Select Size"
-                                        : "Add to Cart"}
+                                {cartLoading || isAddingToCart ? (
+                                    <>
+                                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                        Adding...
+                                    </>
+                                ) : (
+                                    <>
+                                        <BiShoppingBag className="w-6 h-6" />
+                                        {!product.isActive
+                                            ? "Out of Stock"
+                                            : !selectedSize
+                                                ? "Select Size"
+                                                : isProductInCart
+                                                    ? "Update Cart"
+                                                    : "Add to Cart"}
+                                    </>
+                                )}
                             </button>
 
                             <button className="flex-none w-16 bg-[#edf0f5ff] border border-gray-200 hover:border-gray-300 rounded-xl flex items-center justify-center text-slate-700 transition-colors hover:text-red-500">

@@ -5,6 +5,7 @@ import { AuthProvider } from '@/context/AuthContext';
 import { ProductProvider } from '@/context/ProductContext';
 import { UserProvider } from '@/context/UserContext';
 import { WishlistProvider } from '@/context/WishlistContext';
+import { CartProvider } from '@/context/CartContext';
 import ProtectedRoute from '@/route/ProtectedRoute';
 import { Toaster } from 'react-hot-toast';
 
@@ -36,9 +37,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <ProductProvider>
             <UserProvider>
               <WishlistProvider>
-                <ProtectedRoute>
-                  {children}
-                </ProtectedRoute>
+                <CartProvider>
+                  <ProtectedRoute>
+                    {children}
+                  </ProtectedRoute>
+                </CartProvider>
               </WishlistProvider>
             </UserProvider>
           </ProductProvider>
