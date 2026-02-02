@@ -70,12 +70,12 @@ const ProductList: React.FC<ProductListProps> = ({ products }) => {
   const handleAddToCart = (product: Product) => {
     const stockStatus = getStockStatus(product);
     const isDisabled = !product.isActive || stockStatus === "out-of-stock";
-    
+
     if (isDisabled) {
       showToast('error', "This product is currently unavailable");
       return;
     }
-    
+
     console.log("Add to cart:", product);
     showToast('success', `"${product.title || product.name}" added to cart`);
   };
@@ -228,7 +228,7 @@ const ProductList: React.FC<ProductListProps> = ({ products }) => {
                   )}
                   Add to Cart
                 </button>
-                
+
                 <button
                   onClick={() => handleViewProduct(productId, productName)}
                   className="w-full flex items-center justify-center gap-2 px-5 py-2.5 border border-neutral-300 text-neutral-700 text-sm font-medium rounded-lg hover:bg-blue-50 hover:text-blue-600 hover:border-blue-300 transition-colors"
@@ -237,7 +237,7 @@ const ProductList: React.FC<ProductListProps> = ({ products }) => {
                   <MdOutlineRemoveRedEye className="text-[20px]" />
                   View Product
                 </button>
-                
+
                 <button
                   onClick={() => handleRemoveFromWishlist(productId, productName)}
                   disabled={isLoading}

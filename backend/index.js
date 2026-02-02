@@ -8,6 +8,7 @@ const authRoutes = require("./routes/authRoutes");
 const productRoutes = require("./routes/productRoutes");
 const userRoutes = require("./routes/userRoutes");
 const wishlistRoutes = require("./routes/wishlistRoutes");
+const cartRoutes = require("./routes/cartRoutes");
 const googleAuthRoutes = require("./routes/googleAuthRoutes");
 
 dotenv.config();
@@ -31,7 +32,7 @@ app.use(express.json({
 
 app.use(cors({
   origin: process.env.FRONTEND_URL,
-  methods: ['GET', 'POST', 'PUT', 'DELETE' ,'PATCH', 'OPTIONS'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
 }));
 
@@ -46,6 +47,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/products", productRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/wishlist', wishlistRoutes);
+app.use('/api/cart', cartRoutes);
 
 app.get("/", (req, res) => {
   res.send("Hello World from Express!");
