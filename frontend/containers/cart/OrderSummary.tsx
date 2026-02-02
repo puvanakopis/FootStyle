@@ -1,36 +1,208 @@
+"use client";
+
+import React from "react";
 import Link from "next/link";
+import { useCart } from "@/context/CartContext";
+import { showToast } from "@/lib/toast";
+
+const TAX_RATE = 0.02;
+const FREE_SHIPPING_THRESHOLD = 5000;
+const SHIPPING_COST = 250;
 
 const OrderSummary = () => {
+    const { cart, isLoading } = useCart();
+
+    // Calculate subtotal from cart items
+    const calculateSubtotal = () => {
+        if (!cart?.items || cart.items.length === 0) return 0;
+
+        return cart.items.reduce((total, item) => {
+            const itemTotal = item.variants.reduce((variantTotal, variant) => {
+                return variantTotal + (item.product.price * variant.quantity);
+            }, 0);
+            return total + itemTotal;
+        }, 0);
+    };
+
+    // Calculate shipping cost
+    const calculateShipping = (subtotal: number) => {
+        if (subtotal >= FREE_SHIPPING_THRESHOLD || subtotal === 0) return 0;
+        return SHIPPING_COST;
+    };
+
+    // Calculate tax
+    const calculateTax = (subtotal: number) => {
+        return subtotal * TAX_RATE;
+    };
+
+    // Calculate total
+    const calculateTotal = (subtotal: number, shipping: number, tax: number) => {
+        return subtotal + shipping + tax;
+    };
+
+    const subtotal = calculateSubtotal();
+    const shipping = calculateShipping(subtotal);
+    const tax = calculateTax(subtotal);
+    const total = calculateTotal(subtotal, shipping, tax);
+
+    // Format currency 
+    const formatCurrency = (amount: number) => {
+        return new Intl.NumberFormat('en-LK', {
+            style: 'currency',
+            currency: 'LKR',
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 0,
+        }).format(amount);
+    };
+
+    // Handle checkout click
+    const handleCheckoutClick = () => {
+        if (!cart?.items || cart.items.length === 0) {
+            showToast('error', 'Your cart is empty. Please add items to checkout.');
+            return;
+        }
+
+        if (subtotal < 100) {
+            showToast('info', 'Minimum order value is Rs 100 for checkout.');
+            return;
+        }
+
+        showToast('success', 'Proceeding to checkout...');
+    };
+
+    // Show loading state
+    if (isLoading) {
+        return (
+            <div className="bg-white rounded-2xl shadow-sm border border-neutral-100 p-6 sm:p-8 animate-pulse">
+                <div className="h-7 bg-gray-200 rounded w-1/3 mb-6"></div>
+                <div className="space-y-4 border-b border-neutral-100 pb-6 mb-6">
+                    {[...Array(3)].map((_, i) => (
+                        <div key={i} className="flex justify-between">
+                            <div className="h-4 bg-gray-200 rounded w-1/4"></div>
+                            <div className="h-4 bg-gray-200 rounded w-1/6"></div>
+                        </div>
+                    ))}
+                </div>
+                <div className="flex justify-between mb-8">
+                    <div className="h-6 bg-gray-200 rounded w-1/4"></div>
+                    <div className="h-10 bg-gray-200 rounded w-1/3"></div>
+                </div>
+                <div className="h-14 bg-gray-200 rounded-xl"></div>
+            </div>
+        );
+    }
+
+    // Show empty cart state
+    if (!cart?.items || cart.items.length === 0) {
+        return (
+            <div className="bg-white rounded-2xl shadow-sm border border-neutral-100 p-6 sm:p-8">
+                <h2 className="text-xl font-bold mb-6">Order Summary</h2>
+                <div className="text-center py-8">
+                    <p className="text-neutral-500 mb-4">Your cart is empty</p>
+                    <Link href="/products">
+                        <button
+                            className="w-full h-14 bg-[#ee2b4b] text-white font-bold rounded-xl hover:opacity-90 transition"
+                            onClick={() => showToast('info', 'Continue shopping for amazing products!')}
+                        >
+                            Continue Shopping
+                        </button>
+                    </Link>
+                </div>
+            </div>
+        );
+    }
+
+    // Calculate cart items count
+    const totalItems = cart.items.reduce((total, item) => {
+        return total + item.variants.reduce((variantTotal, variant) => variantTotal + variant.quantity, 0);
+    }, 0);
+
     return (
-        <div className="bg-white rounded-2xl shadow-sm border border-neutral-100 p-6 sm:p-8">
+        <div className="bg-white rounded-2xl shadow-sm border border-neutral-100 p-6 sm:p-8 sticky top-6">
             <h2 className="text-xl font-bold mb-6">Order Summary</h2>
+
+            {/* Cart summary */}
+            <div className="mb-4 p-3 bg-neutral-50 rounded-lg">
+                <div className="flex justify-between items-center">
+                    <span className="text-sm text-neutral-600">Items in cart</span>
+                    <span className="font-bold">{totalItems} item{totalItems !== 1 ? 's' : ''}</span>
+                </div>
+            </div>
 
             <div className="space-y-4 border-b border-neutral-100 pb-6 mb-6">
                 <div className="flex justify-between">
                     <span className="text-sm text-neutral-500">Subtotal</span>
-                    <span className="font-bold">Rs 425.00</span>
+                    <span className="font-bold">{formatCurrency(subtotal)}</span>
                 </div>
+
                 <div className="flex justify-between">
                     <span className="text-sm text-neutral-500">Shipping</span>
-                    <span className="text-green-600 font-bold text-sm">Free</span>
+                    {shipping === 0 ? (
+                        <span className="text-green-600 font-bold text-sm">Free</span>
+                    ) : (
+                        <span className="font-bold">{formatCurrency(shipping)}</span>
+                    )}
                 </div>
+
                 <div className="flex justify-between">
-                    <span className="text-sm text-neutral-500">Tax</span>
-                    <span className="font-bold">Rs 34.00</span>
+                    <span className="text-sm text-neutral-500">Tax ({TAX_RATE * 100}%)</span>
+                    <span className="font-bold">{formatCurrency(tax)}</span>
                 </div>
             </div>
 
-            <div className="flex justify-between mb-8">
+            <div className="flex justify-between items-center mb-8">
                 <span className="text-lg font-bold">Total</span>
-                <span className="text-3xl font-extrabold">Rs 459.00</span>
+                <div className="text-right">
+                    <span className="text-3xl font-extrabold block">{formatCurrency(total)}</span>
+                    {shipping === 0 && subtotal > 0 && (
+                        <span className="text-green-600 text-sm block mt-1">
+                            Free shipping applied!
+                        </span>
+                    )}
+                    {subtotal > 0 && subtotal < FREE_SHIPPING_THRESHOLD && (
+                        <span className="text-neutral-500 text-sm block mt-1">
+                            Add {formatCurrency(FREE_SHIPPING_THRESHOLD - subtotal)} more for free shipping
+                        </span>
+                    )}
+                </div>
             </div>
 
-            <Link href="/delivery-address">
-                <button className="w-full h-14 bg-[#ee2b4b] text-white font-bold rounded-xl hover:opacity-90 transition">
+            <Link
+                href={totalItems > 0 ? "/checkout" : "#"}
+                className="block"
+                onClick={(e) => {
+                    if (totalItems === 0) {
+                        e.preventDefault();
+                        showToast('error', 'Your cart is empty. Please add items to checkout.');
+                    } else {
+                        handleCheckoutClick();
+                    }
+                }}
+            >
+                <button
+                    className="w-full h-14 bg-[#ee2b4b] text-white font-bold rounded-xl hover:opacity-90 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                    disabled={!cart?.items || cart.items.length === 0}
+                    onClick={handleCheckoutClick}
+                >
                     Proceed to Checkout
                 </button>
             </Link>
 
+            {/* Additional information */}
+            <div className="mt-6 pt-6 border-t border-neutral-100">
+                <div className="flex items-start text-sm text-neutral-500">
+                    <svg className="w-5 h-5 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V5z" clipRule="evenodd" />
+                    </svg>
+                    <p>Estimated delivery: 3-7 business days</p>
+                </div>
+                <div className="flex items-start text-sm text-neutral-500 mt-2">
+                    <svg className="w-5 h-5 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M5 2a2 2 0 00-2 2v14l3.5-2 3.5 2 3.5-2 3.5 2V4a2 2 0 00-2-2H5zm4.707 3.707a1 1 0 00-1.414-1.414l-3 3a1 1 0 000 1.414l3 3a1 1 0 001.414-1.414L8.414 9H10a3 3 0 013 3v1a1 1 0 102 0v-1a5 5 0 00-5-5H8.414l1.293-1.293z" clipRule="evenodd" />
+                    </svg>
+                    <p>14-day return policy for Sri Lanka</p>
+                </div>
+            </div>
         </div>
     );
 };

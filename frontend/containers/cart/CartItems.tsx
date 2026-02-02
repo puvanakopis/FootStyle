@@ -1,122 +1,262 @@
-import { MdOutlineDeleteOutline } from "react-icons/md";
+"use client";
 
-type CartItem = {
-    id: number;
+import { useState, useEffect } from "react";
+import { MdOutlineDeleteOutline } from "react-icons/md";
+import { useCart } from "@/context/CartContext";
+import { CartItem as CartItemType, CartVariant } from "@/interfaces/cartInterface";
+import { showToast } from "@/lib/toast";
+
+interface CartItemDisplay {
+    id: string;
+    productId: string;
     name: string;
     category: string;
     price: number;
-    size: string;
-    color: string;
     image: string;
-};
-
-const items: CartItem[] = [
-    {
-        id: 1,
-        name: "Urban Trekker Low",
-        category: "Men's Running Shoe",
-        price: 120,
-        size: "10",
-        color: "Grey",
-        image:
-            "https://lh3.googleusercontent.com/aida-public/AB6AXuAq9OXD6c-16MG8_MrQwWygSdWLPjNwsk1r8kbz_ggrS_AOpQgI6I-fC_Q8yiBjxOPcICG_Jcz2TYE4AHr7GzLZIgVR-aP04pt9C8-f4aElFBHx8y4YotmyWFfUVDyXMG9_3_BNyn_BndEzLr4huI9UiqorMVJMSOmQe--7IGP_Y1vt0x0GAE6nf50R71pfmeW5_Hb8zILXYoAvvRvyhQGvSAUVndB98MEXstuSi1Io6ILhqObcDtmHS_MOMv8NHUcneC5VijBuUBhz",
-    },
-    {
-        id: 2,
-        name: "Speed Runner Pro",
-        category: "Basketball Sneaker",
-        price: 145,
-        size: "9.5",
-        color: "Red",
-        image:
-            "https://lh3.googleusercontent.com/aida-public/AB6AXuDWMS3ZqlSHblgEuSBl3H9KrESpT45jiSsQqEz9Ze9KRzDTS6_-lZ9R4lCY3W4D408RHuqvwJVSiQVMwCTzuqUYub1KXrK1ZJpqPDa_YYXiEir-Q3qxY7biH9j2DxJ73sTTKHHOFHdy3Wtc8Z3RPYaXCm_WeQeFISZcpJWDw2E_7q-3sNYBcQ7enMV4evbL5BhYRTh-1muqmNPNpZvHtBqhnPqvTWjt0_IlyPSbP702UReH4BZoCicxpPPoLkqOzo8DVBZeu9oOLChJ",
-    },
-    {
-        id: 3,
-        name: "Air Pulse 90",
-        category: "Casual Sneaker",
-        price: 160,
-        size: "11",
-        color: "Mustard",
-        image:
-            "https://lh3.googleusercontent.com/aida-public/AB6AXuDAk78r_VH9KmyTZ5k6Kri-zxpTb3ITYmX5C6f8dN26fJHIc6zSUU7_aniKs6-inddn0UOJLaPLczD4ysP81KHvByuAcXAoY3Q5TcctF6LRU9JhcTM2QBLakAcTp27xwE_ni9FTR39P_cgO_ntQ8qSuxYZSZiaLVOcpZAUpIVbnlPh77MdvAtgkSbX38y_4RIYcvLSxr4T4tGNo4z9DIIusqujCgwUuy0HAILTyu3_qxuTCFt9UMTk-8Z1OknI1I1v_9Ii4TOjMB5Lr",
-    },
-    {
-        id: 4,
-        name: "Air Pulse 90",
-        category: "Casual Sneaker",
-        price: 160,
-        size: "11",
-        color: "Mustard",
-        image:
-            "https://lh3.googleusercontent.com/aida-public/AB6AXuDAk78r_VH9KmyTZ5k6Kri-zxpTb3ITYmX5C6f8dN26fJHIc6zSUU7_aniKs6-inddn0UOJLaPLczD4ysP81KHvByuAcXAoY3Q5TcctF6LRU9JhcTM2QBLakAcTp27xwE_ni9FTR39P_cgO_ntQ8qSuxYZSZiaLVOcpZAUpIVbnlPh77MdvAtgkSbX38y_4RIYcvLSxr4T4tGNo4z9DIIusqujCgwUuy0HAILTyu3_qxuTCFt9UMTk-8Z1OknI1I1v_9Ii4TOjMB5Lr",
-    },
-    {
-        id: 5,
-        name: "Air Pulse 90",
-        category: "Casual Sneaker",
-        price: 160,
-        size: "11",
-        color: "Mustard",
-        image:
-            "https://lh3.googleusercontent.com/aida-public/AB6AXuDAk78r_VH9KmyTZ5k6Kri-zxpTb3ITYmX5C6f8dN26fJHIc6zSUU7_aniKs6-inddn0UOJLaPLczD4ysP81KHvByuAcXAoY3Q5TcctF6LRU9JhcTM2QBLakAcTp27xwE_ni9FTR39P_cgO_ntQ8qSuxYZSZiaLVOcpZAUpIVbnlPh77MdvAtgkSbX38y_4RIYcvLSxr4T4tGNo4z9DIIusqujCgwUuy0HAILTyu3_qxuTCFt9UMTk-8Z1OknI1I1v_9Ii4TOjMB5Lr",
-    },
-];
+    variants: {
+        size: string;
+        quantity: number;
+    }[];
+}
 
 const CartItems = () => {
-    return (
-        <>
-            {items.map((item) => (
-                <div
-                    key={item.id}
-                    className="flex flex-col sm:flex-row gap-6 p-5 bg-white rounded-2xl shadow-sm border border-neutral-100 hover:border-[#ee2b4b]/20 transition"
+    const { cart, isLoading, updateQuantity, removeFromCart, fetchCart } = useCart();
+    const [cartItems, setCartItems] = useState<CartItemDisplay[]>([]);
+    const [localLoading, setLocalLoading] = useState<boolean>(false);
+
+    // Get image URL helper function
+    const getImageUrl = (imagePath: string) => {
+        const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+        if (!imagePath || imagePath === "/default-product.jpg") {
+            return "/default-product.jpg";
+        }
+        if (imagePath.startsWith("http")) {
+            return imagePath;
+        }
+        return `${API_BASE_URL}/uploads/product/${imagePath}`;
+    };
+
+    // Transform cart data for display
+    useEffect(() => {
+        if (cart && cart.items) {
+            const transformedItems: CartItemDisplay[] = cart.items.map((item: CartItemType) => {
+                const variants = item.variants.map((variant: CartVariant) => ({
+                    size: variant.size,
+                    quantity: variant.quantity,
+                }));
+
+                return {
+                    id: item.product?._id || `temp-${Date.now()}`,
+                    productId: item.product?._id || "",
+                    name: item.product?.name || "Unknown Product",
+                    category: item.product?.gender || "Uncategorized",
+                    price: item.product?.price || 0,
+                    image: getImageUrl(item.product?.images?.[0]),
+                    variants
+                };
+            });
+
+            setCartItems(transformedItems);
+        }
+    }, [cart]);
+
+    // Handle quantity update
+    const handleUpdateQuantity = async (productId: string, size: string, action: "increment" | "decrement") => {
+        try {
+            setLocalLoading(true);
+            await updateQuantity({ productId, size, action });
+            showToast('success', `Quantity ${action === 'increment' ? 'increased' : 'decreased'} successfully!`);
+        } catch (error) {
+            console.error("Failed to update quantity :", error);
+            showToast('error', 'Cannot update quantity. Only limited stock available.');
+        } finally {
+            setLocalLoading(false);
+        }
+    };
+
+    // Handle item removal
+    const handleRemoveItem = async (productId: string, size: string) => {
+        try {
+            setLocalLoading(true);
+            await removeFromCart({ productId, size });
+            showToast('success', 'Item removed from cart successfully!');
+        } catch (error) {
+            console.error("Failed to remove item:", error);
+            showToast('error', 'Failed to remove item. Please try again.');
+        } finally {
+            setLocalLoading(false);
+        }
+    };
+
+    // Handle cart refresh
+    const handleRefreshCart = async () => {
+        try {
+            setLocalLoading(true);
+            await fetchCart();
+            showToast('info', 'Cart refreshed successfully!');
+        } catch (error) {
+            console.error("Failed to refresh cart:", error);
+            showToast('error', 'Failed to refresh cart. Please try again.');
+        } finally {
+            setLocalLoading(false);
+        }
+    };
+
+    // Calculate total quantity for a product variant
+    const getTotalQuantity = (variants: CartItemDisplay["variants"]) => {
+        return variants.reduce((total, variant) => total + variant.quantity, 0);
+    };
+
+    // Calculate total price for a product with all variants
+    const getTotalPriceForItem = (item: CartItemDisplay) => {
+        const totalQuantity = getTotalQuantity(item.variants);
+        return item.price * totalQuantity;
+    };
+
+    if (isLoading || localLoading) {
+        return (
+            <div className="flex flex-col gap-6">
+                {[1, 2, 3].map((i) => (
+                    <div key={i} className="animate-pulse">
+                        <div className="flex flex-col sm:flex-row gap-6 p-5 bg-white rounded-2xl shadow-sm border border-neutral-100">
+                            <div className="w-full sm:w-32 aspect-square rounded-xl bg-neutral-200" />
+                            <div className="flex-1 space-y-4">
+                                <div className="h-4 bg-neutral-200 rounded w-3/4" />
+                                <div className="h-3 bg-neutral-200 rounded w-1/2" />
+                                <div className="flex gap-3">
+                                    <div className="h-6 bg-neutral-200 rounded w-16" />
+                                    <div className="h-6 bg-neutral-200 rounded w-20" />
+                                </div>
+                                <div className="flex justify-between">
+                                    <div className="h-8 bg-neutral-200 rounded w-24" />
+                                    <div className="h-8 bg-neutral-200 rounded w-24" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                ))}
+            </div>
+        );
+    }
+
+    if (!cartItems || cartItems.length === 0) {
+        return (
+            <div className="text-center py-12">
+                <h3 className="text-xl font-semibold mb-2">Your cart is empty</h3>
+                <p className="text-neutral-500 mb-6">Add some products to your cart to see them here</p>
+                <button
+                    onClick={handleRefreshCart}
+                    disabled={localLoading}
+                    className="px-6 py-2 bg-[#ee2b4b] text-white rounded-lg hover:bg-[#d12541] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                    <div className="w-full sm:w-32 aspect-square rounded-xl overflow-hidden bg-neutral-50">
-                        <div
-                            className="w-full h-full bg-cover bg-center hover:scale-110 transition-transform duration-500"
-                            style={{ backgroundImage: `url(${item.image})` }}
+                    {localLoading ? "Refreshing..." : "Refresh Cart"}
+                </button>
+            </div>
+        );
+    }
+
+    return (
+        <div className="space-y-6">
+            {cartItems.map((item) => (
+                <div
+                    key={`${item.id}-${item.variants[0]?.size}`}
+                    className="flex flex-col sm:flex-row gap-6 p-5 bg-white rounded-2xl shadow-sm border border-neutral-100 hover:border-[#ee2b4b]/20 transition-all"
+                >
+                    {/* Product Image */}
+                    <div className="w-full sm:w-32 aspect-square rounded-xl overflow-hidden bg-neutral-50 flex-shrink-0 group">
+                        <img
+                            src={item.image}
+                            alt={item.name}
+                            className="object-cover w-full h-full group-hover:scale-110 transition-transform duration-500"
+                            onError={(e) => {
+                                (e.target as HTMLImageElement).src = "/default-product.jpg";
+                            }}
                         />
                     </div>
 
-                    <div className="flex flex-1 flex-col justify-between">
-                        <div className="flex justify-between">
-                            <div>
-                                <h3 className="text-lg font-bold">{item.name}</h3>
-                                <p className="text-sm text-neutral-500">{item.category}</p>
+                    {/* Product Details */}
+                    <div className="flex flex-col flex-1 justify-between">
+                        <div className="flex flex-col sm:flex-row sm:justify-between gap-4">
+                            <div className="flex-1">
+                                <h3 className="text-lg font-bold text-gray-900">{item.name}</h3>
+                                <p className="text-sm text-neutral-500 mt-1">{item.category}</p>
 
-                                <div className="flex gap-3 mt-3">
-                                    <span className="px-2.5 py-0.5 text-xs bg-neutral-100 rounded-md">
-                                        Size: {item.size}
-                                    </span>
-                                    <span className="px-2.5 py-0.5 text-xs bg-neutral-100 rounded-md">
-                                        Color: {item.color}
-                                    </span>
+                                {/* Display each variant separately */}
+                                <div className="mt-4 space-y-3">
+                                    {item.variants.map((variant, index) => (
+                                        <div key={`${item.id}-${variant.size}-${index}`} className="p-3 bg-neutral-50 rounded-lg">
+                                            <div className="flex flex-wrap items-center justify-between gap-3">
+                                                <div className="flex flex-wrap gap-3">
+                                                    <span className="px-3 py-1 text-sm bg-white rounded-md border border-neutral-200">
+                                                        Size: {variant.size}
+                                                    </span>
+                                                    <span className="px-3 py-1 text-sm bg-white rounded-md border border-neutral-200">
+                                                        Qty: {variant.quantity}
+                                                    </span>
+                                                </div>
+
+                                                {/* Quantity Controls for this specific variant */}
+                                                <div className="flex items-center gap-2">
+                                                    <div className="flex items-center border rounded-lg border-neutral-200 bg-white">
+                                                        <button
+                                                            onClick={() => handleUpdateQuantity(item.productId, variant.size, "decrement")}
+                                                            disabled={localLoading}
+                                                            className="w-8 h-8 flex items-center justify-center cursor-pointer hover:bg-neutral-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                                                        >
+                                                            −
+                                                        </button>
+                                                        <input
+                                                            readOnly
+                                                            value={variant.quantity}
+                                                            className="w-10 h-8 text-center text-sm bg-transparent"
+                                                        />
+                                                        <button
+                                                            onClick={() => handleUpdateQuantity(item.productId, variant.size, "increment")}
+                                                            disabled={localLoading}
+                                                            className="w-8 h-8 flex items-center justify-center cursor-pointer hover:bg-neutral-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                                                        >
+                                                            +
+                                                        </button>
+                                                    </div>
+
+                                                    {/* Remove this specific variant */}
+                                                    <button
+                                                        onClick={() => handleRemoveItem(item.productId, variant.size)}
+                                                        disabled={localLoading}
+                                                        className="flex items-center gap-1.5 text-sm font-medium text-neutral-400 hover:text-red-500 transition-colors disabled:opacity-50"
+                                                        title="Remove this variant"
+                                                    >
+                                                        <MdOutlineDeleteOutline className="text-[20px]" />
+                                                        <span className="hidden sm:inline">Remove</span>
+                                                    </button>
+                                                </div>
+                                            </div>
+
+                                            {/* Price for this variant */}
+                                            <div className="text-right mt-2">
+                                                <span className="text-sm text-neutral-500">
+                                                    Rs {item.price} × {variant.quantity} = Rs {item.price * variant.quantity}.00
+                                                </span>
+                                            </div>
+                                        </div>
+                                    ))}
                                 </div>
                             </div>
 
-                            <p className="text-lg font-bold">Rs {item.price}.00</p>
-                        </div>
-
-                        <div className="flex justify-between items-end mt-4">
-                            <div className="flex items-center border rounded-lg border-neutral-100">
-                                <button className="w-8 h-8 cursor-pointer">−</button>
-                                <input
-                                    readOnly
-                                    value={1}
-                                    className="w-10 h-8 text-center text-sm"
-                                />
-                                <button className="w-8 h-8 cursor-pointer">+</button>
+                            {/* Total price for all variants of this product */}
+                            <div className="sm:text-right">
+                                <p className="text-lg font-bold text-gray-900">
+                                    Rs {getTotalPriceForItem(item)}.00
+                                </p>
+                                <p className="text-sm text-neutral-500 mt-1">
+                                    {getTotalQuantity(item.variants)} item(s) total
+                                </p>
                             </div>
-
-                            <button className="flex cursor-pointer items-center gap-1.5 text-sm font-medium text-neutral-400 hover:text-red-500 transition-colors">
-                                <span className="material-symbols-outlined text-[20px]"><MdOutlineDeleteOutline /></span>
-                                <span className="hidden sm:inline">Remove</span>
-                            </button>
                         </div>
                     </div>
                 </div>
             ))}
-        </>
+        </div>
     );
 };
 
