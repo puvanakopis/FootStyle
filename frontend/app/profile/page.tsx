@@ -23,6 +23,14 @@ export default function Profile() {
 
                     {/* Main content with remaining width */}
                     <section className="w-full lg:w-4/5 space-y-6">
+                        <div className="flex justify-between items-center">
+                            <div>
+                                <h1 className="text-2xl font-bold text-neutral-900">My Profile</h1>
+                                <p className="text-neutral-600 mt-1">
+                                    Manage your personal information and account settings
+                                </p>
+                            </div>
+                        </div>
                         <ProfileDetails />
                     </section>
                 </div>

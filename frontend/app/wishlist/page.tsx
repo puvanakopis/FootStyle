@@ -8,7 +8,6 @@ import Sidebar from "@/components/Sidebar";
 import ProductList from "@/containers/wishlist/ProductList";
 import WishlistFilter from "@/containers/wishlist/WishlistFilter";
 import { useWishlist } from "@/context/WishlistContext";
-import { Product } from "@/interfaces/productInterface";
 import Link from "next/link";
 
 const breadcrumbItems = [
