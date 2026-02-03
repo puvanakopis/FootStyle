@@ -168,7 +168,7 @@ const OrderSummary = () => {
             </div>
 
             <Link
-                href={totalItems > 0 ? "/checkout" : "#"}
+                href={totalItems > 0 ? "/delivery-address" : "#"}
                 className="block"
                 onClick={(e) => {
                     if (totalItems === 0) {
@@ -182,7 +182,6 @@ const OrderSummary = () => {
                 <button
                     className="w-full h-14 bg-[#ee2b4b] text-white font-bold rounded-xl hover:opacity-90 transition disabled:opacity-50 disabled:cursor-not-allowed"
                     disabled={!cart?.items || cart.items.length === 0}
-                    onClick={handleCheckoutClick}
                 >
                     Proceed to Checkout
                 </button>

@@ -55,11 +55,11 @@ const userSchema = new mongoose.Schema({
             type: String,
             trim: true
         },
-        city: {
+        district: {
             type: String,
             trim: true
         },
-        state: {
+        province: {
             type: String,
             trim: true
         },
