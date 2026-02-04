@@ -16,6 +16,19 @@ interface UserData {
   address?: Address;
 }
 
+// Province → District mapping
+const provinceDistricts: Record<string, string[]> = {
+  "Western": ["Colombo", "Gampaha", "Kalutara"],
+  "Central": ["Kandy", "Matale", "Nuwara Eliya"],
+  "Southern": ["Galle", "Matara", "Hambantota"],
+  "Northern": ["Jaffna", "Kilinochchi", "Mannar", "Vavuniya", "Mullaitivu"],
+  "Eastern": ["Trincomalee", "Batticaloa", "Ampara"],
+  "North Western": ["Kurunegala", "Puttalam"],
+  "North Central": ["Anuradhapura", "Polonnaruwa"],
+  "Uva": ["Badulla", "Monaragala"],
+  "Sabaragamuwa": ["Ratnapura", "Kegalle"],
+};
+
 const ProfileDetails = () => {
   const { user, getCurrentUser, updateCurrentUser } = useAuth();
   const [formData, setFormData] = useState<UserData>({
@@ -77,7 +90,10 @@ const ProfileDetails = () => {
       showToast("success", "Profile updated successfully!");
     } catch (error: any) {
       console.error("Failed to save profile:", error);
-      showToast("error", error?.response?.data?.message || "Failed to update profile. Please try again.");
+      showToast(
+        "error",
+        error?.response?.data?.message || "Failed to update profile. Please try again."
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -102,7 +118,10 @@ const ProfileDetails = () => {
       setIsEditingAddress(false);
     } catch (error: any) {
       console.error("Failed to save address:", error);
-      showToast("error", error?.response?.data?.message || "Failed to update address. Please try again.");
+      showToast(
+        "error",
+        error?.response?.data?.message || "Failed to update address. Please try again."
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -117,7 +136,7 @@ const ProfileDetails = () => {
         firstName: formData.firstName.trim(),
         lastName: formData.lastName.trim(),
         phoneNumber: formData.phoneNumber.trim(),
-        address: {}, 
+        address: {},
       };
 
       await updateCurrentUser(updateData);
@@ -125,14 +144,17 @@ const ProfileDetails = () => {
 
       setFormData((prev) => ({
         ...prev,
-        address: {}, 
+        address: {},
       }));
 
       showToast("success", "Address removed successfully!");
-      setIsEditingAddress(false); 
+      setIsEditingAddress(false);
     } catch (error: any) {
       console.error("Failed to remove address:", error);
-      showToast("error", error?.response?.data?.message || "Failed to remove address. Please try again.");
+      showToast(
+        "error",
+        error?.response?.data?.message || "Failed to remove address. Please try again."
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -162,9 +184,7 @@ const ProfileDetails = () => {
       {/* Personal Info */}
       <section className="bg-white rounded-2xl shadow-sm border border-neutral-100 p-6 sm:p-8">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-xl font-bold text-neutral-900">
-            Personal Information
-          </h2>
+          <h2 className="text-xl font-bold text-neutral-900">Personal Information</h2>
         </div>
 
         <form onSubmit={handleSubmit}>
@@ -208,9 +228,7 @@ const ProfileDetails = () => {
                 disabled
                 className="w-full flex-1 rounded-lg border border-neutral-300 focus:border-0 bg-gray-100 py-3 pl-4 text-sm text-gray-500 cursor-not-allowed"
               />
-              <p className="text-xs text-gray-400 mt-1">
-                Email cannot be changed
-              </p>
+              <p className="text-xs text-gray-400 mt-1">Email cannot be changed</p>
             </div>
 
             <div className="space-y-2">
@@ -242,9 +260,7 @@ const ProfileDetails = () => {
       {/* Shipping Address */}
       <section className="bg-white rounded-2xl shadow-sm border border-neutral-100 p-6 sm:p-8">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-xl font-bold text-neutral-900">
-            Shipping Address
-          </h2>
+          <h2 className="text-xl font-bold text-neutral-900">Shipping Address</h2>
           <div className="flex gap-2">
             <button
               onClick={() => setIsEditingAddress(!isEditingAddress)}
@@ -281,30 +297,36 @@ const ProfileDetails = () => {
                 />
               </div>
 
-              <div className="space-y-2">
-                <label className="block text-xs font-bold text-neutral-500 uppercase tracking-wider">
-                  District
-                </label>
-                <input
-                  type="text"
-                  value={formData.address?.district || ""}
-                  onChange={(e) => handleAddressChange("district", e.target.value)}
-                  className="w-full flex-1 rounded-lg border border-neutral-300 focus:border-0 bg-white py-3 pl-4 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#ee2b4b]"
-                  placeholder="Enter district"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label className="block text-xs font-bold text-neutral-500 uppercase tracking-wider">
-                  province
-                </label>
-                <input
-                  type="text"
+              {/* Province Dropdown */}
+              <div className="space-y-2 md:col-span-1">
+                <label className="block text-sm font-medium mb-2">Province</label>
+                <select
                   value={formData.address?.province || ""}
                   onChange={(e) => handleAddressChange("province", e.target.value)}
-                  className="w-full flex-1 rounded-lg border border-neutral-300 focus:border-0 bg-white py-3 pl-4 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#ee2b4b]"
-                  placeholder="Enter province"
-                />
+                  className="block w-full rounded-lg border border-neutral-300 h-11 px-4 focus:ring-[#ee2b4b] bg-white text-sm text-gray-900"
+                >
+                  <option value="">Select Province</option>
+                  {Object.keys(provinceDistricts).map((prov) => (
+                    <option key={prov} value={prov}>{prov} Province</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* District Dropdown */}
+              <div className="space-y-2 md:col-span-1">
+                <label className="block text-sm font-medium mb-2">District</label>
+                <select
+                  value={formData.address?.district || ""}
+                  onChange={(e) => handleAddressChange("district", e.target.value)}
+                  className="block w-full rounded-lg border border-neutral-300 h-11 px-4 focus:ring-[#ee2b4b] bg-white text-sm text-gray-900"
+                  disabled={!formData.address?.province}
+                >
+                  <option value="">Select District</option>
+                  {formData.address?.province &&
+                    provinceDistricts[formData.address.province]?.map((district) => (
+                      <option key={district} value={district}>{district}</option>
+                    ))}
+                </select>
               </div>
 
               <div className="space-y-2">
@@ -354,8 +376,8 @@ const ProfileDetails = () => {
         ) : (
           <div
             className={`relative p-5 rounded-xl transition-all ${isAddressEmpty()
-              ? "border-2 border-dashed border-neutral-300 bg-neutral-50"
-              : "border-2 border-[#ee2b4b] bg-[#ee2b4b]/5"
+                ? "border-2 border-dashed border-neutral-300 bg-neutral-50"
+                : "border-2 border-[#ee2b4b] bg-[#ee2b4b]/5"
               }`}
           >
             <div className="flex items-center gap-2 mb-3">
@@ -366,9 +388,7 @@ const ProfileDetails = () => {
               ) : (
                 <IoHomeOutline className="text-neutral-400" />
               )}
-              <span className="font-bold text-neutral-900">
-                {getAddressLabel()}
-              </span>
+              <span className="font-bold text-neutral-900">{getAddressLabel()}</span>
 
               {!isAddressEmpty() && (
                 <span className="text-[10px] font-bold uppercase bg-[#ee2b4b] text-white px-2 py-0.5 rounded-full ml-2">
@@ -379,25 +399,17 @@ const ProfileDetails = () => {
 
             {isAddressEmpty() ? (
               <p className="text-sm text-neutral-500 italic">
-                No address saved. Click "Edit Address" to add one.
+                No address saved. Click Edit Address to add one.
               </p>
             ) : (
               <div className="text-sm text-neutral-600 space-y-1">
-                {formData.address?.street && (
-                  <p>{formData.address.street}</p>
-                )}
+                {formData.address?.street && <p>{formData.address.street}</p>}
                 <div className="flex flex-wrap gap-1">
                   {formData.address?.district && <span>{formData.address.district}</span>}
-                  {formData.address?.province && (
-                    <span>, {formData.address.province}</span>
-                  )}
-                  {formData.address?.zipCode && (
-                    <span>{formData.address.zipCode}</span>
-                  )}
+                  {formData.address?.province && <span>, {formData.address.province}</span>}
+                  {formData.address?.zipCode && <span>{formData.address.zipCode}</span>}
                 </div>
-                {formData.address?.country && (
-                  <p>{formData.address.country}</p>
-                )}
+                {formData.address?.country && <p>{formData.address.country}</p>}
               </div>
             )}
           </div>
