@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
@@ -12,6 +12,8 @@ import { useCart } from "@/context/CartContext";
 import { showToast } from "@/lib/toast";
 import { CartItem as CartItemType, CartVariant } from "@/interfaces/cartInterface";
 import { TAX_RATE, FREE_SHIPPING_THRESHOLD, SHIPPING_COST } from '@/constants/cart';
+import { routeModule } from "next/dist/build/templates/pages";
+import { useRouter } from "next/dist/client/components/navigation";
 
 const breadcrumbItems = [
     { label: "Home", href: "/" },
@@ -19,6 +21,8 @@ const breadcrumbItems = [
 ];
 
 export default function CartPage() {
+
+    const router = useRouter();
     const { cart, isLoading, updateQuantity, removeFromCart, fetchCart } = useCart();
     const [localLoading, setLocalLoading] = useState(false);
     const [cartItems, setCartItems] = useState<any[]>([]);
@@ -95,6 +99,7 @@ export default function CartPage() {
         }
 
         showToast('success', 'Proceeding to checkout...');
+        router.push('/checkout');
     };
 
     const handleUpdateQuantity = async (productId: string, size: string, action: "increment" | "decrement") => {

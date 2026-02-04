@@ -127,3 +127,24 @@ exports.updateOrderStatus = async (req, res) => {
         return res.status(500).json({ message: "Error updating status", error });
     }
 };
+
+exports.getOrdersByUser = async (req, res) => {
+    try {
+        const userId = req.user.id;
+
+        const orders = await Order.find({ user: userId })
+            .populate("items.product")
+            .sort({ createdAt: -1 });
+
+        return res.status(200).json({
+            message: "User orders retrieved successfully",
+            orders
+        });
+
+    } catch (error) {
+        return res.status(500).json({
+            message: "Error retrieving user orders",
+            error
+        });
+    }
+};
