@@ -9,6 +9,8 @@ import ProductList from "@/containers/wishlist/ProductList";
 import WishlistFilter from "@/containers/wishlist/WishlistFilter";
 import { useWishlist } from "@/context/WishlistContext";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { showToast } from "@/lib/toast";
 
 const breadcrumbItems = [
     { label: "Account", href: "" },
@@ -16,49 +18,96 @@ const breadcrumbItems = [
 ];
 
 export default function Wishlist() {
-    const { wishlist, isLoading, error, fetchWishlist } = useWishlist();
+    const { wishlist, isLoading, error, fetchWishlist, removeFromWishlist } = useWishlist();
     const [sortOption, setSortOption] = useState<string>("newest");
 
-    // Fetch wishlist on component mount
+    const router = useRouter();
+
+    // Fetch wishlist on mount
     useEffect(() => {
         fetchWishlist();
     }, []);
 
-    // Handle sorting of wishlist products
+    // Handle sorting
     const sortedProducts = useMemo(() => {
         const products = [...wishlist];
-
         switch (sortOption) {
             case "newest":
-                return products.sort((a, b) => {
-                    const dateA = new Date(a.createdAt || "").getTime();
-                    const dateB = new Date(b.createdAt || "").getTime();
-                    return dateB - dateA;
-                });
-
+                return products.sort((a, b) => new Date(b.createdAt || "").getTime() - new Date(a.createdAt || "").getTime());
             case "oldest":
-                return products.sort((a, b) => {
-                    const dateA = new Date(a.createdAt || "").getTime();
-                    const dateB = new Date(b.createdAt || "").getTime();
-                    return dateA - dateB;
-                });
-
+                return products.sort((a, b) => new Date(a.createdAt || "").getTime() - new Date(b.createdAt || "").getTime());
             case "price-asc":
                 return products.sort((a, b) => a.price - b.price);
-
             case "price-desc":
                 return products.sort((a, b) => b.price - a.price);
-
             default:
                 return products;
         }
     }, [wishlist, sortOption]);
 
-    const handleSortChange = (sortValue: string) => {
-        setSortOption(sortValue);
+    const handleSortChange = (value: string) => {
+        setSortOption(value);
     };
 
-    // Show loading state
+    // Helper functions
+    const getStockStatus = (product: any) => {
+        const totalStock = product.sizes.reduce((sum: number, size: any) => sum + size.stock, 0);
+        return totalStock > 0 ? "in-stock" : "out-of-stock";
+    };
+
+    const getPrimaryImage = (product: any) => {
+        const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+        return `${API_BASE_URL}/uploads/product/${product.images[0]}`;
+    };
+
+    const getReviewCount = (product: any) => product.reviews.length;
+
+    const formatDate = (dateString?: string) => {
+        if (!dateString) return "Date not available";
+        const date = new Date(dateString);
+        return date.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
+    };
+
+    const getLastSavedSize = (product: any) => {
+        const availableSize = product.sizes.find((size: any) => size.stock > 0);
+        return availableSize ? availableSize.size : product.sizes[0]?.size || "N/A";
+    };
+
+    const calculateAverageRating = (product: any) => {
+        if (product.reviews.length === 0) return 0;
+        const sum = product.reviews.reduce((acc: number, review: any) => acc + review.rating, 0);
+        return sum / product.reviews.length;
+    };
+
+    // Event handlers
+    const handleRemoveFromWishlist = async (productId: string, productName: string) => {
+        try {
+            await removeFromWishlist(productId);
+            showToast("success", `"${productName}" removed from wishlist`);
+        } catch (error) {
+            console.error("Failed to remove from wishlist:", error);
+            showToast("error", "Failed to remove item from wishlist. Please try again.");
+        }
+    };
+
+    const handleAddToCart = (product: any) => {
+        const stockStatus = getStockStatus(product);
+        const isDisabled = !product.isActive || stockStatus === "out-of-stock";
+
+        if (isDisabled) {
+            showToast("error", "This product is currently unavailable");
+            return;
+        }
+
+        showToast("success", `"${product.title || product.name}" added to cart`);
+    };
+
+    const handleViewProduct = (productId: string, productName: string) => {
+        showToast("info", `Viewing "${productName}"`);
+        router.push(`/products/${productId}`);
+    };
+
+    // Loading state
     if (isLoading) {
         return (
             <main className="min-h-screen bg-background text-foreground">
@@ -81,7 +130,7 @@ export default function Wishlist() {
         );
     }
 
-    // Show error state
+    // Error state
     if (error) {
         return (
             <main className="min-h-screen bg-background text-foreground">
@@ -110,7 +159,7 @@ export default function Wishlist() {
         );
     }
 
-    // Show empty wishlist state
+    // Empty wishlist
     if (wishlist.length === 0) {
         return (
             <main className="min-h-screen bg-background text-foreground">
@@ -157,12 +206,24 @@ export default function Wishlist() {
                             <div>
                                 <h1 className="text-2xl font-bold text-neutral-900">My Wishlist</h1>
                                 <p className="text-neutral-600 mt-1">
-                                    {wishlist.length} {wishlist.length === 1 ? 'item' : 'items'}
+                                    {wishlist.length} {wishlist.length === 1 ? "item" : "items"}
                                 </p>
                             </div>
-                            <WishlistFilter onSortChange={handleSortChange} />
+                            <WishlistFilter selectedSort={sortOption} onSortChange={handleSortChange} />
                         </div>
-                        <ProductList products={sortedProducts} />
+                        <ProductList
+                            products={sortedProducts}
+                            isLoading={isLoading}
+                            getStockStatus={getStockStatus}
+                            getPrimaryImage={getPrimaryImage}
+                            getReviewCount={getReviewCount}
+                            formatDate={formatDate}
+                            getLastSavedSize={getLastSavedSize}
+                            calculateAverageRating={calculateAverageRating}
+                            handleRemoveFromWishlist={handleRemoveFromWishlist}
+                            handleAddToCart={handleAddToCart}
+                            handleViewProduct={handleViewProduct}
+                        />
                     </section>
                 </div>
             </div>

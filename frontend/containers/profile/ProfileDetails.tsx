@@ -1,184 +1,45 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { IoHomeOutline } from "react-icons/io5";
 import { PiBuildingApartment } from "react-icons/pi";
 import { AiOutlineDelete } from "react-icons/ai";
-import { useAuth } from "@/context/AuthContext";
 import { Address } from "@/interfaces/authInterface";
-import { showToast } from "@/lib/toast";
 
-interface UserData {
-  firstName: string;
-  lastName: string;
-  email: string;
-  phoneNumber: string;
-  address?: Address;
+interface ProfileDetailsProps {
+  formData: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    phoneNumber: string;
+    address?: Address;
+  };
+  isEditingAddress: boolean;
+  isSubmitting: boolean;
+  provinceDistricts: Record<string, string[]>;
+  handleChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  handleAddressChange: (field: keyof Address, value: string) => void;
+  handleSubmit: (e: React.FormEvent) => void;
+  handleSaveAddress: () => void;
+  handleClearAddress: () => void;
+  setIsEditingAddress: React.Dispatch<React.SetStateAction<boolean>>;
+  isAddressEmpty: () => boolean;
+  getAddressLabel: () => string;
 }
 
-// Province → District mapping
-const provinceDistricts: Record<string, string[]> = {
-  "Western": ["Colombo", "Gampaha", "Kalutara"],
-  "Central": ["Kandy", "Matale", "Nuwara Eliya"],
-  "Southern": ["Galle", "Matara", "Hambantota"],
-  "Northern": ["Jaffna", "Kilinochchi", "Mannar", "Vavuniya", "Mullaitivu"],
-  "Eastern": ["Trincomalee", "Batticaloa", "Ampara"],
-  "North Western": ["Kurunegala", "Puttalam"],
-  "North Central": ["Anuradhapura", "Polonnaruwa"],
-  "Uva": ["Badulla", "Monaragala"],
-  "Sabaragamuwa": ["Ratnapura", "Kegalle"],
-};
-
-const ProfileDetails = () => {
-  const { user, getCurrentUser, updateCurrentUser } = useAuth();
-  const [formData, setFormData] = useState<UserData>({
-    firstName: "",
-    lastName: "",
-    email: "",
-    phoneNumber: "",
-    address: undefined,
-  });
-
-  const [isEditingAddress, setIsEditingAddress] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  // Populate formData when user data changes
-  useEffect(() => {
-    if (user) {
-      setFormData({
-        firstName: user.firstName || "",
-        lastName: user.lastName || "",
-        email: user.email || "",
-        phoneNumber: user.phoneNumber || "",
-        address: user.address || undefined,
-      });
-    }
-  }, [user]);
-
-  // Handle personal info changes
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  // Handle address changes
-  const handleAddressChange = (field: keyof Address, value: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      address: {
-        ...(prev.address || {}),
-        [field]: value,
-      } as Address,
-    }));
-  };
-
-  // Handle form submit to update user
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-
-    try {
-      const updateData = {
-        firstName: formData.firstName.trim(),
-        lastName: formData.lastName.trim(),
-        phoneNumber: formData.phoneNumber.trim(),
-        address: formData.address || {},
-      };
-
-      await updateCurrentUser(updateData);
-      await getCurrentUser();
-      showToast("success", "Profile updated successfully!");
-    } catch (error: any) {
-      console.error("Failed to save profile:", error);
-      showToast(
-        "error",
-        error?.response?.data?.message || "Failed to update profile. Please try again."
-      );
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  // Handle address save separately
-  const handleSaveAddress = async () => {
-    setIsSubmitting(true);
-
-    try {
-      const updateData = {
-        firstName: formData.firstName.trim(),
-        lastName: formData.lastName.trim(),
-        phoneNumber: formData.phoneNumber.trim(),
-        address: formData.address || {},
-      };
-
-      await updateCurrentUser(updateData);
-      await getCurrentUser();
-
-      showToast("success", "Address updated successfully!");
-      setIsEditingAddress(false);
-    } catch (error: any) {
-      console.error("Failed to save address:", error);
-      showToast(
-        "error",
-        error?.response?.data?.message || "Failed to update address. Please try again."
-      );
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  // Clear address
-  const handleClearAddress = async () => {
-    try {
-      setIsSubmitting(true);
-
-      const updateData = {
-        firstName: formData.firstName.trim(),
-        lastName: formData.lastName.trim(),
-        phoneNumber: formData.phoneNumber.trim(),
-        address: {},
-      };
-
-      await updateCurrentUser(updateData);
-      await getCurrentUser();
-
-      setFormData((prev) => ({
-        ...prev,
-        address: {},
-      }));
-
-      showToast("success", "Address removed successfully!");
-      setIsEditingAddress(false);
-    } catch (error: any) {
-      console.error("Failed to remove address:", error);
-      showToast(
-        "error",
-        error?.response?.data?.message || "Failed to remove address. Please try again."
-      );
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  // Check if address is empty
-  const isAddressEmpty = () => {
-    if (!formData.address) return true;
-    const { street, district, province, zipCode, country } = formData.address;
-    return !street && !district && !province && !zipCode && !country;
-  };
-
-  // Get address label based on content
-  const getAddressLabel = () => {
-    if (isAddressEmpty()) return "No Address";
-    if (
-      formData.address?.street?.toLowerCase().includes("apt") ||
-      formData.address?.street?.toLowerCase().includes("apartment")
-    ) {
-      return "Apartment";
-    }
-    return "Home";
-  };
-
+const ProfileDetails = ({
+  formData,
+  isEditingAddress,
+  isSubmitting,
+  provinceDistricts,
+  handleChange,
+  handleAddressChange,
+  handleSubmit,
+  handleSaveAddress,
+  handleClearAddress,
+  setIsEditingAddress,
+  isAddressEmpty,
+  getAddressLabel,
+}: ProfileDetailsProps) => {
   return (
     <div className="lg:col-span-9 space-y-8">
       {/* Personal Info */}
@@ -307,7 +168,9 @@ const ProfileDetails = () => {
                 >
                   <option value="">Select Province</option>
                   {Object.keys(provinceDistricts).map((prov) => (
-                    <option key={prov} value={prov}>{prov} Province</option>
+                    <option key={prov} value={prov}>
+                      {prov} Province
+                    </option>
                   ))}
                 </select>
               </div>
@@ -324,7 +187,9 @@ const ProfileDetails = () => {
                   <option value="">Select District</option>
                   {formData.address?.province &&
                     provinceDistricts[formData.address.province]?.map((district) => (
-                      <option key={district} value={district}>{district}</option>
+                      <option key={district} value={district}>
+                        {district}
+                      </option>
                     ))}
                 </select>
               </div>
@@ -376,8 +241,8 @@ const ProfileDetails = () => {
         ) : (
           <div
             className={`relative p-5 rounded-xl transition-all ${isAddressEmpty()
-              ? "border-2 border-dashed border-neutral-300 bg-neutral-50"
-              : "border-2 border-[#ee2b4b] bg-[#ee2b4b]/5"
+                ? "border-2 border-dashed border-neutral-300 bg-neutral-50"
+                : "border-2 border-[#ee2b4b] bg-[#ee2b4b]/5"
               }`}
           >
             <div className="flex items-center gap-2 mb-3">

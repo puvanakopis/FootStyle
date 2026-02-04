@@ -87,7 +87,8 @@ const Contact = () => {
                   <div
                     className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
                     style={{
-                      backgroundImage: 'url("/frontend/public/images/ContactImage.avif")',
+                      backgroundImage:
+                        'url("https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=800&auto=format&fit=crop")',
                     }}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
