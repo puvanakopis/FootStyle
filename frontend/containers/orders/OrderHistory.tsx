@@ -111,9 +111,8 @@ const OrderHistory = () => {
               >
                 {/* Image */}
                 <div
-                  className={`w-24 h-24 rounded-lg bg-cover bg-center ${
-                    order.status === "cancelled" ? "grayscale" : ""
-                  }`}
+                  className={`w-24 h-24 rounded-lg bg-cover bg-center ${order.status === "cancelled" ? "grayscale" : ""
+                    }`}
                   style={{ backgroundImage: `url(${item.image})` }}
                 />
 
@@ -134,7 +133,7 @@ const OrderHistory = () => {
                       {order.status === "processing" ? "Track Order" : "Buy Again"}
                     </button>
                   )}
-          
+
                 </div>
               </div>
             ))}

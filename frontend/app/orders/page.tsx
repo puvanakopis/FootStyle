@@ -22,9 +22,16 @@ export default function Orders() {
                         <Sidebar />
                     </div>
 
-                    {/* Main content with remaining width */}
                     <section className="w-full lg:w-4/5 space-y-6">
-                        <OrderFilter />
+                        <div className="flex justify-between items-center">
+                            <div>
+                                <h1 className="text-2xl font-bold text-neutral-900">My Orders</h1>
+                                <p className="text-neutral-600 mt-1">
+                                    5 items
+                                </p>
+                            </div>
+                            <OrderFilter />
+                        </div>
                         <OrderHistory />
                     </section>
                 </div>

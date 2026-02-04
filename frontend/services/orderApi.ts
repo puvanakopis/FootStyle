@@ -53,4 +53,10 @@ export const orderApi = {
         const res = await api.put<OrderResponse>(`/api/orders/${orderId}/status`, data);
         return res.data;
     },
+
+    // -------- GET ORDERS BY USER  --------
+    getUserOrders: async (): Promise<OrdersResponse> => {
+        const res = await api.get<OrdersResponse>("/api/orders/user/all");
+        return res.data;
+    },
 };

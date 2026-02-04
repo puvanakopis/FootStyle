@@ -36,7 +36,13 @@ export interface Order {
   subtotal: number;
   shippingFee: number;
   total: number;
-  status: "Pending" | "Processing" | "Shipped" | "Delivered" | "Cancelled" | "Returned";
+  status:
+    | "Pending"
+    | "Processing"
+    | "Shipped"
+    | "Delivered"
+    | "Cancelled"
+    | "Returned";
   isActive?: boolean;
   createdAt?: string;
   updatedAt?: string;
@@ -56,21 +62,29 @@ export interface AddPaymentRequest {
 }
 
 export interface UpdateOrderStatusRequest {
-  status: "Pending" | "Processing" | "Shipped" | "Delivered" | "Cancelled" | "Returned";
+  status:
+    | "Pending"
+    | "Processing"
+    | "Shipped"
+    | "Delivered"
+    | "Cancelled"
+    | "Returned";
 }
 
+// ---------- API RESPONSES ----------
 export interface OrdersResponse {
-  success: boolean;
+  success?: boolean;     
   message?: string;
   orders: Order[];
 }
 
 export interface OrderResponse {
-  success: boolean;
+  success?: boolean;
   message?: string;
   order: Order;
 }
 
+// ---------- CONTEXT STATE ----------
 export interface OrderState {
   orders: Order[];
   currentOrder: Order | null;
@@ -78,8 +92,10 @@ export interface OrderState {
   error: string | null;
 }
 
+// ---------- CONTEXT ACTIONS ----------
 export interface OrderContextType extends OrderState {
-  getAllOrders: () => Promise<void>;
+  getAllOrders: () => Promise<void>;               
+  getUserOrders: () => Promise<void>;              
   getOrderById: (orderId: string) => Promise<void>;
   createOrder: (data: CreateOrderRequest) => Promise<Order>;
   addPaymentToOrder: (orderId: string, data: AddPaymentRequest) => Promise<void>;

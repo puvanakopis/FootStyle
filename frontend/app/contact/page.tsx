@@ -44,7 +44,7 @@ const Contact = () => {
   return (
     <main className="min-h-screen bg-background text-foreground">
       <Header />
-      
+
       {/* Contact Content */}
       <div className="px-4 md:px-10 py-6">
         {/* Hero Section */}
@@ -87,8 +87,7 @@ const Contact = () => {
                   <div
                     className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
                     style={{
-                      backgroundImage:
-                        'url("https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=800&auto=format&fit=crop")',
+                      backgroundImage: 'url("/frontend/public/images/ContactImage.avif")',
                     }}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
@@ -286,7 +285,7 @@ const Contact = () => {
           </div>
         </section>
       </div>
-      
+
       <Footer />
     </main>
   );

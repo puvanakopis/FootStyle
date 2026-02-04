@@ -376,8 +376,8 @@ const ProfileDetails = () => {
         ) : (
           <div
             className={`relative p-5 rounded-xl transition-all ${isAddressEmpty()
-                ? "border-2 border-dashed border-neutral-300 bg-neutral-50"
-                : "border-2 border-[#ee2b4b] bg-[#ee2b4b]/5"
+              ? "border-2 border-dashed border-neutral-300 bg-neutral-50"
+              : "border-2 border-[#ee2b4b] bg-[#ee2b4b]/5"
               }`}
           >
             <div className="flex items-center gap-2 mb-3">

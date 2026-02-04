@@ -3,7 +3,13 @@
 import React, { createContext, useContext, useState, ReactNode } from "react";
 import { AxiosError } from "axios";
 import { orderApi } from "@/services/orderApi";
-import { Order, OrderContextType, CreateOrderRequest, AddPaymentRequest, UpdateOrderStatusRequest } from "@/interfaces/orderInterface";
+import {
+    Order,
+    OrderContextType,
+    CreateOrderRequest,
+    AddPaymentRequest,
+    UpdateOrderStatusRequest
+} from "@/interfaces/orderInterface";
 
 const OrderContext = createContext<OrderContextType | undefined>(undefined);
 
@@ -49,6 +55,19 @@ export const OrderProvider: React.FC<OrderProviderProps> = ({ children }) => {
         }
     };
 
+    // ---------- GET USER ORDERS ----------
+    const getUserOrders = async () => {
+        try {
+            setIsLoading(true);
+            const res = await orderApi.getUserOrders();
+            setOrders(res.orders);
+        } catch (err) {
+            handleError(err);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
     // ---------- GET ORDER BY ID ----------
     const getOrderById = async (orderId: string) => {
         try {
@@ -67,7 +86,7 @@ export const OrderProvider: React.FC<OrderProviderProps> = ({ children }) => {
         try {
             setIsLoading(true);
             const res = await orderApi.createOrder(data);
-            getAllOrders();
+            await getUserOrders(); // refresh user's order list
             return res.order;
         } catch (err) {
             handleError(err);
@@ -83,7 +102,7 @@ export const OrderProvider: React.FC<OrderProviderProps> = ({ children }) => {
             setIsLoading(true);
             const res = await orderApi.addPaymentToOrder(orderId, data);
             setCurrentOrder(res.order);
-            getAllOrders();
+            await getUserOrders();
         } catch (err) {
             handleError(err);
             throw err;
@@ -98,7 +117,7 @@ export const OrderProvider: React.FC<OrderProviderProps> = ({ children }) => {
             setIsLoading(true);
             const res = await orderApi.updateOrderStatus(orderId, data);
             setCurrentOrder(res.order);
-            getAllOrders();
+            await getAllOrders();
         } catch (err) {
             handleError(err);
             throw err;
@@ -117,6 +136,7 @@ export const OrderProvider: React.FC<OrderProviderProps> = ({ children }) => {
                 isLoading,
                 error,
                 getAllOrders,
+                getUserOrders,
                 getOrderById,
                 createOrder,
                 addPaymentToOrder,
