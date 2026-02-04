@@ -1,51 +1,19 @@
 "use client";
 
-import React from "react";
-import Link from "next/link";
-import { useCart } from "@/context/CartContext";
-import { showToast } from "@/lib/toast";
+interface OrderSummaryProps {
+    subtotal: number;
+    shipping: number;
+    tax: number;
+    total: number;
+    totalItems: number;
+    handleCheckoutClick: () => void;
+}
 
 const TAX_RATE = 0.02;
 const FREE_SHIPPING_THRESHOLD = 5000;
-const SHIPPING_COST = 250;
 
-const OrderSummary = () => {
-    const { cart, isLoading } = useCart();
+const OrderSummary = ({ subtotal, shipping, tax, total, totalItems, handleCheckoutClick }: OrderSummaryProps) => {
 
-    // Calculate subtotal from cart items
-    const calculateSubtotal = () => {
-        if (!cart?.items || cart.items.length === 0) return 0;
-
-        return cart.items.reduce((total, item) => {
-            const itemTotal = item.variants.reduce((variantTotal, variant) => {
-                return variantTotal + (item.product.price * variant.quantity);
-            }, 0);
-            return total + itemTotal;
-        }, 0);
-    };
-
-    // Calculate shipping cost
-    const calculateShipping = (subtotal: number) => {
-        if (subtotal >= FREE_SHIPPING_THRESHOLD || subtotal === 0) return 0;
-        return SHIPPING_COST;
-    };
-
-    // Calculate tax
-    const calculateTax = (subtotal: number) => {
-        return subtotal * TAX_RATE;
-    };
-
-    // Calculate total
-    const calculateTotal = (subtotal: number, shipping: number, tax: number) => {
-        return subtotal + shipping + tax;
-    };
-
-    const subtotal = calculateSubtotal();
-    const shipping = calculateShipping(subtotal);
-    const tax = calculateTax(subtotal);
-    const total = calculateTotal(subtotal, shipping, tax);
-
-    // Format currency 
     const formatCurrency = (amount: number) => {
         return new Intl.NumberFormat('en-LK', {
             style: 'currency',
@@ -54,68 +22,6 @@ const OrderSummary = () => {
             maximumFractionDigits: 0,
         }).format(amount);
     };
-
-    // Handle checkout click
-    const handleCheckoutClick = () => {
-        if (!cart?.items || cart.items.length === 0) {
-            showToast('error', 'Your cart is empty. Please add items to checkout.');
-            return;
-        }
-
-        if (subtotal < 100) {
-            showToast('info', 'Minimum order value is Rs 100 for checkout.');
-            return;
-        }
-
-        showToast('success', 'Proceeding to checkout...');
-    };
-
-    // Show loading state
-    if (isLoading) {
-        return (
-            <div className="bg-white rounded-2xl shadow-sm border border-neutral-100 p-6 sm:p-8 animate-pulse">
-                <div className="h-7 bg-gray-200 rounded w-1/3 mb-6"></div>
-                <div className="space-y-4 border-b border-neutral-100 pb-6 mb-6">
-                    {[...Array(3)].map((_, i) => (
-                        <div key={i} className="flex justify-between">
-                            <div className="h-4 bg-gray-200 rounded w-1/4"></div>
-                            <div className="h-4 bg-gray-200 rounded w-1/6"></div>
-                        </div>
-                    ))}
-                </div>
-                <div className="flex justify-between mb-8">
-                    <div className="h-6 bg-gray-200 rounded w-1/4"></div>
-                    <div className="h-10 bg-gray-200 rounded w-1/3"></div>
-                </div>
-                <div className="h-14 bg-gray-200 rounded-xl"></div>
-            </div>
-        );
-    }
-
-    // Show empty cart state
-    if (!cart?.items || cart.items.length === 0) {
-        return (
-            <div className="bg-white rounded-2xl shadow-sm border border-neutral-100 p-6 sm:p-8">
-                <h2 className="text-xl font-bold mb-6">Order Summary</h2>
-                <div className="text-center py-8">
-                    <p className="text-neutral-500 mb-4">Your cart is empty</p>
-                    <Link href="/products">
-                        <button
-                            className="w-full h-14 bg-[#ee2b4b] text-white font-bold rounded-xl hover:opacity-90 transition"
-                            onClick={() => showToast('info', 'Continue shopping for amazing products!')}
-                        >
-                            Continue Shopping
-                        </button>
-                    </Link>
-                </div>
-            </div>
-        );
-    }
-
-    // Calculate cart items count
-    const totalItems = cart.items.reduce((total, item) => {
-        return total + item.variants.reduce((variantTotal, variant) => variantTotal + variant.quantity, 0);
-    }, 0);
 
     return (
         <div className="bg-white rounded-2xl shadow-sm border border-neutral-100 p-6 sm:p-8 sticky top-6">
@@ -155,9 +61,7 @@ const OrderSummary = () => {
                 <div className="text-right">
                     <span className="text-3xl font-extrabold block">{formatCurrency(total)}</span>
                     {shipping === 0 && subtotal > 0 && (
-                        <span className="text-green-600 text-sm block mt-1">
-                            Free shipping applied!
-                        </span>
+                        <span className="text-green-600 text-sm block mt-1">Free shipping applied!</span>
                     )}
                     {subtotal > 0 && subtotal < FREE_SHIPPING_THRESHOLD && (
                         <span className="text-neutral-500 text-sm block mt-1">
@@ -167,25 +71,13 @@ const OrderSummary = () => {
                 </div>
             </div>
 
-            <Link
-                href={totalItems > 0 ? "/delivery-address" : "#"}
-                className="block"
-                onClick={(e) => {
-                    if (totalItems === 0) {
-                        e.preventDefault();
-                        showToast('error', 'Your cart is empty. Please add items to checkout.');
-                    } else {
-                        handleCheckoutClick();
-                    }
-                }}
+            <button
+                onClick={handleCheckoutClick}
+                className="w-full h-14 bg-[#ee2b4b] text-white font-bold rounded-xl hover:opacity-90 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={totalItems === 0}
             >
-                <button
-                    className="w-full h-14 bg-[#ee2b4b] text-white font-bold rounded-xl hover:opacity-90 transition disabled:opacity-50 disabled:cursor-not-allowed"
-                    disabled={!cart?.items || cart.items.length === 0}
-                >
-                    Proceed to Checkout
-                </button>
-            </Link>
+                Proceed to Checkout
+            </button>
 
             {/* Additional information */}
             <div className="mt-6 pt-6 border-t border-neutral-100">

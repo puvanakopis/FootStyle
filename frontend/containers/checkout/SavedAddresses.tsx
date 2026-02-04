@@ -2,7 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
-import {  IoLocationOutline } from "react-icons/io5";
+import { IoLocationOutline } from "react-icons/io5";
 
 interface Address {
     fullName: string;

@@ -4,22 +4,17 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import Breadcrumbs from '@/components/Breadcrumbs';
 import PageHeader from '@/components/PageHeader';
-import NewAddress from "@/containers/delivery-address/SavedAddresses";
-import OrderSummary from "@/containers/delivery-address/OrderSummary";
-import PaymentPopup from "@/containers/delivery-address/PaymentPopup";
+import NewAddress from "@/containers/checkout/SavedAddresses";
+import OrderSummary from "@/containers/checkout/OrderSummary";
+import PaymentPopup from "@/containers/checkout/PaymentPopup";
 
 import { useCart } from "@/context/CartContext";
 import { useOrder } from "@/context/OrderContext";
 import { useAuth } from "@/context/AuthContext";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-
 import { showToast } from "@/lib/toast";
-
-// Constants
-const FREE_SHIPPING_THRESHOLD = 1000;
-const SHIPPING_COST = 200;
-const TAX_RATE = 0.02;
+import { TAX_RATE, FREE_SHIPPING_THRESHOLD, SHIPPING_COST } from '@/constants/cart';
 
 // Province → District mapping
 const provinceDistricts: Record<string, string[]> = {
@@ -34,7 +29,7 @@ const provinceDistricts: Record<string, string[]> = {
     "Sabaragamuwa": ["Ratnapura", "Kegalle"],
 };
 
-export default function DeliveryAddress() {
+export default function Checkout() {
     const router = useRouter();
     const { cart, clearCart } = useCart();
     const { user, isAuthenticated } = useAuth();
@@ -197,7 +192,7 @@ export default function DeliveryAddress() {
     const breadcrumbItems = [
         { label: "Home", href: "/" },
         { label: "Cart", href: "/cart" },
-        { label: "Delivery Address", href: "/delivery-address" },
+        { label: "Delivery Address", href: "/checkout" },
     ];
 
     return (

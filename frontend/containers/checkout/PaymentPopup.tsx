@@ -7,7 +7,6 @@ import { SiGooglepay } from "react-icons/si";
 
 import Input from "@/components/UI/Input";
 import Button from "@/components/UI/Button";
-
 import { showToast } from "@/lib/toast";
 
 export type PaymentType = "card" | "paypal" | "googlepay" | "wallet" | "cod";

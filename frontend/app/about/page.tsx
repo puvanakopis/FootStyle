@@ -1,19 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import {
-  FaAward,
-  FaShippingFast,
-  FaUsers,
-  FaHeart,
-  FaRocket,
-  FaLeaf,
-} from "react-icons/fa";
-import {
-  MdOutlineHiking,
-  MdOutlineHandshake,
-  MdOutlineLocalShipping,
-} from "react-icons/md";
+import { FaAward, FaShippingFast, FaUsers, FaHeart, FaRocket, FaLeaf, } from "react-icons/fa";
+import { MdOutlineHiking, MdOutlineHandshake, MdOutlineLocalShipping, } from "react-icons/md";
+
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 
@@ -115,10 +105,10 @@ const About = () => {
               <div
                 className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
                 style={{
-                  backgroundImage:
-                    'url("https://images.unsplash.com/photo-1549298916-b41d501d3772?w=800&auto=format&fit=crop")',
+                  backgroundImage: 'url("/frontend/public/images/aboutImage.avif")',
                 }}
               />
+
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
               <div className="absolute bottom-8 left-8 text-white">
                 <p className="text-sm">Our flagship design studio</p>
