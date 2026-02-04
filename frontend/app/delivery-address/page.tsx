@@ -4,13 +4,18 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import Breadcrumbs from '@/components/Breadcrumbs';
 import PageHeader from '@/components/PageHeader';
-import SavedAddresses from "@/containers/delivery-address/SavedAddresses";
+import NewAddress from "@/containers/delivery-address/SavedAddresses";
 import OrderSummary from "@/containers/delivery-address/OrderSummary";
 
 import { useCart } from "@/context/CartContext";
+import { useOrder } from "@/context/OrderContext";
 import { useAuth } from "@/context/AuthContext";
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
+import { showToast } from "@/lib/toast";
+
+// Constants
 const FREE_SHIPPING_THRESHOLD = 1000;
 const SHIPPING_COST = 200;
 const TAX_RATE = 0.02;
@@ -29,41 +34,39 @@ const provinceDistricts: Record<string, string[]> = {
 };
 
 export default function DeliveryAddress() {
+    const router = useRouter();
     const { cart } = useCart();
     const { user, isAuthenticated } = useAuth();
+    const { createOrder, isLoading: orderLoading } = useOrder();
 
-    // --- Address Logic ---
-    const savedAddress = user?.address
-        ? {
-            label: "Saved Address",
-            address: `${user.address.street || ""}\n${user.address.district || ""}`,
+    // Redirect if not authenticated
+    useEffect(() => {
+        if (!isAuthenticated) {
+            router.push("/login");
         }
-        : null;
+    }, [isAuthenticated, router]);
 
-    const [selectedOption, setSelectedOption] = useState<"saved" | "new">(
-        savedAddress ? "saved" : "new"
-    );
-
+    // Address state
     const [newAddress, setNewAddress] = useState({
-        fullName: "",
-        phone: "",
-        email: "",
+        fullName: user ? `${user.firstName} ${user.lastName}` : "",
+        phoneNumber: user?.phoneNumber || "",
+        email: user?.email || "",
         street: "",
-        district: "",
+        city: "",
         province: "",
-        country: "",
         postalCode: "",
+        country: "Sri Lanka",
     });
 
     const handleAddressChange = (field: keyof typeof newAddress, value: string) => {
         if (field === "province") {
-            setNewAddress(prev => ({ ...prev, province: value, district: "" }));
+            setNewAddress(prev => ({ ...prev, province: value, city: "" }));
         } else {
             setNewAddress(prev => ({ ...prev, [field]: value }));
         }
     };
 
-    // --- Order Summary Logic ---
+    // Order summary calculation
     const [summary, setSummary] = useState({
         subtotal: 0,
         shipping: 0,
@@ -91,21 +94,83 @@ export default function DeliveryAddress() {
         setSummary({ subtotal, shipping, tax, total });
     }, [cart]);
 
-    // IMAGE RESOLVER
-    const getImageUrl = (imagePath?: string) => {
-        const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
-        if (!imagePath || imagePath === "/default-product.jpg") return "/default-product.jpg";
-        if (imagePath.startsWith("http")) return imagePath;
-        return `${API_BASE_URL}/uploads/product/${imagePath}`;
+    // Validate address before placing order
+    const validateAddress = () => {
+        const requiredFields = ['fullName', 'phoneNumber', 'email', 'street', 'city', 'province', 'postalCode'];
+
+        for (const field of requiredFields) {
+            if (!newAddress[field as keyof typeof newAddress]) {
+                const msg = `Please fill in the ${field.replace(/([A-Z])/g, ' $1').toLowerCase()}`;
+                showToast("error", msg);
+                return false;
+            }
+        }
+
+        // Validate email format
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(newAddress.email)) {
+            showToast("error", "Please enter a valid email address");
+            return false;
+        }
+
+        // Validate phone number (Sri Lankan format)
+        const phoneRegex = /^(?:\+94|0)[1-9][0-9]{8}$/;
+        if (!phoneRegex.test(newAddress.phoneNumber.replace(/\s+/g, ''))) {
+            showToast("error", "Please enter a valid Sri Lankan phone number");
+            return false;
+        }
+
+        return true;
     };
 
-    // FORMAT CURRENCY
+    // Handle order creation
+    const handlePlaceOrder = async () => {
+        if (!isAuthenticated || !cart?.items?.length) {
+            showToast("error", "Please login and add items to cart");
+            return;
+        }
+
+        if (!validateAddress()) return;
+
+        try {
+            const orderItems = cart.items.flatMap(item =>
+                item.variants.map(variant => ({
+                    product: item.product?._id || "",
+                    size: variant.size,
+                    quantity: variant.quantity
+                }))
+            );
+
+            const orderData = {
+                items: orderItems,
+                shippingAddress: newAddress,
+                subtotal: summary.subtotal,
+                shippingFee: summary.shipping,
+                total: summary.total
+            };
+
+            await createOrder(orderData);
+
+            showToast("success", "Order created successfully!");
+
+        } catch (error: any) {
+            showToast("error", error.response?.data?.message || "Failed to create order");
+        }
+    };
+
     const formatCurrency = (amount: number) =>
         new Intl.NumberFormat("en-LK", {
             style: "currency",
             currency: "LKR",
             minimumFractionDigits: 0,
         }).format(amount);
+
+    const getImageUrl = (imagePath?: string) => {
+        const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+        if (!imagePath || imagePath === "/default-product.jpg") return "/default-product.jpg";
+        if (imagePath.startsWith("http")) return imagePath;
+        return `${API_BASE_URL}/uploads/product/${imagePath}`;
+    };
 
     const breadcrumbItems = [
         { label: "Home", href: "/" },
@@ -117,16 +182,12 @@ export default function DeliveryAddress() {
         <main className="min-h-screen bg-background text-foreground">
             <Header />
 
-            <div className="px-30 py-6">
+            <div className="px-4 md:px-30 py-6">
                 <Breadcrumbs items={breadcrumbItems} />
                 <PageHeader title="Shipping Information" />
 
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
-                    <SavedAddresses
-                        savedAddress={savedAddress}
-                        user={user}
-                        selectedOption={selectedOption}
-                        setSelectedOption={setSelectedOption}
+                    <NewAddress
                         newAddress={newAddress}
                         handleAddressChange={handleAddressChange}
                         provinceDistricts={provinceDistricts}
@@ -139,6 +200,8 @@ export default function DeliveryAddress() {
                         formatCurrency={formatCurrency}
                         getImageUrl={getImageUrl}
                         freeShippingThreshold={FREE_SHIPPING_THRESHOLD}
+                        onPlaceOrder={handlePlaceOrder}
+                        isLoading={orderLoading}
                     />
                 </div>
             </div>

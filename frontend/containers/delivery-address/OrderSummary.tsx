@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { CiLock } from "react-icons/ci";
+import { FiLoader } from "react-icons/fi";
 
 interface Variant {
     size: string;
@@ -32,6 +33,8 @@ interface OrderSummaryProps {
     formatCurrency: (value: number) => string;
     getImageUrl: (path?: string) => string;
     freeShippingThreshold: number;
+    onPlaceOrder: () => Promise<void>;
+    isLoading: boolean;
 }
 
 const OrderSummary = ({
@@ -41,13 +44,21 @@ const OrderSummary = ({
     formatCurrency,
     getImageUrl,
     freeShippingThreshold,
+    onPlaceOrder,
+    isLoading,
 }: OrderSummaryProps) => {
     const isEmpty = items.length === 0;
+
+    const handleCheckout = async () => {
+        if (!isAuthenticated) {
+            return;
+        }
+        await onPlaceOrder();
+    };
 
     return (
         <div className="lg:col-span-4 lg:sticky lg:top-24">
             <div className="bg-white rounded-2xl shadow-sm border border-neutral-100 p-6 sm:p-8">
-
                 <h2 className="text-xl font-bold text-neutral-900 mb-6">Order Summary</h2>
 
                 {/* EMPTY STATE */}
@@ -138,11 +149,28 @@ const OrderSummary = ({
                         </div>
 
                         {/* CTA */}
-                        <Link href={isAuthenticated ? "/payment" : "/login"}>
-                            <button className="w-full bg-[#ee2b4b] hover:bg-[#d4203e] text-white font-bold text-lg h-14 rounded-xl shadow-lg transition-all flex items-center justify-center">
-                                {isAuthenticated ? "Add Payment" : "Login to Checkout"}
+                        {!isAuthenticated ? (
+                            <Link href="/login" className="block">
+                                <button className="w-full bg-[#ee2b4b] hover:bg-[#d4203e] text-white font-bold text-lg h-14 rounded-xl shadow-lg transition-all flex items-center justify-center">
+                                    Login to Checkout
+                                </button>
+                            </Link>
+                        ) : (
+                            <button
+                                onClick={handleCheckout}
+                                disabled={isLoading}
+                                className={`w-full ${isLoading ? 'bg-gray-400' : 'bg-[#ee2b4b] hover:bg-[#d4203e]'} text-white font-bold text-lg h-14 rounded-xl shadow-lg transition-all flex items-center justify-center`}
+                            >
+                                {isLoading ? (
+                                    <>
+                                        <FiLoader className="animate-spin mr-2" />
+                                        Creating Order...
+                                    </>
+                                ) : (
+                                    'Proceed to Payment'
+                                )}
                             </button>
-                        </Link>
+                        )}
 
                         {/* FOOTER */}
                         <div className="mt-6 text-center">
