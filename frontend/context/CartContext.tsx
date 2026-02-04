@@ -94,8 +94,18 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
         }
     };
 
-    const clearCart = () => {
-        setCart(null);
+    // ---------- CLEAR CART ----------
+    const clearCart = async () => {
+        try {
+            setIsLoading(true);
+            const response = await cartApi.clearCart();
+            setCart(response.cart); 
+        } catch (err) {
+            handleError(err);
+            throw err;
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     return (

@@ -53,5 +53,5 @@ export interface CartContextType extends CartState {
     addToCart: (data: AddToCartRequest) => Promise<void>;
     updateQuantity: (data: UpdateCartQuantityRequest) => Promise<void>;
     removeFromCart: (data: RemoveFromCartRequest) => Promise<void>;
-    clearCart: () => void;
+    clearCart: () => Promise<void>;
 }
