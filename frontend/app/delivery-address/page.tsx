@@ -6,6 +6,7 @@ import Breadcrumbs from '@/components/Breadcrumbs';
 import PageHeader from '@/components/PageHeader';
 import NewAddress from "@/containers/delivery-address/SavedAddresses";
 import OrderSummary from "@/containers/delivery-address/OrderSummary";
+import PaymentPopup from "@/containers/delivery-address/PaymentPopup";
 
 import { useCart } from "@/context/CartContext";
 import { useOrder } from "@/context/OrderContext";
@@ -35,16 +36,13 @@ const provinceDistricts: Record<string, string[]> = {
 
 export default function DeliveryAddress() {
     const router = useRouter();
-    const { cart } = useCart();
+    const { cart, clearCart } = useCart();
     const { user, isAuthenticated } = useAuth();
     const { createOrder, isLoading: orderLoading } = useOrder();
 
-    // Redirect if not authenticated
-    useEffect(() => {
-        if (!isAuthenticated) {
-            router.push("/login");
-        }
-    }, [isAuthenticated, router]);
+    // State for payment popup
+    const [showPaymentPopup, setShowPaymentPopup] = useState(false);
+    const [createdOrderId, setCreatedOrderId] = useState<string | null>(null);
 
     // Address state
     const [newAddress, setNewAddress] = useState({
@@ -113,7 +111,7 @@ export default function DeliveryAddress() {
             return false;
         }
 
-        // Validate phone number (Sri Lankan format)
+        // Validate phone number 
         const phoneRegex = /^(?:\+94|0)[1-9][0-9]{8}$/;
         if (!phoneRegex.test(newAddress.phoneNumber.replace(/\s+/g, ''))) {
             showToast("error", "Please enter a valid Sri Lankan phone number");
@@ -149,13 +147,37 @@ export default function DeliveryAddress() {
                 total: summary.total
             };
 
-            await createOrder(orderData);
+            const createdOrder = await createOrder(orderData);
+            setCreatedOrderId(createdOrder._id);
 
-            showToast("success", "Order created successfully!");
+            setShowPaymentPopup(true);
 
         } catch (error: any) {
             showToast("error", error.response?.data?.message || "Failed to create order");
         }
+    };
+
+    // Handle payment success
+    const handlePaymentSuccess = async () => {
+        try {
+            await clearCart();
+
+            showToast("success", "Order and payment completed successfully!");
+
+            setTimeout(() => {
+                router.push('/');
+            }, 2000);
+
+        } catch (error) {
+            console.log("Error clearing cart after payment:", error);
+            showToast("error", "Failed to clear cart after payment");
+        }
+    };
+
+    // Handle payment cancellation
+    const handlePaymentCancel = () => {
+        setShowPaymentPopup(false);
+        showToast("info", "You can complete payment later from your orders page");
     };
 
     const formatCurrency = (amount: number) =>
@@ -205,6 +227,16 @@ export default function DeliveryAddress() {
                     />
                 </div>
             </div>
+
+            {createdOrderId && (
+                <PaymentPopup
+                    isOpen={showPaymentPopup}
+                    onClose={handlePaymentCancel}
+                    orderId={createdOrderId}
+                    totalAmount={summary.total}
+                    onPaymentSuccess={handlePaymentSuccess}
+                />
+            )}
 
             <Footer />
         </main>
