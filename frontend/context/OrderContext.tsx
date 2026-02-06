@@ -3,13 +3,7 @@
 import React, { createContext, useContext, useState, ReactNode } from "react";
 import { AxiosError } from "axios";
 import { orderApi } from "@/services/orderApi";
-import {
-    Order,
-    OrderContextType,
-    CreateOrderRequest,
-    AddPaymentRequest,
-    UpdateOrderStatusRequest
-} from "@/interfaces/orderInterface";
+import { Order, OrderContextType, CreateOrderRequest, AddPaymentRequest, UpdateOrderStatusRequest, } from "@/interfaces/orderInterface";
 
 const OrderContext = createContext<OrderContextType | undefined>(undefined);
 
@@ -26,13 +20,34 @@ interface OrderProviderProps {
 }
 
 export const OrderProvider: React.FC<OrderProviderProps> = ({ children }) => {
-    const [orders, setOrders] = useState<Order[]>([]);
-    const [currentOrder, setCurrentOrder] = useState<Order | null>(null);
-    const [isLoading, setIsLoading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
+    // ---------- GET ALL ORDERS ----------
+    const [allOrders, setAllOrders] = useState<Order[]>([]);
+    const [allOrdersLoading, setAllOrdersLoading] = useState(false);
+    const [allOrdersError, setAllOrdersError] = useState<string | null>(null);
 
- 
-    const handleError = (err: unknown) => {
+    // ---------- GET USER ORDERS ----------
+    const [userOrders, setUserOrders] = useState<Order[]>([]);
+    const [userOrdersLoading, setUserOrdersLoading] = useState(false);
+    const [userOrdersError, setUserOrdersError] = useState<string | null>(null);
+
+    // ---------- GET ORDER BY ID ----------
+    const [currentOrder, setCurrentOrder] = useState<Order | null>(null);
+    const [orderLoading, setOrderLoading] = useState(false);
+    const [orderError, setOrderError] = useState<string | null>(null);
+
+    // ---------- CREATE ORDER ----------
+    const [createOrderLoading, setCreateOrderLoading] = useState(false);
+    const [createOrderError, setCreateOrderError] = useState<string | null>(null);
+
+    // ---------- ADD PAYMENT ----------
+    const [addPaymentLoading, setAddPaymentLoading] = useState(false);
+    const [addPaymentError, setAddPaymentError] = useState<string | null>(null);
+
+    // ---------- UPDATE ORDER STATUS ----------
+    const [updateStatusLoading, setUpdateStatusLoading] = useState(false);
+    const [updateStatusError, setUpdateStatusError] = useState<string | null>(null);
+
+    const handleError = (err: unknown, setError: React.Dispatch<React.SetStateAction<string | null>>) => {
         const error = err as AxiosError<{ message: string }> | Error;
         if ("response" in error && error.response?.data?.message) {
             setError(error.response.data.message);
@@ -43,87 +58,93 @@ export const OrderProvider: React.FC<OrderProviderProps> = ({ children }) => {
         }
     };
 
-    // ---------- GET ALL ORDERS (Admin only) ----------
+    // ---------- GET ALL ORDERS ----------
     const getAllOrders = async () => {
         try {
-            setIsLoading(true);
+            setAllOrdersLoading(true);
             const res = await orderApi.getAllOrders();
-            setOrders(res.orders);
+            setAllOrders(res.orders);
+            setAllOrdersError(null);
         } catch (err) {
-            handleError(err);
+            handleError(err, setAllOrdersError);
         } finally {
-            setIsLoading(false);
+            setAllOrdersLoading(false);
         }
     };
 
     // ---------- GET USER ORDERS ----------
     const getUserOrders = async () => {
         try {
-            setIsLoading(true);
+            setUserOrdersLoading(true);
             const res = await orderApi.getUserOrders();
-            setOrders(res.orders);
+            setUserOrders(res.orders);
+            setUserOrdersError(null);
         } catch (err) {
-            handleError(err);
+            handleError(err, setUserOrdersError);
         } finally {
-            setIsLoading(false);
+            setUserOrdersLoading(false);
         }
     };
 
     // ---------- GET ORDER BY ID ----------
     const getOrderById = async (orderId: string) => {
         try {
-            setIsLoading(true);
+            setOrderLoading(true);
             const res = await orderApi.getOrderById(orderId);
             setCurrentOrder(res.order);
+            setOrderError(null);
         } catch (err) {
-            handleError(err);
+            handleError(err, setOrderError);
         } finally {
-            setIsLoading(false);
+            setOrderLoading(false);
         }
     };
 
     // ---------- CREATE ORDER ----------
     const createOrder = async (data: CreateOrderRequest): Promise<Order> => {
         try {
-            setIsLoading(true);
+            setCreateOrderLoading(true);
             const res = await orderApi.createOrder(data);
-            await getUserOrders(); // refresh user's order list
+            await getUserOrders();
+            setCreateOrderError(null);
             return res.order;
         } catch (err) {
-            handleError(err);
+            handleError(err, setCreateOrderError);
             throw err;
         } finally {
-            setIsLoading(false);
+            setCreateOrderLoading(false);
         }
     };
 
-    // ---------- ADD PAYMENT TO ORDER ----------
+    // ---------- ADD PAYMENT ----------
     const addPaymentToOrder = async (orderId: string, data: AddPaymentRequest) => {
         try {
-            setIsLoading(true);
+            setAddPaymentLoading(true);
             const res = await orderApi.addPaymentToOrder(orderId, data);
             setCurrentOrder(res.order);
             await getUserOrders();
+            setAddPaymentError(null);
         } catch (err) {
-            handleError(err);
+            handleError(err, setAddPaymentError);
             throw err;
         } finally {
-            setIsLoading(false);
+            setAddPaymentLoading(false);
         }
     };
 
-    // ---------- UPDATE ORDER STATUS (Admin only) ----------
+    // ---------- UPDATE ORDER STATUS ----------
     const updateOrderStatus = async (orderId: string, data: UpdateOrderStatusRequest) => {
         try {
-            setIsLoading(true);
+            setUpdateStatusLoading(true);
             const res = await orderApi.updateOrderStatus(orderId, data);
             setCurrentOrder(res.order);
             await getAllOrders();
+            setUpdateStatusError(null);
         } catch (err) {
-            handleError(err);
+            handleError(err, setUpdateStatusError);
             throw err;
         } finally {
-            setIsLoading(false);
+            setUpdateStatusLoading(false);
         }
     };
 
@@ -132,10 +153,21 @@ export const OrderProvider: React.FC<OrderProviderProps> = ({ children }) => {
     return (
         <OrderContext.Provider
             value={{
-                orders,
+                allOrders,
+                allOrdersLoading,
+                allOrdersError,
+                userOrders,
+                userOrdersLoading,
+                userOrdersError,
                 currentOrder,
-                isLoading,
-                error,
+                orderLoading,
+                orderError,
+                createOrderLoading,
+                createOrderError,
+                addPaymentLoading,
+                addPaymentError,
+                updateStatusLoading,
+                updateStatusError,
                 getAllOrders,
                 getUserOrders,
                 getOrderById,

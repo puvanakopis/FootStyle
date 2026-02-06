@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useEffect, useState, ReactNode, } from "react";
+import React, { createContext, useContext, useState, ReactNode, } from "react";
 import { AxiosError } from "axios";
 import { userApi } from "@/services/userApi";
 import { UserContextType, User, } from "@/interfaces/userInterface";
@@ -23,11 +23,6 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     const [users, setUsers] = useState<User[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
-
-    // Fetch all users automatically
-    useEffect(() => {
-        fetchUsers();
-    }, []);
 
     // ---------------- ERROR HANDLER ----------------
     const handleError = (err: unknown) => {

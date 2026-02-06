@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useEffect, useState, ReactNode } from "react";
+import React, { createContext, useContext, useState, ReactNode } from "react";
 import { AxiosError } from "axios";
 import { wishlistApi } from "@/services/wishlistApi";
 import { WishlistContextType, AddToWishlistRequest } from "@/interfaces/wishlistInterface";
@@ -24,10 +24,6 @@ export const WishlistProvider: React.FC<WishlistProviderProps> = ({ children }) 
     const [wishlist, setWishlist] = useState<Product[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
-
-    useEffect(() => {
-        fetchWishlist();
-    }, []);
 
     const handleError = (err: unknown) => {
         const error = err as AxiosError<{ message: string }> | Error;

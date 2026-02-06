@@ -23,7 +23,6 @@ export const userApi = {
     // ----------------- GET ALL USERS -----------------
     getUsers: async (): Promise<User[]> => {
         const response = await api.get<UsersResponse>('/api/users');
-        console.log("Fetched Users Response:", response.data);
         return response.data;
     },
 

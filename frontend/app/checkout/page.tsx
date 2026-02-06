@@ -16,7 +16,6 @@ import { useRouter } from "next/navigation";
 import { showToast } from "@/lib/toast";
 import { TAX_RATE, FREE_SHIPPING_THRESHOLD, SHIPPING_COST } from '@/constants/cart';
 
-// Province → District mapping
 const provinceDistricts: Record<string, string[]> = {
     "Western": ["Colombo", "Gampaha", "Kalutara"],
     "Central": ["Kandy", "Matale", "Nuwara Eliya"],
@@ -33,7 +32,14 @@ export default function Checkout() {
     const router = useRouter();
     const { cart, clearCart } = useCart();
     const { user, isAuthenticated } = useAuth();
-    const { createOrder, isLoading: orderLoading } = useOrder();
+    const {
+        createOrder,
+        createOrderLoading,
+        createOrderError,
+        addPaymentToOrder,
+        addPaymentLoading,
+        addPaymentError
+    } = useOrder();
 
     // State for payment popup
     const [showPaymentPopup, setShowPaymentPopup] = useState(false);
@@ -144,28 +150,36 @@ export default function Checkout() {
 
             const createdOrder = await createOrder(orderData);
             setCreatedOrderId(createdOrder._id);
-
             setShowPaymentPopup(true);
 
         } catch (error: any) {
-            showToast("error", error.response?.data?.message || "Failed to create order");
+            const errorMessage = createOrderError || error.response?.data?.message || "Failed to create order";
+            showToast("error", errorMessage);
         }
     };
 
     // Handle payment success
     const handlePaymentSuccess = async () => {
+        if (!createdOrderId) return;
+
         try {
+            await addPaymentToOrder(createdOrderId, {
+                method: "COD",
+                transactionId: undefined
+            });
+
             await clearCart();
 
             showToast("success", "Order and payment completed successfully!");
 
             setTimeout(() => {
-                router.push('/');
+                router.push('/orders');
             }, 2000);
 
-        } catch (error) {
-            console.log("Error clearing cart after payment:", error);
-            showToast("error", "Failed to clear cart after payment");
+        } catch (error: any) {
+            const errorMessage = addPaymentError || "Failed to process payment";
+            console.error("Payment error:", error);
+            showToast("error", errorMessage);
         }
     };
 
@@ -173,6 +187,10 @@ export default function Checkout() {
     const handlePaymentCancel = () => {
         setShowPaymentPopup(false);
         showToast("info", "You can complete payment later from your orders page");
+
+        setTimeout(() => {
+            router.push('/orders');
+        }, 1500);
     };
 
     const formatCurrency = (amount: number) =>
@@ -194,6 +212,9 @@ export default function Checkout() {
         { label: "Cart", href: "/cart" },
         { label: "Delivery Address", href: "/checkout" },
     ];
+
+    // Combine loading states for UI
+    const isLoading = createOrderLoading || addPaymentLoading;
 
     return (
         <main className="min-h-screen bg-background text-foreground">
@@ -218,7 +239,7 @@ export default function Checkout() {
                         getImageUrl={getImageUrl}
                         freeShippingThreshold={FREE_SHIPPING_THRESHOLD}
                         onPlaceOrder={handlePlaceOrder}
-                        isLoading={orderLoading}
+                        isLoading={isLoading}
                     />
                 </div>
             </div>

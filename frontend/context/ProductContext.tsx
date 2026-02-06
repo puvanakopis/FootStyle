@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useEffect, useState, ReactNode, } from "react";
+import React, { createContext, useContext, useState, ReactNode, } from "react";
 import { AxiosError } from "axios";
 import { productApi } from "@/services/productApi";
 import { ProductContextType, Product, CreateProductRequest, UpdateProductRequest, AddReviewRequest, } from "@/interfaces/productInterface";
@@ -24,10 +24,6 @@ export const ProductProvider: React.FC<ProductProviderProps> = ({ children }) =>
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [currentProduct, setCurrentProduct] = useState<Product | null>(null);
-
-    useEffect(() => {
-        fetchProducts();
-    }, []);
 
     const handleError = (err: unknown) => {
         const error = err as AxiosError<{ message: string }> | Error;

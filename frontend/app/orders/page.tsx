@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 
 import Header from "@/components/Header";
@@ -11,6 +11,7 @@ import OrderHistory from "@/containers/orders/OrderHistory";
 import OrderFilter from "@/containers/orders/OrderFilter";
 import { useOrder } from "@/context/OrderContext";
 import { Order } from "@/interfaces/orderInterface";
+import { showToast } from "@/lib/toast";
 
 const breadcrumbItems = [
     { label: "Account", href: "" },
@@ -18,15 +19,35 @@ const breadcrumbItems = [
 ];
 
 export default function Orders() {
-    const { getUserOrders, orders } = useOrder();
+    const {
+        getUserOrders,
+        userOrders,
+        userOrdersLoading,
+        userOrdersError
+    } = useOrder();
     const [filter, setFilter] = useState<string>("all");
 
     // Fetch user orders
     useEffect(() => {
-        getUserOrders();
+        const fetchOrders = async () => {
+            try {
+                await getUserOrders();
+            } catch (error) {
+                console.error("Failed to fetch orders:", error);
+            }
+        };
+
+        fetchOrders();
     }, []);
 
-    // --- Helper Functions (passed as props) ---
+    // Show error toast if there's an error
+    useEffect(() => {
+        if (userOrdersError) {
+            showToast("error", userOrdersError);
+        }
+    }, [userOrdersError]);
+
+    // --- Helper Functions  ---
     const formatDate = (dateString?: string) => {
         if (!dateString) return "N/A";
         return new Date(dateString).toLocaleDateString("en-US", {
@@ -36,12 +57,21 @@ export default function Orders() {
         });
     };
 
-    const formatCurrency = (amount: number) => `Rs ${amount.toFixed(2)}`;
+    const formatCurrency = (amount: number) =>
+        new Intl.NumberFormat("en-LK", {
+            style: "currency",
+            currency: "LKR",
+            minimumFractionDigits: 0,
+        }).format(amount);
 
     const getPrimaryImage = (product: any) => {
         const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
         if (!product) return "https://via.placeholder.com/100";
+
+        if (typeof product === 'string') {
+            return "https://via.placeholder.com/100";
+        }
 
         if (product.image) {
             return `${API_BASE_URL}/uploads/product/${product.image}`;
@@ -55,11 +85,11 @@ export default function Orders() {
 
     // Filtered Orders
     const filteredOrders = useMemo(() => {
-        if (filter === "all") return orders;
-        return orders.filter(
+        if (filter === "all") return userOrders;
+        return userOrders.filter(
             (order: Order) => order.status.toLowerCase() === filter.toLowerCase()
         );
-    }, [orders, filter]);
+    }, [userOrders, filter]);
 
     return (
         <main className="min-h-screen bg-background text-foreground">
@@ -82,7 +112,7 @@ export default function Orders() {
                                     My Orders
                                 </h1>
                                 <p className="text-neutral-600 mt-1">
-                                    {orders.length} Orders
+                                    {userOrders.length} {userOrders.length === 1 ? 'Order' : 'Orders'}
                                 </p>
                             </div>
 
@@ -92,7 +122,35 @@ export default function Orders() {
                             />
                         </div>
 
-                        {filteredOrders.length === 0 ? (
+                        {/* Loading State */}
+                        {userOrdersLoading ? (
+                            <div className="bg-white rounded-2xl shadow-sm border border-neutral-100 p-12 text-center">
+                                <div className="flex justify-center items-center">
+                                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#ee2b4b]"></div>
+                                </div>
+                                <p className="text-neutral-600 mt-4">Loading your orders...</p>
+                            </div>
+                        ) : userOrdersError ? (
+                            <div className="bg-white rounded-2xl shadow-sm border border-neutral-100 p-12 text-center">
+                                <div className="text-red-500 mb-4">
+                                    <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                </div>
+                                <h3 className="text-xl font-bold text-neutral-900 mb-2">
+                                    Error Loading Orders
+                                </h3>
+                                <p className="text-neutral-500 mb-6">
+                                    {userOrdersError || "Failed to load your orders. Please try again."}
+                                </p>
+                                <button
+                                    onClick={() => getUserOrders()}
+                                    className="inline-block px-6 py-3 bg-[#ee2b4b] text-white rounded-lg font-bold hover:bg-red-600 transition"
+                                >
+                                    Retry
+                                </button>
+                            </div>
+                        ) : filteredOrders.length === 0 ? (
                             <div className="bg-white rounded-2xl shadow-sm border border-neutral-100 p-12 text-center">
                                 <div className="text-neutral-400 mb-4">
                                     <svg

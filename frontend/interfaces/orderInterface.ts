@@ -1,5 +1,7 @@
+
 import { Product } from "./productInterface";
 
+// ---------- ADDRESS ----------
 export interface Address {
   fullName: string;
   phoneNumber: string;
@@ -11,43 +13,37 @@ export interface Address {
   country: string;
 }
 
+// ---------- PAYMENT ----------
 export interface PaymentMethod {
   method: "Card" | "PayPal" | "GooglePay" | "Wallet" | "COD";
   status: "Pending" | "Paid" | "Failed" | "Refunded";
   transactionId?: string | null;
 }
 
+// ---------- ORDER ITEM ----------
 export interface OrderItem {
   product: string | Product;
   size: string;
   quantity: number;
 }
 
+// ---------- ORDER ----------
 export interface Order {
   _id: string;
-  user: string | {
-    _id: string;
-    name?: string;
-    email?: string;
-  };
+  user: string | { _id: string; name?: string; email?: string };
   items: OrderItem[];
   shippingAddress: Address;
   payment: PaymentMethod;
   subtotal: number;
   shippingFee: number;
   total: number;
-  status:
-    | "Pending"
-    | "Processing"
-    | "Shipped"
-    | "Delivered"
-    | "Cancelled"
-    | "Returned";
+  status: "Pending" | "Processing" | "Shipped" | "Delivered" | "Cancelled" | "Returned";
   isActive?: boolean;
   createdAt?: string;
   updatedAt?: string;
 }
 
+// ---------- REQUESTS ----------
 export interface CreateOrderRequest {
   items: OrderItem[];
   shippingAddress: Address;
@@ -62,18 +58,12 @@ export interface AddPaymentRequest {
 }
 
 export interface UpdateOrderStatusRequest {
-  status:
-    | "Pending"
-    | "Processing"
-    | "Shipped"
-    | "Delivered"
-    | "Cancelled"
-    | "Returned";
+  status: "Pending" | "Processing" | "Shipped" | "Delivered" | "Cancelled" | "Returned";
 }
 
 // ---------- API RESPONSES ----------
 export interface OrdersResponse {
-  success?: boolean;     
+  success?: boolean;
   message?: string;
   orders: Order[];
 }
@@ -84,18 +74,38 @@ export interface OrderResponse {
   order: Order;
 }
 
-// ---------- CONTEXT STATE ----------
-export interface OrderState {
-  orders: Order[];
-  currentOrder: Order | null;
-  isLoading: boolean;
-  error: string | null;
-}
+// ---------- CONTEXT STATE PER OPERATION ----------
+export interface OrderContextType {
+  // GET ALL ORDERS
+  allOrders: Order[];
+  allOrdersLoading: boolean;
+  allOrdersError: string | null;
 
-// ---------- CONTEXT ACTIONS ----------
-export interface OrderContextType extends OrderState {
-  getAllOrders: () => Promise<void>;               
-  getUserOrders: () => Promise<void>;              
+  // GET USER ORDERS
+  userOrders: Order[];
+  userOrdersLoading: boolean;
+  userOrdersError: string | null;
+
+  // GET ORDER BY ID
+  currentOrder: Order | null;
+  orderLoading: boolean;
+  orderError: string | null;
+
+  // CREATE ORDER
+  createOrderLoading: boolean;
+  createOrderError: string | null;
+
+  // ADD PAYMENT
+  addPaymentLoading: boolean;
+  addPaymentError: string | null;
+
+  // UPDATE ORDER STATUS
+  updateStatusLoading: boolean;
+  updateStatusError: string | null;
+
+  // ---------- ACTIONS ----------
+  getAllOrders: () => Promise<void>;
+  getUserOrders: () => Promise<void>;
   getOrderById: (orderId: string) => Promise<void>;
   createOrder: (data: CreateOrderRequest) => Promise<Order>;
   addPaymentToOrder: (orderId: string, data: AddPaymentRequest) => Promise<void>;

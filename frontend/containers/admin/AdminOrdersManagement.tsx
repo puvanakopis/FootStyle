@@ -1,12 +1,12 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { MdOutlineEdit, MdOutlineVisibility, MdClose, MdDeleteOutline } from "react-icons/md";
+import { MdOutlineEdit, MdOutlineVisibility, MdClose, MdDeleteOutline, MdPayment } from "react-icons/md";
 import { LuChevronLeft, LuChevronRight } from "react-icons/lu";
 import { IoSearch } from "react-icons/io5";
 import { useOrder } from "@/context/OrderContext";
 import { showToast } from "@/lib/toast";
-import { Order, Address, UpdateOrderStatusRequest } from "@/interfaces/orderInterface";
+import { Order, Address, UpdateOrderStatusRequest, AddPaymentRequest } from "@/interfaces/orderInterface";
 
 type OrderFormData = {
     status: "Pending" | "Processing" | "Shipped" | "Delivered" | "Cancelled" | "Returned";
@@ -14,14 +14,24 @@ type OrderFormData = {
     paymentStatus: "Pending" | "Paid" | "Failed" | "Refunded";
 };
 
+type PaymentFormData = {
+    method: "Card" | "PayPal" | "GooglePay" | "Wallet" | "COD";
+    status: "Pending" | "Paid" | "Failed" | "Refunded";
+    transactionId?: string;
+};
+
 const AdminOrdersManagement = () => {
     const {
-        orders,
         getAllOrders,
         getOrderById,
         updateOrderStatus,
-        isLoading,
-        error
+        addPaymentToOrder,
+        allOrders,
+        allOrdersLoading,
+        allOrdersError,
+        currentOrder,
+        orderLoading,
+        addPaymentLoading
     } = useOrder();
 
     // State for filters
@@ -34,6 +44,7 @@ const AdminOrdersManagement = () => {
     const [showEditModal, setShowEditModal] = useState(false);
     const [showViewModal, setShowViewModal] = useState(false);
     const [showCancelModal, setShowCancelModal] = useState(false);
+    const [showPaymentModal, setShowPaymentModal] = useState(false); // New payment modal
 
     // State for form data
     const [formData, setFormData] = useState<OrderFormData>({
@@ -51,10 +62,18 @@ const AdminOrdersManagement = () => {
         paymentStatus: "Pending",
     });
 
+    // State for payment form data
+    const [paymentFormData, setPaymentFormData] = useState<PaymentFormData>({
+        method: "COD",
+        status: "Pending",
+        transactionId: ""
+    });
+
     // Other states
     const [editingOrderId, setEditingOrderId] = useState<string | null>(null);
     const [viewingOrder, setViewingOrder] = useState<Order | null>(null);
     const [cancellingOrderId, setCancellingOrderId] = useState<string | null>(null);
+    const [updatingPaymentOrderId, setUpdatingPaymentOrderId] = useState<string | null>(null); // New state
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     // Pagination state
@@ -65,6 +84,35 @@ const AdminOrdersManagement = () => {
     useEffect(() => {
         getAllOrders();
     }, []);
+
+    // Update form data when currentOrder changes (for edit modal)
+    useEffect(() => {
+        if (currentOrder && editingOrderId) {
+            setFormData({
+                status: currentOrder.status,
+                shippingAddress: currentOrder.shippingAddress,
+                paymentStatus: currentOrder.payment.status,
+            });
+        }
+    }, [currentOrder, editingOrderId]);
+
+    // Update payment form data when currentOrder changes (for payment modal)
+    useEffect(() => {
+        if (currentOrder && updatingPaymentOrderId) {
+            setPaymentFormData({
+                method: currentOrder.payment.method,
+                status: currentOrder.payment.status,
+                transactionId: currentOrder.payment.transactionId || ""
+            });
+        }
+    }, [currentOrder, updatingPaymentOrderId]);
+
+    // Show error toast if there's an error
+    useEffect(() => {
+        if (allOrdersError) {
+            showToast("error", allOrdersError);
+        }
+    }, [allOrdersError]);
 
     // Get user initials and color
     const getUserInitials = (name: string) => {
@@ -125,7 +173,7 @@ const AdminOrdersManagement = () => {
     };
 
     // Filter orders based on search and filters
-    const filteredOrders = orders.filter((order) => {
+    const filteredOrders = allOrders.filter((order) => {
         const matchesSearch =
             order._id.toLowerCase().includes(searchQuery.toLowerCase()) ||
             (typeof order.user !== 'string' && order.user?.name?.toLowerCase().includes(searchQuery.toLowerCase())) ||
@@ -164,7 +212,8 @@ const AdminOrdersManagement = () => {
     const handleViewOrder = async (orderId: string) => {
         try {
             await getOrderById(orderId);
-            setViewingOrder(orders.find(o => o._id === orderId) || null);
+            const orderToView = allOrders.find(o => o._id === orderId) || null;
+            setViewingOrder(orderToView);
             setShowViewModal(true);
         } catch (error) {
             console.error("Error fetching order details:", error);
@@ -176,6 +225,18 @@ const AdminOrdersManagement = () => {
     const handleCancelOrder = (orderId: string) => {
         setCancellingOrderId(orderId);
         setShowCancelModal(true);
+    };
+
+    // Handle update payment
+    const handleUpdatePayment = async (orderId: string) => {
+        try {
+            await getOrderById(orderId);
+            setUpdatingPaymentOrderId(orderId);
+            setShowPaymentModal(true);
+        } catch (error) {
+            console.error("Error fetching order details:", error);
+            showToast('error', "Failed to load order details");
+        }
     };
 
     // Confirm cancel
@@ -191,6 +252,46 @@ const AdminOrdersManagement = () => {
             } catch (error) {
                 console.error("Error cancelling order:", error);
                 showToast('error', "Failed to cancel order");
+            } finally {
+                setIsSubmitting(false);
+            }
+        }
+    };
+
+    // Handle payment form input changes
+    const handlePaymentInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+        const { name, value } = e.target;
+        setPaymentFormData(prev => ({ ...prev, [name]: value }));
+    };
+
+    // Handle payment update
+    const handlePaymentUpdate = async (e: React.FormEvent) => {
+        e.preventDefault();
+
+        if (updatingPaymentOrderId) {
+            try {
+                setIsSubmitting(true);
+
+                // Prepare payment data
+                const paymentData: AddPaymentRequest = {
+                    method: paymentFormData.method,
+                    ...(paymentFormData.transactionId && { transactionId: paymentFormData.transactionId })
+                };
+
+                // Update payment
+                await addPaymentToOrder(updatingPaymentOrderId, paymentData);
+
+                // If status is also changed, update it separately
+                if (currentOrder && currentOrder.payment.status !== paymentFormData.status) {
+                    showToast('info', 'Payment method updated. Note: Payment status changes may require separate processing.');
+                }
+
+                showToast('success', "Payment information updated successfully");
+                setShowPaymentModal(false);
+                setUpdatingPaymentOrderId(null);
+            } catch (error) {
+                console.error("Error updating payment:", error);
+                showToast('error', "Failed to update payment information");
             } finally {
                 setIsSubmitting(false);
             }
@@ -298,6 +399,15 @@ const AdminOrdersManagement = () => {
         return pageNumbers;
     };
 
+    // Payment methods options
+    const paymentMethods = [
+        { value: "COD", label: "Cash on Delivery" },
+        { value: "Card", label: "Credit/Debit Card" },
+        { value: "PayPal", label: "PayPal" },
+        { value: "GooglePay", label: "Google Pay" },
+        { value: "Wallet", label: "Digital Wallet" }
+    ];
+
     return (
         <div className="flex-1 overflow-y-auto p-6 lg:p-10 scroll-smooth">
             <div className="max-w-7xl mx-auto flex flex-col gap-8">
@@ -383,7 +493,7 @@ const AdminOrdersManagement = () => {
                 </div>
 
                 {/* Loading State */}
-                {isLoading && (
+                {allOrdersLoading && (
                     <div className="bg-white rounded-2xl border border-[#f3e7e9] shadow-sm p-8 text-center">
                         <div className="flex flex-col items-center justify-center gap-4">
                             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#ee2b4b]"></div>
@@ -393,11 +503,11 @@ const AdminOrdersManagement = () => {
                 )}
 
                 {/* Error State */}
-                {error && !isLoading && (
+                {allOrdersError && !allOrdersLoading && (
                     <div className="bg-white rounded-2xl border border-[#f3e7e9] shadow-sm p-8 text-center">
                         <div className="flex flex-col items-center justify-center gap-4">
                             <p className="text-red-600 font-medium">Error loading orders</p>
-                            <p className="text-text-secondary">{error}</p>
+                            <p className="text-text-secondary">{allOrdersError}</p>
                             <button
                                 onClick={() => getAllOrders()}
                                 className="px-4 py-2 bg-[#ee2b4b] text-white rounded-xl font-medium hover:bg-[#ee2b4b]/90"
@@ -409,7 +519,7 @@ const AdminOrdersManagement = () => {
                 )}
 
                 {/* Orders Table */}
-                {!isLoading && !error && (
+                {!allOrdersLoading && !allOrdersError && (
                     <div className="bg-white rounded-2xl border border-[#f3e7e9] shadow-sm overflow-hidden flex flex-col">
                         <div className="overflow-x-auto">
                             <table className="w-full text-left border-collapse">
@@ -434,7 +544,7 @@ const AdminOrdersManagement = () => {
                                     {currentOrders.length === 0 ? (
                                         <tr>
                                             <td colSpan={8} className="px-6 py-8 text-center text-text-secondary">
-                                                {orders.length === 0 ? "No orders found" : "No orders match your filters"}
+                                                {allOrders.length === 0 ? "No orders found" : "No orders match your filters"}
                                             </td>
                                         </tr>
                                     ) : (
@@ -520,6 +630,13 @@ const AdminOrdersManagement = () => {
                                                                 title="View Details"
                                                             >
                                                                 <MdOutlineVisibility size={18} />
+                                                            </button>
+                                                            <button
+                                                                onClick={() => handleUpdatePayment(order._id)}
+                                                                className="size-8 flex items-center justify-center rounded-lg text-text-secondary hover:text-green-600 hover:bg-green-50 transition-colors"
+                                                                title="Update Payment"
+                                                            >
+                                                                <MdPayment size={18} />
                                                             </button>
                                                             <button
                                                                 onClick={() => handleEditOrder(order._id)}
@@ -632,10 +749,91 @@ const AdminOrdersManagement = () => {
                                 </button>
                                 <button
                                     type="submit"
-                                    disabled={isSubmitting}
+                                    disabled={isSubmitting || orderLoading}
                                     className="px-5 py-2.5 bg-[#ee2b4b] text-white rounded-xl font-medium shadow-sm transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#ee2b4b]/90"
                                 >
-                                    {isSubmitting ? "Updating..." : "Update Status"}
+                                    {(isSubmitting || orderLoading) ? "Updating..." : "Update Status"}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
+
+            {/* Payment Update Modal */}
+            {showPaymentModal && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                    <div className="bg-white rounded-2xl w-full max-w-md max-h-[90vh] overflow-y-auto">
+                        <div className="p-6 border-b border-[#f3e7e9]">
+                            <h3 className="text-xl font-bold text-text-main">Update Payment Information</h3>
+                        </div>
+                        <form onSubmit={handlePaymentUpdate} className="p-6">
+                            <div className="space-y-4 mb-6">
+                                <div className="space-y-2">
+                                    <label className="text-sm font-medium text-text-main block">
+                                        Payment Method *
+                                    </label>
+                                    <select
+                                        name="method"
+                                        value={paymentFormData.method}
+                                        onChange={handlePaymentInputChange}
+                                        className="w-full px-4 py-2.5 bg-[#f8f6f6] border-none rounded-xl text-sm focus:ring-2 focus:ring-[#ee2b4b]/20"
+                                        required
+                                    >
+                                        {paymentMethods.map(method => (
+                                            <option key={method.value} value={method.value}>
+                                                {method.label}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+
+                                <div className="space-y-2">
+                                    <label className="text-sm font-medium text-text-main block">
+                                        Transaction ID (Optional)
+                                    </label>
+                                    <input
+                                        type="text"
+                                        name="transactionId"
+                                        value={paymentFormData.transactionId}
+                                        onChange={handlePaymentInputChange}
+                                        placeholder="Enter transaction ID if available"
+                                        className="w-full px-4 py-2.5 bg-[#f8f6f6] border-none rounded-xl text-sm focus:ring-2 focus:ring-[#ee2b4b]/20"
+                                    />
+                                    <p className="text-xs text-text-secondary mt-1">
+                                        Leave empty for Cash on Delivery orders
+                                    </p>
+                                </div>
+
+                                <div className="space-y-2">
+                                    <label className="text-sm font-medium text-text-main block">
+                                        Current Payment Status
+                                    </label>
+                                    <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-xl">
+                                        <span className={`w-3 h-3 rounded-full ${paymentFormData.status === "Paid" ? "bg-green-500" : paymentFormData.status === "Pending" ? "bg-yellow-500" : paymentFormData.status === "Failed" ? "bg-red-500" : "bg-purple-500"}`}></span>
+                                        <span className={`font-medium ${getPaymentStatusColor(paymentFormData.status).split(' ')[1]}`}>
+                                            {paymentFormData.status}
+                                        </span>
+                                    </div>
+                                    <p className="text-xs text-text-secondary mt-1">
+                                        Note: Payment status changes may require separate processing.
+                                    </p>
+                                </div>
+                            </div>
+                            <div className="flex justify-end gap-3">
+                                <button
+                                    type="button"
+                                    onClick={() => setShowPaymentModal(false)}
+                                    className="px-5 py-2.5 text-text-main hover:bg-gray-50 rounded-xl font-medium transition-colors"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="submit"
+                                    disabled={isSubmitting || addPaymentLoading}
+                                    className="px-5 py-2.5 bg-green-600 text-white rounded-xl font-medium shadow-sm transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-green-700"
+                                >
+                                    {(isSubmitting || addPaymentLoading) ? "Updating..." : "Update Payment"}
                                 </button>
                             </div>
                         </form>
@@ -764,6 +962,36 @@ const AdminOrdersManagement = () => {
                                             {viewingOrder.payment.transactionId || 'N/A'}
                                         </p>
                                     </div>
+                                    <div className="space-y-1">
+                                        <p className="text-sm text-text-secondary">Payment Status</p>
+                                        <span
+                                            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold border ${getPaymentStatusColor(viewingOrder.payment.status)}`}
+                                        >
+                                            <span
+                                                className={`w-2 h-2 rounded-full mr-1 ${viewingOrder.payment.status === "Paid"
+                                                    ? "bg-green-500"
+                                                    : viewingOrder.payment.status === "Pending"
+                                                        ? "bg-yellow-500"
+                                                        : viewingOrder.payment.status === "Failed"
+                                                            ? "bg-red-500"
+                                                            : "bg-purple-500"
+                                                    }`}
+                                            ></span>
+                                            {viewingOrder.payment.status}
+                                        </span>
+                                    </div>
+                                    <div className="space-y-1">
+                                        <p className="text-sm text-text-secondary">Actions</p>
+                                        <button
+                                            onClick={() => {
+                                                setShowViewModal(false);
+                                                handleUpdatePayment(viewingOrder._id);
+                                            }}
+                                            className="px-3 py-1.5 text-sm bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-colors"
+                                        >
+                                            Update Payment
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
 
@@ -788,7 +1016,13 @@ const AdminOrdersManagement = () => {
                                 </div>
                             </div>
                         </div>
-                        <div className="p-6 border-t border-[#f3e7e9] flex justify-end">
+                        <div className="p-6 border-t border-[#f3e7e9] flex justify-end gap-3">
+                            <button
+                                onClick={() => handleUpdatePayment(viewingOrder._id)}
+                                className="px-5 py-2.5 bg-green-600 text-white rounded-xl font-medium shadow-sm transition-all active:scale-95 hover:bg-green-700"
+                            >
+                                Update Payment
+                            </button>
                             <button
                                 onClick={() => setShowViewModal(false)}
                                 className="px-5 py-2.5 bg-[#ee2b4b] text-white rounded-xl font-medium shadow-sm transition-all active:scale-95"

@@ -1,6 +1,6 @@
 "use client";
 
-import { use, useEffect, useState } from "react";
+import {  useEffect, useState } from "react";
 
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
@@ -12,7 +12,6 @@ import { useCart } from "@/context/CartContext";
 import { showToast } from "@/lib/toast";
 import { CartItem as CartItemType, CartVariant } from "@/interfaces/cartInterface";
 import { TAX_RATE, FREE_SHIPPING_THRESHOLD, SHIPPING_COST } from '@/constants/cart';
-import { routeModule } from "next/dist/build/templates/pages";
 import { useRouter } from "next/dist/client/components/navigation";
 
 const breadcrumbItems = [

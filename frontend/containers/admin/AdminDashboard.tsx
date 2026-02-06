@@ -12,8 +12,22 @@ import { useEffect, useState } from "react";
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
+interface RecentOrder {
+    id: string;
+    product: string;
+    customer: string;
+    date: string;
+    amount: number;
+    status: string;
+}
+
 export default function AdminDashboard() {
-    const { orders, getAllOrders, isLoading: orderLoading } = useOrder();
+    const {
+        allOrders: orders,
+        getAllOrders,
+        allOrdersLoading: orderLoading
+    } = useOrder();
+
     const { products, fetchProducts, isLoading: productLoading } = useProduct();
     const { users, fetchUsers, isLoading: userLoading } = useUser();
 
@@ -26,7 +40,7 @@ export default function AdminDashboard() {
         orderChange: 0,
         customerChange: 0,
         productChange: 0,
-        recentOrders: [] as any[],
+        recentOrders: [] as RecentOrder[],
     });
 
     const [chartData, setChartData] = useState({
@@ -58,7 +72,6 @@ export default function AdminDashboard() {
         },
     };
 
-    // Fetch all dashboard data
     useEffect(() => {
         getAllOrders();
         fetchProducts();
@@ -97,7 +110,7 @@ export default function AdminDashboard() {
 
         const totalProducts = products.length;
 
-        const revenueChange = 12; // example value
+        const revenueChange = 12;
         const orderChange = orders.length > 20 ? 5 : 0;
         const customerChange = users.length > 50 ? 8 : 0;
 
@@ -113,7 +126,7 @@ export default function AdminDashboard() {
             .sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime())
             .slice(0, 5)
             .map(order => ({
-                id: order._id,
+                id: order._id || "",
                 product:
                     order.items?.[0]?.product &&
                         typeof order.items[0].product === "object"
@@ -360,5 +373,5 @@ export default function AdminDashboard() {
                 )}
             </div>
         </div>
-    )
+    );
 }
