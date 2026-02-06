@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { FcGoogle } from "react-icons/fc";
 import { useAuth } from '@/context/AuthContext';
+import { useRouter } from 'next/navigation';
 import { showToast } from '@/utils/toast';
 
 export default function Login() {
@@ -11,12 +12,14 @@ export default function Login() {
     const [password, setPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
     const { login, isLoading } = useAuth();
+    const router = useRouter();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
         try {
             await login(email, password);
+            router.push('/');
             showToast('success', 'Login successful!');
         } catch (error: any) {
             console.error('Login failed:', error);

@@ -10,6 +10,7 @@ import { FaRegUser } from 'react-icons/fa6';
 import { useAuth } from '@/context/AuthContext';
 import { useCart } from '@/context/CartContext';
 import { useWishlist } from '@/context/WishlistContext';
+import { showToast } from '@/utils/toast';
 
 const Header = () => {
   const { user, isAuthenticated, logout, isLoading: authLoading } = useAuth();
@@ -54,11 +55,19 @@ const Header = () => {
     return cart.items.reduce((total, item) => total + item.quantity, 0);
   };
 
-  // Handle logout
-  const handleLogout = () => {
-    logout();
-    setShowUserMenu(false);
-    setShowMobileMenu(false);
+  // Handle logout with notification
+  const handleLogout = async () => {
+    try {
+      await logout();
+
+      showToast('success', 'Logged out successfully!');
+
+      setShowUserMenu(false);
+      setShowMobileMenu(false);
+    } catch (error) {
+      showToast('error', 'Failed to logout. Please try again.');
+      console.error('Logout error:', error);
+    }
   };
 
   // Toggle functions
@@ -262,14 +271,14 @@ const Header = () => {
                           className="flex w-full items-center gap-3 px-3 py-2 text-sm text-gray-700 hover:bg-[#f8f6f6] hover:text-[#ee2b4b] transition-colors"
                           onClick={() => setShowUserMenu(false)}
                         >
-                          <MdLogin className="text-base" /> Login / Register
+                          <MdLogin className="text-base" /> Login
                         </Link>
                         <Link
-                          href="/guest-checkout"
+                          href="/signup"
                           className="flex items-center gap-3 px-3 py-2 text-sm text-gray-700 hover:bg-[#f8f6f6] hover:text-[#ee2b4b] transition-colors"
                           onClick={() => setShowUserMenu(false)}
                         >
-                          <FiShoppingCart className="text-base" /> Continue as Guest
+                          <FiShoppingCart className="text-base" /> Register
                         </Link>
                       </>
                     )}
