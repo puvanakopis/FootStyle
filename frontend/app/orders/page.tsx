@@ -11,7 +11,8 @@ import OrderHistory from "@/containers/orders/OrderHistory";
 import OrderFilter from "@/containers/orders/OrderFilter";
 import { useOrder } from "@/context/OrderContext";
 import { Order } from "@/interfaces/orderInterface";
-import { showToast } from "@/lib/toast";
+import { showToast } from "@/utils/toast";
+import {formatDate } from "@/utils/dateUtils"
 
 const breadcrumbItems = [
     { label: "Account", href: "" },
@@ -40,24 +41,13 @@ export default function Orders() {
         fetchOrders();
     }, []);
 
-    // Show error toast if there's an error
     useEffect(() => {
         if (userOrdersError) {
             showToast("error", userOrdersError);
         }
     }, [userOrdersError]);
 
-    // --- Helper Functions  ---
-    const formatDate = (dateString?: string) => {
-        if (!dateString) return "N/A";
-        return new Date(dateString).toLocaleDateString("en-US", {
-            year: "numeric",
-            month: "long",
-            day: "numeric",
-        });
-    };
-
-    const formatCurrency = (amount: number) =>
+   const formatCurrency = (amount: number) =>
         new Intl.NumberFormat("en-LK", {
             style: "currency",
             currency: "LKR",

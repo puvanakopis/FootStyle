@@ -9,7 +9,7 @@ import PageHeader from '@/components/PageHeader';
 import OrderSummary from '@/containers/cart/OrderSummary';
 import CartItems from '@/containers/cart/CartItems';
 import { useCart } from "@/context/CartContext";
-import { showToast } from "@/lib/toast";
+import { showToast } from "@/utils/toast";
 import { CartItem as CartItemType, CartVariant } from "@/interfaces/cartInterface";
 import { TAX_RATE, FREE_SHIPPING_THRESHOLD, SHIPPING_COST } from '@/constants/cart';
 import { useRouter } from "next/dist/client/components/navigation";

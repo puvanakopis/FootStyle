@@ -13,7 +13,7 @@ import { useOrder } from "@/context/OrderContext";
 import { useAuth } from "@/context/AuthContext";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { showToast } from "@/lib/toast";
+import { showToast } from "@/utils/toast";
 import { TAX_RATE, FREE_SHIPPING_THRESHOLD, SHIPPING_COST } from '@/constants/cart';
 
 const provinceDistricts: Record<string, string[]> = {

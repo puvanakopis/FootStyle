@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { MdOutlineEdit, MdDeleteOutline, MdOutlineVisibility, MdClose, } from "react-icons/md";
 import { IoSearch } from "react-icons/io5";
 import { LuChevronLeft, LuChevronRight } from "react-icons/lu";
-import { showToast } from "@/lib/toast";
+import { showToast } from "@/utils/toast";
 import { User } from "@/interfaces/userInterface";
 import { useUser } from "@/context/UserContext";
 

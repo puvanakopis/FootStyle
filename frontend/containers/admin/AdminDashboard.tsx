@@ -3,12 +3,8 @@
 import { IoMdAdd, IoMdTrendingUp } from "react-icons/io";
 import { FaRegMoneyBillAlt } from "react-icons/fa";
 import { MdOutlineShoppingBag, MdOutlineGroup, MdOutlineInventory2 } from "react-icons/md";
-import { useOrder } from "@/context/OrderContext";
-import { useProduct } from "@/context/ProductContext";
-import { useUser } from "@/context/UserContext";
 import { Bar } from "react-chartjs-2";
-import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, } from "chart.js";
-import { useEffect, useState } from "react";
+import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from "chart.js";
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
@@ -21,186 +17,60 @@ interface RecentOrder {
     status: string;
 }
 
-export default function AdminDashboard() {
-    const {
-        allOrders: orders,
-        getAllOrders,
-        allOrdersLoading: orderLoading
-    } = useOrder();
+interface DashboardStats {
+    totalRevenue: number;
+    totalOrders: number;
+    totalCustomers: number;
+    totalProducts: number;
+    revenueChange: number;
+    orderChange: number;
+    customerChange: number;
+    productChange: number;
+    recentOrders: RecentOrder[];
+}
 
-    const { products, fetchProducts, isLoading: productLoading } = useProduct();
-    const { users, fetchUsers, isLoading: userLoading } = useUser();
+interface ChartData {
+    labels: string[];
+    datasets: {
+        label: string;
+        data: number[];
+        backgroundColor: string;
+        borderRadius: number;
+    }[];
+}
 
-    const [dashboardStats, setDashboardStats] = useState({
-        totalRevenue: 0,
-        totalOrders: 0,
-        totalCustomers: 0,
-        totalProducts: 0,
-        revenueChange: 0,
-        orderChange: 0,
-        customerChange: 0,
-        productChange: 0,
-        recentOrders: [] as RecentOrder[],
-    });
+interface AdminDashboardProps {
+    dashboardStats: DashboardStats;
+    chartData: ChartData;
+    isLoading: boolean;
+    formatCurrency: (amount: number) => string;
+    getStatusColor: (status: string) => string;
+}
 
-    const [chartData, setChartData] = useState({
-        labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
-        datasets: [
-            {
-                label: "Revenue",
-                data: [0, 0, 0, 0, 0, 0],
-                backgroundColor: "#ee2b4b",
-                borderRadius: 8,
-            },
-        ],
-    });
-
-    const chartOptions = {
-        responsive: true,
-        plugins: {
-            legend: { display: false },
-            tooltip: { enabled: true },
-        },
-        scales: {
-            y: {
-                beginAtZero: true,
-                ticks: {
-                    stepSize: 1000,
-                    callback: (value: number) => `Rs. ${value.toLocaleString()}`,
-                },
+const chartOptions = {
+    responsive: true,
+    plugins: {
+        legend: { display: false },
+        tooltip: { enabled: true },
+    },
+    scales: {
+        y: {
+            beginAtZero: true,
+            ticks: {
+                stepSize: 1000,
+                callback: (value: number) => `Rs. ${value.toLocaleString()}`,
             },
         },
-    };
+    },
+};
 
-    useEffect(() => {
-        getAllOrders();
-        fetchProducts();
-        fetchUsers();
-    }, []);
-
-    const calculateMonthlyRevenue = (ordersList: typeof orders) => {
-        const monthlyRevenue = Array(6).fill(0);
-        const currentDate = new Date();
-
-        ordersList.forEach(order => {
-            if (order.createdAt) {
-                const orderDate = new Date(order.createdAt);
-                const monthDiff =
-                    (currentDate.getFullYear() - orderDate.getFullYear()) * 12 +
-                    (currentDate.getMonth() - orderDate.getMonth());
-                if (monthDiff >= 0 && monthDiff < 6) {
-                    monthlyRevenue[5 - monthDiff] += order.total || 0;
-                }
-            }
-        });
-
-        return monthlyRevenue.map(val => Math.ceil(val / 1000) * 1000);
-    };
-
-    const calculateDashboardStats = () => {
-        const totalRevenue = orders.reduce((sum, order) => sum + (order.total || 0), 0);
-        const totalOrders = orders.length;
-
-        const uniqueCustomers = new Set(
-            orders.map(order =>
-                typeof order.user === "string" ? order.user : order.user?._id
-            )
-        ).size;
-        const totalCustomers = Math.max(uniqueCustomers, users.length);
-
-        const totalProducts = products.length;
-
-        const revenueChange = 12;
-        const orderChange = orders.length > 20 ? 5 : 0;
-        const customerChange = users.length > 50 ? 8 : 0;
-
-        const productChange = products.filter(product => {
-            if (!product.createdAt) return false;
-            const createdDate = new Date(product.createdAt);
-            const thirtyDaysAgo = new Date();
-            thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-            return createdDate > thirtyDaysAgo;
-        }).length;
-
-        const recentOrders = [...orders]
-            .sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime())
-            .slice(0, 5)
-            .map(order => ({
-                id: order._id || "",
-                product:
-                    order.items?.[0]?.product &&
-                        typeof order.items[0].product === "object"
-                        ? order.items[0].product?.name || "Product"
-                        : `Product ${order.items?.[0]?.product?.slice(-4) || ""}`,
-                customer:
-                    typeof order.user !== "string"
-                        ? `${order.user?.firstName || ""} ${order.user?.lastName || ""}`.trim() || "Customer"
-                        : "Customer",
-                date: order.createdAt
-                    ? new Date(order.createdAt).toLocaleDateString("en-US", {
-                        month: "short",
-                        day: "numeric",
-                        year: "numeric",
-                    })
-                    : "N/A",
-                amount: order.total || 0,
-                status: order.status || "Pending",
-            }));
-
-        const monthlyRevenue = calculateMonthlyRevenue(orders);
-
-        setChartData({
-            labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
-            datasets: [
-                {
-                    label: "Revenue",
-                    data: monthlyRevenue,
-                    backgroundColor: "#ee2b4b",
-                    borderRadius: 8,
-                },
-            ],
-        });
-
-        setDashboardStats({
-            totalRevenue,
-            totalOrders,
-            totalCustomers,
-            totalProducts,
-            revenueChange,
-            orderChange,
-            customerChange,
-            productChange,
-            recentOrders,
-        });
-    };
-
-    useEffect(() => {
-        calculateDashboardStats();
-    }, [orders, products, users]);
-
-    const getStatusColor = (status: string) => {
-        switch (status) {
-            case "Delivered":
-                return "text-green-600";
-            case "Processing":
-                return "text-blue-600";
-            case "Shipped":
-                return "text-indigo-600";
-            case "Pending":
-                return "text-yellow-600";
-            case "Cancelled":
-                return "text-red-600";
-            case "Returned":
-                return "text-purple-600";
-            default:
-                return "text-gray-600";
-        }
-    };
-
-    const formatCurrency = (amount: number) => `Rs. ${amount.toLocaleString()}`;
-
-    const isLoading = orderLoading || productLoading || userLoading;
-
+export default function AdminDashboard({
+    dashboardStats,
+    chartData,
+    isLoading,
+    formatCurrency,
+    getStatusColor
+}: AdminDashboardProps) {
     return (
         <div className="flex-1 overflow-y-auto p-4 lg:p-10 scroll-smooth">
             <div className="max-w-7xl mx-auto flex flex-col gap-8">

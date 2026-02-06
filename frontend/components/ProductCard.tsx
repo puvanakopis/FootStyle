@@ -6,7 +6,7 @@ import { MdFavoriteBorder, MdFavorite } from "react-icons/md";
 import { useRouter } from "next/navigation";
 import { useWishlist } from "@/context/WishlistContext";
 import { useState } from "react";
-import { showToast } from "@/lib/toast";
+import { showToast } from "@/utils/toast";
 
 interface ProductCardProps {
   id: string;

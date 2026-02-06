@@ -8,7 +8,7 @@ import Sidebar from "@/components/Sidebar";
 import ProfileDetails from "@/containers/profile/ProfileDetails";
 import { useAuth } from "@/context/AuthContext";
 import { Address } from "@/interfaces/authInterface";
-import { showToast } from "@/lib/toast";
+import { showToast } from "@/utils/toast";
 
 const breadcrumbItems = [
     { label: "Account", href: "" },

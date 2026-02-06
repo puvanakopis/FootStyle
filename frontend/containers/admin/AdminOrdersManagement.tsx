@@ -5,7 +5,7 @@ import { MdOutlineEdit, MdOutlineVisibility, MdClose, MdDeleteOutline, MdPayment
 import { LuChevronLeft, LuChevronRight } from "react-icons/lu";
 import { IoSearch } from "react-icons/io5";
 import { useOrder } from "@/context/OrderContext";
-import { showToast } from "@/lib/toast";
+import { showToast } from "@/utils/toast";
 import { Order, Address, UpdateOrderStatusRequest, AddPaymentRequest } from "@/interfaces/orderInterface";
 
 type OrderFormData = {
@@ -633,7 +633,7 @@ const AdminOrdersManagement = () => {
                                                             </button>
                                                             <button
                                                                 onClick={() => handleUpdatePayment(order._id)}
-                                                                className="size-8 flex items-center justify-center rounded-lg text-text-secondary hover:text-green-600 hover:bg-green-50 transition-colors"
+                                                                className="size-8 flex items-center justify-center rounded-lg text-text-secondary hover:bg-[#ee2b4b] transition-colors"
                                                                 title="Update Payment"
                                                             >
                                                                 <MdPayment size={18} />
@@ -831,7 +831,7 @@ const AdminOrdersManagement = () => {
                                 <button
                                     type="submit"
                                     disabled={isSubmitting || addPaymentLoading}
-                                    className="px-5 py-2.5 bg-green-600 text-white rounded-xl font-medium shadow-sm transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-green-700"
+                                    className="px-5 py-2.5 bg-[#ee2b4b] text-white rounded-xl font-medium shadow-sm transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed "
                                 >
                                     {(isSubmitting || addPaymentLoading) ? "Updating..." : "Update Payment"}
                                 </button>
@@ -987,7 +987,7 @@ const AdminOrdersManagement = () => {
                                                 setShowViewModal(false);
                                                 handleUpdatePayment(viewingOrder._id);
                                             }}
-                                            className="px-3 py-1.5 text-sm bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-colors"
+                                            className="px-3 py-1.5 text-sm bg-[#ee2b4b] text-white rounded-lg font-medium transition-colors"
                                         >
                                             Update Payment
                                         </button>
@@ -1019,7 +1019,7 @@ const AdminOrdersManagement = () => {
                         <div className="p-6 border-t border-[#f3e7e9] flex justify-end gap-3">
                             <button
                                 onClick={() => handleUpdatePayment(viewingOrder._id)}
-                                className="px-5 py-2.5 bg-green-600 text-white rounded-xl font-medium shadow-sm transition-all active:scale-95 hover:bg-green-700"
+                                className="px-5 py-2.5 bg-[#ee2b4b] text-white rounded-xl font-medium shadow-sm transition-all active:scale-95"
                             >
                                 Update Payment
                             </button>

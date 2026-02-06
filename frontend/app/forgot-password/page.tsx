@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
-import { showToast } from "@/lib/toast";
+import { showToast } from "@/utils/toast";
 
 export default function ForgotPassword() {
     const { requestPasswordResetOtp, isLoading, clearError } = useAuth();

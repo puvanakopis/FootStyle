@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { FcGoogle } from "react-icons/fc";
 import { useAuth } from '@/context/AuthContext';
-import { showToast } from '@/lib/toast';
+import { showToast } from '@/utils/toast';
 
 export default function Login() {
     const [email, setEmail] = useState("");

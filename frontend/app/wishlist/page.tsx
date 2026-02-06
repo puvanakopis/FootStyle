@@ -10,7 +10,8 @@ import WishlistFilter from "@/containers/wishlist/WishlistFilter";
 import { useWishlist } from "@/context/WishlistContext";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { showToast } from "@/lib/toast";
+import { showToast } from "@/utils/toast";
+import {formatDate} from "@/utils/dateUtils"
 
 const breadcrumbItems = [
     { label: "Account", href: "" },
@@ -61,12 +62,6 @@ export default function Wishlist() {
     };
 
     const getReviewCount = (product: any) => product.reviews.length;
-
-    const formatDate = (dateString?: string) => {
-        if (!dateString) return "Date not available";
-        const date = new Date(dateString);
-        return date.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
-    };
 
     const getLastSavedSize = (product: any) => {
         const availableSize = product.sizes.find((size: any) => size.stock > 0);
