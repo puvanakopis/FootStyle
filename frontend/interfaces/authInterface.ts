@@ -1,7 +1,7 @@
 export interface Address {
     street?: string;
-    city?: string;
-    state?: string;
+    district?: string;
+    province?: string;
     zipCode?: string;
     country?: string;
 }

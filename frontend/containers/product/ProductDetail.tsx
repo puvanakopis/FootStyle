@@ -8,7 +8,7 @@ import { Product, Review as ProductReview } from "@/interfaces/productInterface"
 import { useAuth } from "@/context/AuthContext";
 import { useProduct } from "@/context/ProductContext";
 import { useCart } from "@/context/CartContext";
-import { showToast } from "@/lib/toast";
+import { showToast } from "@/utils/toast";
 
 interface ProductDetailProps {
     product: Product;

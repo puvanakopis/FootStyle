@@ -5,94 +5,34 @@ import { AiOutlineDelete } from "react-icons/ai";
 import { CiStar } from "react-icons/ci";
 import { MdBlock, MdOutlineShoppingCart, MdOutlineRemoveRedEye } from "react-icons/md";
 import { TbShoppingCartOff } from "react-icons/tb";
-import { Product } from "@/interfaces/productInterface";
-import { useWishlist } from "@/context/WishlistContext";
-import { useRouter } from "next/navigation";
-import { showToast } from "@/lib/toast";
 
 interface ProductListProps {
-  products: Product[];
+  products: any[];
+  isLoading: boolean;
+  getStockStatus: (product: any) => string;
+  getPrimaryImage: (product: any) => string;
+  getReviewCount: (product: any) => number;
+  formatDate: (dateString?: string) => string;
+  getLastSavedSize: (product: any) => string;
+  calculateAverageRating: (product: any) => number;
+  handleRemoveFromWishlist: (productId: string, productName: string) => void;
+  handleAddToCart: (product: any) => void;
+  handleViewProduct: (productId: string, productName: string) => void;
 }
 
-const ProductList: React.FC<ProductListProps> = ({ products }) => {
-  const { removeFromWishlist, isLoading } = useWishlist();
-  const router = useRouter();
-
-  // calculate stock status
-  const getStockStatus = (product: Product) => {
-    const totalStock = product.sizes.reduce((sum, size) => sum + size.stock, 0);
-    return totalStock > 0 ? "in-stock" : "out-of-stock";
-  };
-
-  // get primary image
-  const getPrimaryImage = (product: Product) => {
-    const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
-    return `${API_BASE_URL}/uploads/product/${product.images[0]}`;
-  };
-
-  // get most recent review count
-  const getReviewCount = (product: Product) => {
-    return product.reviews.length;
-  };
-
-  // format date
-  const formatDate = (dateString?: string) => {
-    if (!dateString) return "Date not available";
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
-  };
-
-  // get the last saved size
-  const getLastSavedSize = (product: Product) => {
-    const availableSize = product.sizes.find(size => size.stock > 0);
-    if (availableSize) return availableSize.size;
-
-    // If no stock, return the first size
-    return product.sizes.length > 0 ? product.sizes[0].size : "N/A";
-  };
-
-  // Handle remove from wishlist
-  const handleRemoveFromWishlist = async (productId: string, productName: string) => {
-    try {
-      await removeFromWishlist(productId);
-      showToast('success', `"${productName}" removed from wishlist`);
-    } catch (error) {
-      console.error("Failed to remove from wishlist:", error);
-      showToast('error', "Failed to remove item from wishlist. Please try again.");
-    }
-  };
-
-  // Handle add to cart
-  const handleAddToCart = (product: Product) => {
-    const stockStatus = getStockStatus(product);
-    const isDisabled = !product.isActive || stockStatus === "out-of-stock";
-
-    if (isDisabled) {
-      showToast('error', "This product is currently unavailable");
-      return;
-    }
-
-    console.log("Add to cart:", product);
-    showToast('success', `"${product.title || product.name}" added to cart`);
-  };
-
-  // Handle view product
-  const handleViewProduct = (productId: string, productName: string) => {
-    showToast('info', `Viewing "${productName}"`);
-    router.push(`/products/${productId}`);
-  };
-
-  // Calculate average rating
-  const calculateAverageRating = (product: Product) => {
-    if (product.reviews.length === 0) return 0;
-    const sum = product.reviews.reduce((acc, review) => acc + review.rating, 0);
-    return sum / product.reviews.length;
-  };
-
+const ProductList: React.FC<ProductListProps> = ({
+  products,
+  isLoading,
+  getStockStatus,
+  getPrimaryImage,
+  getReviewCount,
+  formatDate,
+  getLastSavedSize,
+  calculateAverageRating,
+  handleRemoveFromWishlist,
+  handleAddToCart,
+  handleViewProduct,
+}) => {
   return (
     <div className="space-y-6">
       {products.map((product) => {
@@ -103,7 +43,7 @@ const ProductList: React.FC<ProductListProps> = ({ products }) => {
         const addedDate = formatDate(product.createdAt);
         const lastSavedSize = getLastSavedSize(product);
         const averageRating = calculateAverageRating(product);
-        const productId = product.id || product._id || '';
+        const productId = product.id || product._id || "";
         const productName = product.title || product.name;
 
         return (
@@ -158,9 +98,7 @@ const ProductList: React.FC<ProductListProps> = ({ products }) => {
                 <div className="flex justify-between items-start">
                   <div>
                     <a href={`/products/${productId}`} className="hover:text-[#ee2b4b] transition-colors">
-                      <h3 className="text-xl font-bold text-neutral-900 mb-1">
-                        {productName}
-                      </h3>
+                      <h3 className="text-xl font-bold text-neutral-900 mb-1">{productName}</h3>
                     </a>
                     <p className="text-sm text-neutral-500 mb-2 line-clamp-2">
                       {product.description || `${product.gender}'s ${product.material} Shoe`}
@@ -168,15 +106,9 @@ const ProductList: React.FC<ProductListProps> = ({ products }) => {
                   </div>
                 </div>
                 <div className="flex flex-wrap gap-2 mb-3">
-                  <span className="px-2 py-1 bg-neutral-100 rounded text-xs font-medium text-neutral-600">
-                    {product.gender}
-                  </span>
-                  <span className="px-2 py-1 bg-neutral-100 rounded text-xs font-medium text-neutral-600">
-                    {product.material}
-                  </span>
-                  <span className="px-2 py-1 bg-neutral-100 rounded text-xs font-medium text-neutral-600">
-                    Size: {lastSavedSize}
-                  </span>
+                  <span className="px-2 py-1 bg-neutral-100 rounded text-xs font-medium text-neutral-600">{product.gender}</span>
+                  <span className="px-2 py-1 bg-neutral-100 rounded text-xs font-medium text-neutral-600">{product.material}</span>
+                  <span className="px-2 py-1 bg-neutral-100 rounded text-xs font-medium text-neutral-600">Size: {lastSavedSize}</span>
                 </div>
                 {reviewCount > 0 ? (
                   <div className="flex items-center gap-1">
@@ -189,7 +121,7 @@ const ProductList: React.FC<ProductListProps> = ({ products }) => {
                       </span>
                     ))}
                     <span className="text-neutral-600 text-xs ml-2">
-                      {averageRating.toFixed(1)} ({reviewCount} {reviewCount === 1 ? 'review' : 'reviews'})
+                      {averageRating.toFixed(1)} ({reviewCount} {reviewCount === 1 ? "review" : "reviews"})
                     </span>
                   </div>
                 ) : (
@@ -202,30 +134,18 @@ const ProductList: React.FC<ProductListProps> = ({ products }) => {
                     <span className="text-neutral-400 text-xs ml-2">(No reviews yet)</span>
                   </div>
                 )}
-                {isDisabled && (
-                  <p className="text-sm text-neutral-500 italic mt-2">
-                    This item is currently unavailable.
-                  </p>
-                )}
+                {isDisabled && <p className="text-sm text-neutral-500 italic mt-2">This item is currently unavailable.</p>}
               </div>
 
               {/* Actions */}
               <div className="flex flex-col justify-end gap-3 mt-4 sm:mt-0 min-w-[160px]">
                 <button
                   onClick={() => handleAddToCart(product)}
-                  className={`w-full flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-bold rounded-lg shadow-lg transition-colors ${isDisabled
-                    ? "bg-neutral-200 text-neutral-400 cursor-not-allowed"
-                    : "bg-[#ee2b4b] text-white hover:bg-[#d4203e] shadow-[#ee2b4b]/20"
+                  className={`w-full flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-bold rounded-lg shadow-lg transition-colors ${isDisabled ? "bg-neutral-200 text-neutral-400 cursor-not-allowed" : "bg-[#ee2b4b] text-white hover:bg-[#d4203e] shadow-[#ee2b4b]/20"
                     }`}
                   disabled={isLoading}
                 >
-                  {isLoading ? (
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                  ) : isDisabled ? (
-                    <TbShoppingCartOff className="text-[20px]" />
-                  ) : (
-                    <MdOutlineShoppingCart className="text-[20px]" />
-                  )}
+                  {isDisabled ? <TbShoppingCartOff className="text-[20px]" /> : <MdOutlineShoppingCart className="text-[20px]" />}
                   Add to Cart
                 </button>
 
@@ -243,11 +163,7 @@ const ProductList: React.FC<ProductListProps> = ({ products }) => {
                   disabled={isLoading}
                   className="w-full flex items-center justify-center gap-2 px-5 py-2.5 border border-neutral-200 text-neutral-600 text-sm font-medium rounded-lg hover:bg-red-50 hover:text-red-600 hover:border-red-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {isLoading ? (
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-red-600"></div>
-                  ) : (
-                    <AiOutlineDelete className="text-[20px]" />
-                  )}
+                  <AiOutlineDelete className="text-[20px]" />
                   Remove
                 </button>
               </div>

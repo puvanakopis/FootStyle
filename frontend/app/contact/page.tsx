@@ -44,7 +44,7 @@ const Contact = () => {
   return (
     <main className="min-h-screen bg-background text-foreground">
       <Header />
-      
+
       {/* Contact Content */}
       <div className="px-4 md:px-10 py-6">
         {/* Hero Section */}
@@ -286,7 +286,7 @@ const Contact = () => {
           </div>
         </section>
       </div>
-      
+
       <Footer />
     </main>
   );

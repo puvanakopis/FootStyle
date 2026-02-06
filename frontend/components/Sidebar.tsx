@@ -8,7 +8,7 @@ import { LuUserRound } from "react-icons/lu";
 import { MdFavoriteBorder } from "react-icons/md";
 import { VscAccount } from "react-icons/vsc";
 import { useAuth } from "@/context/AuthContext";
-import { showToast } from "@/lib/toast";
+import { showToast } from "@/utils/toast";
 
 const Sidebar = () => {
     const { user, logout } = useAuth();

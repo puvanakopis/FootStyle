@@ -9,7 +9,7 @@ import Loading from '@/components/loading';
 
 import { useEffect, useState } from "react";
 import { useProduct } from "@/context/ProductContext";
-import { showToast } from "@/lib/toast";
+import { showToast } from "@/utils/toast";
 
 export default function Products() {
   const { products, fetchProducts, isLoading, error } = useProduct();
