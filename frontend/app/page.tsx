@@ -8,7 +8,7 @@ import ProductGrid from "@/containers/home/TrendingProductGrid";
 import FeatureBanner from "@/containers/home/FeatureBanner";
 import CTASection from "@/containers/home/CTASection";
 import { useProduct } from "@/context/ProductContext";
-import Loading from "@/components/loading";
+import Loading from "@/components/Loading";
 
 export default function Home() {
   const { products, fetchProducts, isLoading } = useProduct();
@@ -31,18 +31,18 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-background text-foreground">
       <Header />
-      <div>
-        <HeroSection />
 
-        {isLoading ? (
-          <Loading message="Loading products..." />
-        ) : (
+      {isLoading ? (
+        <Loading message="Loading products..." />
+      ) : (
+        <div>
+          <HeroSection />
           <ProductGrid products={topProducts} getAverageRating={getAverageRating} />
-        )}
+          <FeatureBanner />
+          <CTASection />
+        </div>
+      )}
 
-        <FeatureBanner />
-        <CTASection />
-      </div>
       <Footer />
     </main>
   );

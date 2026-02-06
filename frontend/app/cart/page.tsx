@@ -1,6 +1,6 @@
 "use client";
 
-import {  useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
@@ -13,6 +13,7 @@ import { showToast } from "@/utils/toast";
 import { CartItem as CartItemType, CartVariant } from "@/interfaces/cartInterface";
 import { TAX_RATE, FREE_SHIPPING_THRESHOLD, SHIPPING_COST } from '@/constants/cart';
 import { useRouter } from "next/dist/client/components/navigation";
+import Loading from "@/components/Loading";
 
 const breadcrumbItems = [
     { label: "Home", href: "/" },
@@ -143,32 +144,36 @@ export default function CartPage() {
     return (
         <main className="min-h-screen bg-background text-foreground">
             <Header />
-            <div className="px-30 py-6">
-                <Breadcrumbs items={breadcrumbItems} />
-                <PageHeader title="Your Shopping Cart" />
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
-                    <div className="lg:col-span-8 space-y-6">
-                        <CartItems
-                            cartItems={cartItems}
-                            isLoading={isLoading || localLoading}
-                            handleUpdateQuantity={handleUpdateQuantity}
-                            handleRemoveItem={handleRemoveItem}
-                            handleRefreshCart={handleRefreshCart}
-                        />
-                    </div>
+            {isLoading ? (
+                <Loading message="Loading products..." />
+            ) : (
+                <div className="px-30 py-6">
+                    <Breadcrumbs items={breadcrumbItems} />
+                    <PageHeader title="Your Shopping Cart" />
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
+                        <div className="lg:col-span-8 space-y-6">
+                            <CartItems
+                                cartItems={cartItems}
+                                isLoading={isLoading || localLoading}
+                                handleUpdateQuantity={handleUpdateQuantity}
+                                handleRemoveItem={handleRemoveItem}
+                                handleRefreshCart={handleRefreshCart}
+                            />
+                        </div>
 
-                    <div className="lg:col-span-4 lg:sticky lg:top-24">
-                        <OrderSummary
-                            subtotal={subtotal}
-                            shipping={shipping}
-                            tax={tax}
-                            total={total}
-                            totalItems={totalItems}
-                            handleCheckoutClick={handleCheckoutClick}
-                        />
+                        <div className="lg:col-span-4 lg:sticky lg:top-24">
+                            <OrderSummary
+                                subtotal={subtotal}
+                                shipping={shipping}
+                                tax={tax}
+                                total={total}
+                                totalItems={totalItems}
+                                handleCheckoutClick={handleCheckoutClick}
+                            />
+                        </div>
                     </div>
                 </div>
-            </div>
+            )}
             <Footer />
         </main>
     );

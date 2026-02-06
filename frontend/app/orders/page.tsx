@@ -12,7 +12,7 @@ import OrderFilter from "@/containers/orders/OrderFilter";
 import { useOrder } from "@/context/OrderContext";
 import { Order } from "@/interfaces/orderInterface";
 import { showToast } from "@/utils/toast";
-import {formatDate } from "@/utils/dateUtils"
+import { formatDate } from "@/utils/dateUtils"
 
 const breadcrumbItems = [
     { label: "Account", href: "" },
@@ -20,12 +20,7 @@ const breadcrumbItems = [
 ];
 
 export default function Orders() {
-    const {
-        getUserOrders,
-        userOrders,
-        userOrdersLoading,
-        userOrdersError
-    } = useOrder();
+    const { getUserOrders, userOrders, userOrdersLoading, userOrdersError } = useOrder();
     const [filter, setFilter] = useState<string>("all");
 
     // Fetch user orders
@@ -47,7 +42,7 @@ export default function Orders() {
         }
     }, [userOrdersError]);
 
-   const formatCurrency = (amount: number) =>
+    const formatCurrency = (amount: number) =>
         new Intl.NumberFormat("en-LK", {
             style: "currency",
             currency: "LKR",

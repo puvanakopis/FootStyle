@@ -9,6 +9,7 @@ import ProfileDetails from "@/containers/profile/ProfileDetails";
 import { useAuth } from "@/context/AuthContext";
 import { Address } from "@/interfaces/authInterface";
 import { showToast } from "@/utils/toast";
+import Loading from "@/components/Loading";
 
 const breadcrumbItems = [
     { label: "Account", href: "" },
@@ -37,7 +38,7 @@ const provinceDistricts: Record<string, string[]> = {
 };
 
 export default function Profile() {
-    const { user, getCurrentUser, updateCurrentUser } = useAuth();
+    const { user, getCurrentUser, updateCurrentUser, isLoading } = useAuth();
 
     const [formData, setFormData] = useState<UserData>({
         firstName: "",
@@ -186,6 +187,16 @@ export default function Profile() {
         }
         return "Home";
     };
+
+    if (isLoading) {
+        return (
+            <main className="min-h-screen bg-background text-foreground">
+                <Header />
+                <Loading message='loading profile .....' />
+                <Footer />
+            </main>
+        )
+    }
 
     return (
         <main className="min-h-screen bg-background text-foreground">

@@ -8,12 +8,13 @@ import NoCurrentProduct from "@/containers/product/NoCurrentProduct";
 import { useProduct } from '@/context/ProductContext';
 import { useParams } from 'next/navigation';
 import { useEffect } from 'react';
+import Loading from '@/components/Loading';
 
 export default function ProductDetailPage() {
     const params = useParams();
     const productId = params.id as string;
 
-    const { currentProduct, fetchProductById } = useProduct();
+    const { currentProduct, fetchProductById, isLoading } = useProduct();
 
     useEffect(() => {
         fetchProductById(productId);
@@ -30,6 +31,15 @@ export default function ProductDetailPage() {
         { label: currentProduct.name, href: `/products/${productId}` },
     ];
 
+    if (isLoading) {
+        return (
+            <main className="min-h-screen bg-background text-foreground">
+                <Header />
+                <Loading message='loading products .....' />
+                <Footer />
+            </main>
+        )
+    }
 
     return (
         <main className="min-h-screen bg-background text-foreground">
