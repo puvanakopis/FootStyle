@@ -5,11 +5,11 @@ import Footer from '@/components/Footer';
 import Breadcrumbs from '@/components/Breadcrumbs';
 import Filters from '@/containers/products/Filters';
 import ProductGrid from '@/containers/products/ProductGrid';
-import Loading from '@/components/loading';
+import Loading from '@/components/Loading';
 
 import { useEffect, useState } from "react";
 import { useProduct } from "@/context/ProductContext";
-import { showToast } from "@/lib/toast";
+import { showToast } from "@/utils/toast";
 
 export default function Products() {
   const { products, fetchProducts, isLoading, error } = useProduct();
@@ -64,6 +64,16 @@ export default function Products() {
     return isActive && genderMatch && materialMatch && priceMatch;
   });
 
+  if (isLoading) {
+    return (
+      <main className="min-h-screen bg-background text-foreground">
+        <Header />
+        <Loading message='loading products .....'/>
+        <Footer />
+      </main>
+    )
+  }
+
   return (
     <main className="min-h-screen bg-background text-foreground">
       <Header />
@@ -84,8 +94,7 @@ export default function Products() {
           </div>
 
           <div className="w-full lg:w-4/5">
-            {isLoading && <Loading />}
-            {!isLoading && !error && <ProductGrid products={filteredProducts} />}
+            <ProductGrid products={filteredProducts} />
           </div>
         </div>
       </div>

@@ -2,7 +2,6 @@ const mongoose = require("mongoose");
 const Counter = require("./counterModel");
 const path = require("path");
 
-// Size Schema
 const SizeSchema = new mongoose.Schema(
     {
         size: {
@@ -19,7 +18,6 @@ const SizeSchema = new mongoose.Schema(
     { _id: false }
 );
 
-// Review Schema
 const ReviewSchema = new mongoose.Schema(
     {
         _id: {
@@ -44,7 +42,6 @@ const ReviewSchema = new mongoose.Schema(
     { timestamps: true }
 );
 
-// Product Schema
 const ProductSchema = new mongoose.Schema(
     {
         _id: {

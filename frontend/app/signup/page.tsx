@@ -5,10 +5,11 @@ import { useState } from "react";
 import { FcGoogle } from "react-icons/fc";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
-import { showToast } from '@/lib/toast';
+import { showToast } from '@/utils/toast';
+import Loading from "@/components/Loading";
 
 export default function Signup() {
-    const { requestSignupOtp } = useAuth();
+    const { requestSignupOtp , isLoading } = useAuth();
     const router = useRouter();
 
     const [firstName, setFirstName] = useState("");
@@ -59,6 +60,9 @@ export default function Signup() {
         // Google signup implementation
         showToast('error', 'Google signup is not implemented yet');
     };
+
+
+    if (isLoading) return <Loading/>;
 
     return (
         <main className="min-h-screen bg-background text-foreground">

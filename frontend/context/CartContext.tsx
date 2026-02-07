@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useEffect, useState, ReactNode } from "react";
+import React, { createContext, useContext, useState, ReactNode } from "react";
 import { AxiosError } from "axios";
 import { cartApi } from "@/services/cartApi";
 import { Cart, CartContextType, AddToCartRequest, UpdateCartQuantityRequest, RemoveFromCartRequest } from "@/interfaces/cartInterface";
@@ -23,10 +23,6 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     const [cart, setCart] = useState<Cart | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
-
-    useEffect(() => {
-        fetchCart();
-    }, []);
 
     const handleError = (err: unknown) => {
         const error = err as AxiosError<{ message: string }> | Error;
@@ -94,8 +90,18 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
         }
     };
 
-    const clearCart = () => {
-        setCart(null);
+    // ---------- CLEAR CART ----------
+    const clearCart = async () => {
+        try {
+            setIsLoading(true);
+            const response = await cartApi.clearCart();
+            setCart(response.cart);
+        } catch (err) {
+            handleError(err);
+            throw err;
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     return (

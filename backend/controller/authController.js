@@ -364,16 +364,22 @@ exports.updateCurrentUser = async (req, res) => {
             lastName,
             phoneNumber,
             profileImage,
-            address // { street, city, state, zipCode, country }
+            address 
         } = req.body;
 
-        // Build update object dynamically
         const updateData = {};
         if (firstName) updateData.firstName = firstName;
         if (lastName) updateData.lastName = lastName;
         if (phoneNumber) updateData.phoneNumber = phoneNumber;
         if (profileImage) updateData.profileImage = profileImage;
-        if (address) updateData.address = { ...address };
+        
+        if (address !== undefined) {
+            if (Object.keys(address).length === 0) {
+                updateData.address = {};
+            } else {
+                updateData.address = { ...address };
+            }
+        }
 
         const updatedUser = await User.findByIdAndUpdate(
             userId,

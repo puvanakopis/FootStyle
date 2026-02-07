@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
-import { showToast } from "@/lib/toast";
+import { showToast } from "@/utils/toast";
 
 export default function ForgotPasswordVerify() {
     const { resetPassword, isLoading, clearError } = useAuth();

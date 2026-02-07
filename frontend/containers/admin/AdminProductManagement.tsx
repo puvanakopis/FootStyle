@@ -6,7 +6,7 @@ import { LuChevronLeft, LuChevronRight } from "react-icons/lu";
 import { IoSearch } from "react-icons/io5";
 import { Size, Product } from "@/interfaces/productInterface";
 import { useProduct } from "@/context/ProductContext";
-import { showToast } from "@/lib/toast";
+import { showToast } from "@/utils/toast";
 
 type ProductFormData = {
     name: string;
