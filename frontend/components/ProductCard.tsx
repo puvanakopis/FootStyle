@@ -44,7 +44,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
   const isInWishlist = wishlist.some((product) => product._id === id);
 
   const handleWishlistToggle = async (e: React.MouseEvent) => {
-    e.stopPropagation(); 
+    e.stopPropagation();
     e.preventDefault();
 
     if (isWishlistProcessing || isLoading) return;
@@ -69,7 +69,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
   };
 
   const handleAddToCart = async (e: React.MouseEvent) => {
-    e.stopPropagation(); 
+    e.stopPropagation();
     e.preventDefault();
 
     if (isCartProcessing) return;
@@ -92,8 +92,8 @@ const ProductCard: React.FC<ProductCardProps> = ({
   return (
     <div
       onClick={() => handleProductClick(id)}
-      className="group relative flex flex-col gap-4 rounded-xl bg-white shadow-sm transition-all duration-300 hover:-translate-y-2 hover:shadow-xl cursor-pointer"
-    >
+      className="group relative flex flex-col gap-4 rounded-xl bg-white shadow-sm transition-all duration-300 hover:border--100 cursor-pointer">
+     
       {/* Loading overlay for wishlist */}
       {isWishlistProcessing && (
         <div className="absolute inset-0 bg-white/50 z-10 rounded-xl flex items-center justify-center">

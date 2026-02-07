@@ -15,6 +15,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { showToast } from "@/utils/toast";
 import { TAX_RATE, FREE_SHIPPING_THRESHOLD, SHIPPING_COST } from '@/constants/cart';
+import Loading from '@/components/Loading';
 
 const provinceDistricts: Record<string, string[]> = {
     "Western": ["Colombo", "Gampaha", "Kalutara"],
@@ -32,14 +33,7 @@ export default function Checkout() {
     const router = useRouter();
     const { cart, clearCart } = useCart();
     const { user, isAuthenticated } = useAuth();
-    const {
-        createOrder,
-        createOrderLoading,
-        createOrderError,
-        addPaymentToOrder,
-        addPaymentLoading,
-        addPaymentError
-    } = useOrder();
+    const { createOrder, createOrderLoading, createOrderError, addPaymentToOrder, addPaymentLoading, addPaymentError } = useOrder();
 
     // State for payment popup
     const [showPaymentPopup, setShowPaymentPopup] = useState(false);
@@ -215,6 +209,16 @@ export default function Checkout() {
 
     // Combine loading states for UI
     const isLoading = createOrderLoading || addPaymentLoading;
+
+    if (isLoading) {
+        return (
+            <main className="min-h-screen bg-background text-foreground">
+                <Header />
+                <Loading message='loading checkout page ...'/>
+                <Footer />
+            </main>
+        )
+    }
 
     return (
         <main className="min-h-screen bg-background text-foreground">

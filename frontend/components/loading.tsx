@@ -12,8 +12,9 @@ export default function Loading({ title, message }: LoadingProps) {
             <div className="w-full max-w-[480px] rounded-2xl">
                 <div className="flex flex-col items-center gap-6">
                     {/* Spinner */}
-                    <div className="h-12 w-12 rounded-full border-4 border-[#ee2b4b]/20 border-t-[#ee2b4b] animate-spin" />
-
+                    <div className="flex justify-center items-center">
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#ee2b4b]"></div>
+                    </div>
                     {/* Text */}
                     <div className="text-center">
                         <h2 className="text-lg font-bold text-gray-800">

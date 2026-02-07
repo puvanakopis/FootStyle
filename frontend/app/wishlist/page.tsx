@@ -11,7 +11,8 @@ import { useWishlist } from "@/context/WishlistContext";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { showToast } from "@/utils/toast";
-import {formatDate} from "@/utils/dateUtils"
+import { formatDate } from "@/utils/dateUtils"
+import Loading from "@/components/Loading";
 
 const breadcrumbItems = [
     { label: "Account", href: "" },
@@ -102,27 +103,14 @@ export default function Wishlist() {
         router.push(`/products/${productId}`);
     };
 
-    // Loading state
     if (isLoading) {
         return (
             <main className="min-h-screen bg-background text-foreground">
                 <Header />
-                <div className="px-30 py-6">
-                    <Breadcrumbs items={breadcrumbItems} />
-                    <div className="flex flex-col lg:flex-row gap-6 mt-6">
-                        <div className="w-full lg:w-1/5">
-                            <Sidebar />
-                        </div>
-                        <section className="w-full lg:w-4/5 space-y-6">
-                            <div className="flex justify-center items-center h-64">
-                                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#ee2b4b]"></div>
-                            </div>
-                        </section>
-                    </div>
-                </div>
+                <Loading message='loading wishlist .....' />
                 <Footer />
             </main>
-        );
+        )
     }
 
     // Error state

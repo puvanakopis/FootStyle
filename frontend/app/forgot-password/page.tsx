@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
 import { showToast } from "@/utils/toast";
+import Loading from "@/components/Loading";
 
 export default function ForgotPassword() {
     const { requestPasswordResetOtp, isLoading, clearError } = useAuth();
@@ -32,6 +33,8 @@ export default function ForgotPassword() {
             console.error("Request Password Reset OTP Error:", error);
         }
     };
+
+    if (isLoading) return <Loading />;
 
     return (
         <main className="flex-1 min-h-screen flex justify-center items-center bg-background text-foreground">

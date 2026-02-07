@@ -1,22 +1,34 @@
 'use client';
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FcGoogle } from "react-icons/fc";
 import { useAuth } from '@/context/AuthContext';
+import { useRouter } from 'next/navigation';
 import { showToast } from '@/utils/toast';
+import Loading from "@/components/Loading";
 
 export default function Login() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
     const { login, isLoading } = useAuth();
+    const router = useRouter();
+
+    const [showLoading, setShowLoading] = useState(true);
+
+    useEffect(() => {
+        const timer = setTimeout(() => setShowLoading(false), 4000);
+        return () => clearTimeout(timer);
+    }, []);
+
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
         try {
             await login(email, password);
+            router.push('/');
             showToast('success', 'Login successful!');
         } catch (error: any) {
             console.error('Login failed:', error);
@@ -34,6 +46,8 @@ export default function Login() {
     const handleGoogleLogin = () => {
         showToast('error', 'Google login is not implemented yet');
     };
+
+    if (showLoading) return <Loading />;
 
     return (
         <main className="flex-1 min-h-screen flex justify-center items-center bg-background text-foreground">

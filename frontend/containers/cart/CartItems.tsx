@@ -25,38 +25,12 @@ interface CartItemsProps {
     handleRefreshCart: () => void;
 }
 
-const CartItems = ({ cartItems, isLoading, handleUpdateQuantity, handleRemoveItem, handleRefreshCart }: CartItemsProps) => {
+const CartItems = ({ cartItems, handleUpdateQuantity, handleRemoveItem, handleRefreshCart }: CartItemsProps) => {
     const getTotalQuantity = (variants: Variant[]) =>
         variants.reduce((total, variant) => total + variant.quantity, 0);
 
     const getTotalPriceForItem = (item: CartItem) =>
         item.price * getTotalQuantity(item.variants);
-
-    if (isLoading) {
-        return (
-            <div className="flex flex-col gap-6">
-                {[1, 2, 3].map((i) => (
-                    <div key={i} className="animate-pulse">
-                        <div className="flex flex-col sm:flex-row gap-6 p-5 bg-white rounded-2xl shadow-sm border border-neutral-100">
-                            <div className="w-full sm:w-32 aspect-square rounded-xl bg-neutral-200" />
-                            <div className="flex-1 space-y-4">
-                                <div className="h-4 bg-neutral-200 rounded w-3/4" />
-                                <div className="h-3 bg-neutral-200 rounded w-1/2" />
-                                <div className="flex gap-3">
-                                    <div className="h-6 bg-neutral-200 rounded w-16" />
-                                    <div className="h-6 bg-neutral-200 rounded w-20" />
-                                </div>
-                                <div className="flex justify-between">
-                                    <div className="h-8 bg-neutral-200 rounded w-24" />
-                                    <div className="h-8 bg-neutral-200 rounded w-24" />
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                ))}
-            </div>
-        );
-    }
 
     if (!cartItems || cartItems.length === 0) {
         return (

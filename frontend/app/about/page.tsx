@@ -1,19 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import {
-  FaAward,
-  FaShippingFast,
-  FaUsers,
-  FaHeart,
-  FaRocket,
-  FaLeaf,
-} from "react-icons/fa";
-import {
-  MdOutlineHiking,
-  MdOutlineHandshake,
-  MdOutlineLocalShipping,
-} from "react-icons/md";
+import { FaAward, FaShippingFast, FaUsers, FaHeart, FaRocket, FaLeaf, } from "react-icons/fa";
+import { MdOutlineHiking, MdOutlineHandshake, MdOutlineLocalShipping, } from "react-icons/md";
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 
