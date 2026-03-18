@@ -304,9 +304,24 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 ---
 
 
-## Author
+## 👤 Author
 
 **Name:** Puvanakopis  
 **GitHub:** [@puvanakopis](https://github.com/puvanakopis)  
 **LinkedIn:** [Puvanakopis](https://www.linkedin.com/in/puvanakopis/)  
 **Email:** puvanakopis@gamil.com
+
+
+
+:
+
+## 📸 Screenshots
+
+Below are some previews of the FootStyle E-Commerce Platform:
+
+<img width="1910" height="1044" alt="localhost_3000_ (1)" src="https://github.com/user-attachments/assets/9326ffd3-d111-4a81-974b-c671b5dc9654" />
+
+
+
+
+
