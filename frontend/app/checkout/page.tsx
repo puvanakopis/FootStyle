@@ -212,7 +212,7 @@ export default function Checkout() {
 
     if (isLoading) {
         return (
-            <main className="min-h-screen bg-background text-foreground">
+            <main className="min-h-screen bg-[#fafafc] text-slate-900">
                 <Header />
                 <Loading message='loading checkout page ...'/>
                 <Footer />
@@ -221,30 +221,32 @@ export default function Checkout() {
     }
 
     return (
-        <main className="min-h-screen bg-background text-foreground">
+        <main className="min-h-screen bg-[#fafafc] text-slate-900">
             <Header />
 
-            <div className="px-4 md:px-30 py-6">
-                <Breadcrumbs items={breadcrumbItems} />
-                <PageHeader title="Shipping Information" />
+            <div className="px-4 md:px-10 py-6">
+                <div className="w-full max-w-[1280px] mx-auto">
+                    <Breadcrumbs items={breadcrumbItems} />
+                    <PageHeader title="Shipping Information" />
 
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
-                    <NewAddress
-                        newAddress={newAddress}
-                        handleAddressChange={handleAddressChange}
-                        provinceDistricts={provinceDistricts}
-                    />
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
+                        <NewAddress
+                            newAddress={newAddress}
+                            handleAddressChange={handleAddressChange}
+                            provinceDistricts={provinceDistricts}
+                        />
 
-                    <OrderSummary
-                        items={cart?.items || []}
-                        summary={summary}
-                        isAuthenticated={isAuthenticated}
-                        formatCurrency={formatCurrency}
-                        getImageUrl={getImageUrl}
-                        freeShippingThreshold={FREE_SHIPPING_THRESHOLD}
-                        onPlaceOrder={handlePlaceOrder}
-                        isLoading={isLoading}
-                    />
+                        <OrderSummary
+                            items={cart?.items || []}
+                            summary={summary}
+                            isAuthenticated={isAuthenticated}
+                            formatCurrency={formatCurrency}
+                            getImageUrl={getImageUrl}
+                            freeShippingThreshold={FREE_SHIPPING_THRESHOLD}
+                            onPlaceOrder={handlePlaceOrder}
+                            isLoading={isLoading}
+                        />
+                    </div>
                 </div>
             </div>
 

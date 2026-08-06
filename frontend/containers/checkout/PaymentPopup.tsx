@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { MdCreditCard, MdOutlineAccountBalanceWallet, MdOutlinePayments, MdClose, } from "react-icons/md";
+import { MdCreditCard, MdOutlineAccountBalanceWallet, MdOutlinePayments, MdClose } from "react-icons/md";
 import { FaPaypal } from "react-icons/fa";
 import { SiGooglepay } from "react-icons/si";
 
@@ -36,7 +36,6 @@ const PaymentPopup: React.FC<PaymentPopupProps> = ({
     });
 
     const handlePaymentSubmit = async () => {
-        // Validation based on payment method
         if (paymentMethod === "card") {
             if (!cardDetails.cardholderName.trim()) {
                 showToast("error", "Please enter cardholder name");
@@ -60,7 +59,6 @@ const PaymentPopup: React.FC<PaymentPopupProps> = ({
 
         try {
             await new Promise(resolve => setTimeout(resolve, 1500));
-
             showToast("success", `Payment of ${formatCurrency(totalAmount)} completed successfully!`);
             onPaymentSuccess();
             onClose();
@@ -73,34 +71,31 @@ const PaymentPopup: React.FC<PaymentPopupProps> = ({
     };
 
     const formatCurrency = (amount: number) =>
-        new Intl.NumberFormat("en-LK", {
-            style: "currency",
-            currency: "LKR",
-            minimumFractionDigits: 0,
-        }).format(amount);
+        `Rs ${amount?.toLocaleString() || amount}`;
+
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
-            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md">
+            <div className="bg-white border border-slate-200/80 rounded-3xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto">
                 {/* Header */}
-                <div className="sticky top-0 bg-white border-b border-neutral-100 p-6 rounded-t-2xl">
+                <div className="sticky top-0 bg-white border-b border-slate-200/80 p-6 rounded-t-3xl z-10">
                     <div className="flex items-center justify-between mb-4">
-                        <h2 className="text-2xl font-bold text-neutral-900">Complete Payment</h2>
+                        <h2 className="text-xl font-black text-slate-900">Complete Payment</h2>
                         <button
                             onClick={onClose}
-                            className="p-2 hover:bg-neutral-100 rounded-full transition-colors"
+                            className="p-2 hover:bg-slate-100 rounded-xl transition-colors"
                         >
-                            <MdClose className="text-2xl text-neutral-500" />
+                            <MdClose className="text-xl text-slate-500" />
                         </button>
                     </div>
-                    <div className="flex items-center justify-between">
-                        <span className="text-neutral-600">Order ID:</span>
-                        <span className="font-semibold text-neutral-900">{orderId}</span>
+                    <div className="flex items-center justify-between text-xs font-semibold text-slate-500">
+                        <span>Drop Order ID:</span>
+                        <span className="font-mono font-bold text-slate-900">#{orderId.slice(-8).toUpperCase()}</span>
                     </div>
                     <div className="flex items-center justify-between mt-2">
-                        <span className="text-neutral-600">Total Amount:</span>
-                        <span className="text-2xl font-bold text-red-500">
+                        <span className="text-xs font-semibold text-slate-500">Total Payable:</span>
+                        <span className="text-2xl font-black text-[#ee2b4b]">
                             {formatCurrency(totalAmount)}
                         </span>
                     </div>
@@ -108,54 +103,54 @@ const PaymentPopup: React.FC<PaymentPopupProps> = ({
 
                 {/* Payment Methods */}
                 <div className="p-6">
-                    <h3 className="text-lg font-semibold text-neutral-900 mb-4">
+                    <h3 className="text-xs font-extrabold uppercase tracking-wider text-slate-700 mb-3">
                         Select Payment Method
                     </h3>
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 mb-6">
                         {[
                             {
                                 id: "card",
                                 label: "Card",
-                                icon: <MdCreditCard className="text-2xl" />,
+                                icon: <MdCreditCard className="text-xl" />,
                             },
                             {
                                 id: "paypal",
                                 label: "PayPal",
-                                icon: <FaPaypal className="text-2xl" />,
+                                icon: <FaPaypal className="text-xl" />,
                             },
                             {
                                 id: "googlepay",
-                                label: "Google Pay",
-                                icon: <SiGooglepay className="text-2xl" />,
+                                label: "GPay",
+                                icon: <SiGooglepay className="text-xl" />,
                             },
                             {
                                 id: "wallet",
                                 label: "Wallet",
-                                icon: <MdOutlineAccountBalanceWallet className="text-2xl" />,
+                                icon: <MdOutlineAccountBalanceWallet className="text-xl" />,
                             },
                             {
                                 id: "cod",
                                 label: "COD",
-                                icon: <MdOutlinePayments className="text-2xl" />,
+                                icon: <MdOutlinePayments className="text-xl" />,
                             },
                         ].map((method) => (
                             <button
                                 key={method.id}
                                 onClick={() => setPaymentMethod(method.id as PaymentType)}
-                                className={`flex flex-col items-center justify-center p-4 rounded-xl border-2 transition-all ${paymentMethod === method.id
-                                    ? "border-red-500 bg-red-50 text-red-500"
-                                    : "border-neutral-200 bg-neutral-50 text-neutral-600 hover:bg-neutral-100"
+                                className={`flex flex-col items-center justify-center p-3 rounded-2xl border transition-all ${paymentMethod === method.id
+                                    ? "border-[#ee2b4b] bg-[#ee2b4b]/10 text-[#ee2b4b] font-bold shadow-xs"
+                                    : "border-slate-200/80 bg-slate-50 text-slate-600 hover:bg-slate-100"
                                     }`}
                             >
                                 {method.icon}
-                                <span className="text-sm font-semibold mt-2">{method.label}</span>
+                                <span className="text-[11px] font-bold mt-1">{method.label}</span>
                             </button>
                         ))}
                     </div>
 
-                    {/* Payment Details */}
+                    {/* Payment Details Form */}
                     {paymentMethod === "card" && (
-                        <div className="space-y-4 mb-6">
+                        <div className="space-y-3.5 mb-6">
                             <Input
                                 label="Cardholder Name"
                                 placeholder="John Doe"
@@ -176,7 +171,7 @@ const PaymentPopup: React.FC<PaymentPopupProps> = ({
                                 }
                                 maxLength={19}
                             />
-                            <div className="grid grid-cols-2 gap-4">
+                            <div className="grid grid-cols-2 gap-3">
                                 <Input
                                     label="Expiry Date"
                                     placeholder="MM/YY"
@@ -210,23 +205,23 @@ const PaymentPopup: React.FC<PaymentPopupProps> = ({
                     )}
 
                     {paymentMethod === "paypal" && (
-                        <div className="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-100">
-                            <p className="text-sm text-blue-800">
+                        <div className="mb-6 p-4 bg-blue-50 rounded-2xl border border-blue-200">
+                            <p className="text-xs font-semibold text-blue-800">
                                 You will be redirected to PayPal to complete your payment securely.
                             </p>
                         </div>
                     )}
 
                     {paymentMethod === "googlepay" && (
-                        <div className="mb-6 p-4 bg-green-50 rounded-lg border border-green-100">
-                            <p className="text-sm text-green-800">
+                        <div className="mb-6 p-4 bg-emerald-50 rounded-2xl border border-emerald-200">
+                            <p className="text-xs font-semibold text-emerald-800">
                                 Google Pay will handle your payment securely. Make sure you are signed in to your Google account.
                             </p>
                         </div>
                     )}
 
                     {paymentMethod === "wallet" && (
-                        <div className="mb-6 space-y-4">
+                        <div className="mb-6 space-y-3">
                             <Input
                                 label="Phone Number"
                                 placeholder="+94 77 123 4567"
@@ -241,29 +236,26 @@ const PaymentPopup: React.FC<PaymentPopupProps> = ({
                     )}
 
                     {paymentMethod === "cod" && (
-                        <div className="mb-6 p-4 bg-yellow-50 rounded-lg border border-yellow-100">
-                            <p className="text-sm text-yellow-800">
-                                You wll pay <span className="font-bold">{formatCurrency(totalAmount)}</span> in cash when your order is delivered.
-                            </p>
-                            <p className="text-xs text-yellow-600 mt-2">
-                                Note: A small processing fee may apply.
+                        <div className="mb-6 p-4 bg-amber-50 rounded-2xl border border-amber-200">
+                            <p className="text-xs font-semibold text-amber-900">
+                                You will pay <span className="font-bold">{formatCurrency(totalAmount)}</span> in cash when your order is delivered.
                             </p>
                         </div>
                     )}
 
                     {/* Security Info */}
-                    <div className="mb-6 p-4 bg-neutral-50 rounded-lg">
-                        <div className="flex items-center justify-center gap-2 text-sm text-neutral-600">
-                            <svg className="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                    <div className="mb-6 p-3.5 bg-slate-50 rounded-2xl border border-slate-200/80">
+                        <div className="flex items-center justify-center gap-2 text-xs font-semibold text-slate-600">
+                            <svg className="w-4 h-4 text-emerald-600" fill="currentColor" viewBox="0 0 20 20">
                                 <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
                             </svg>
-                            <span>Your payment is secure and encrypted</span>
+                            <span>256-Bit Encrypted Payment Protocol</span>
                         </div>
                     </div>
                 </div>
 
                 {/* Footer */}
-                <div className="sticky bottom-0 bg-white border-t border-neutral-100 p-6 rounded-b-2xl">
+                <div className="sticky bottom-0 bg-white border-t border-slate-200/80 p-6 rounded-b-3xl">
                     <div className="flex flex-col sm:flex-row gap-3">
                         <Button
                             variant="outline"
@@ -275,15 +267,12 @@ const PaymentPopup: React.FC<PaymentPopupProps> = ({
                         </Button>
                         <Button
                             onClick={handlePaymentSubmit}
-                            className="flex-1 bg-red-500 hover:bg-red-600"
+                            className="flex-1 bg-[#ee2b4b] hover:bg-[#ff3b5c] text-white"
                             loading={isProcessing}
                         >
                             {isProcessing ? "Processing..." : `Pay ${formatCurrency(totalAmount)}`}
                         </Button>
                     </div>
-                    <p className="text-xs text-center text-neutral-500 mt-3">
-                        By clicking Pay, you agree to our Terms of Service and Privacy Policy
-                    </p>
                 </div>
             </div>
         </div>

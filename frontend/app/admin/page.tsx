@@ -103,27 +103,37 @@ export default function AdminDashboardPage() {
         const recentOrders = [...orders]
             .sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime())
             .slice(0, 5)
-            .map(order => ({
-                id: order._id || "",
-                product:
-                    order.items?.[0]?.product &&
-                        typeof order.items[0].product === "object"
-                        ? order.items[0].product?.name || "Product"
-                        : `Product ${order.items?.[0]?.product?.slice(-4) || ""}`,
-                customer:
-                    typeof order.user !== "string"
-                        ? `${order.user?.firstName || ""} ${order.user?.lastName || ""}`.trim() || "Customer"
-                        : "Customer",
-                date: order.createdAt
-                    ? new Date(order.createdAt).toLocaleDateString("en-US", {
-                        month: "short",
-                        day: "numeric",
-                        year: "numeric",
-                    })
-                    : "N/A",
-                amount: order.total || 0,
-                status: order.status || "Pending",
-            }));
+            .map(order => {
+                const firstItem = order.items?.[0];
+                const prod = firstItem?.product;
+                let productName = "Product";
+                if (typeof prod === "object" && prod !== null) {
+                    productName = prod.name || "Product";
+                } else if (typeof prod === "string") {
+                    productName = `Product ${prod.slice(-4)}`;
+                }
+
+                let customerName = "Customer";
+                if (typeof order.user === "object" && order.user !== null) {
+                    const userObj = order.user as { firstName?: string; lastName?: string; name?: string };
+                    customerName = `${userObj.firstName || userObj.name || ""} ${userObj.lastName || ""}`.trim() || "Customer";
+                }
+
+                return {
+                    id: order._id || "",
+                    product: productName,
+                    customer: customerName,
+                    date: order.createdAt
+                        ? new Date(order.createdAt).toLocaleDateString("en-US", {
+                            month: "short",
+                            day: "numeric",
+                            year: "numeric",
+                        })
+                        : "N/A",
+                    amount: order.total || 0,
+                    status: order.status || "Pending",
+                };
+            });
 
         const monthlyRevenue = calculateMonthlyRevenue(orders);
 

@@ -8,7 +8,10 @@ exports.getWishlistProducts = async (req, res) => {
         const wishlist = await Wishlist.findOne({ user: userId }).populate("products");
 
         if (!wishlist) {
-            return res.status(404).json({ message: "Wishlist not found" });
+            return res.status(200).json({
+                message: "Wishlist retrieved successfully",
+                products: []
+            });
         }
 
         res.json({
@@ -66,7 +69,7 @@ exports.removeFromWishlist = async (req, res) => {
         const wishlist = await Wishlist.findOne({ user: userId });
 
         if (!wishlist) {
-            return res.status(404).json({ message: "Wishlist not found" });
+            return res.status(200).json({ message: "Wishlist not found", wishlist: { user: userId, products: [] } });
         }
 
         wishlist.products = wishlist.products.filter(

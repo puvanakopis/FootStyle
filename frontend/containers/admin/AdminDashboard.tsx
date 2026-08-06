@@ -58,7 +58,7 @@ const chartOptions = {
             beginAtZero: true,
             ticks: {
                 stepSize: 1000,
-                callback: (value: number) => `Rs. ${value.toLocaleString()}`,
+                callback: (value: number | string) => `Rs. ${Number(value).toLocaleString()}`,
             },
         },
     },
@@ -73,7 +73,7 @@ export default function AdminDashboard({
 }: AdminDashboardProps) {
     return (
         <div className="flex-1 overflow-y-auto p-4 lg:p-10 scroll-smooth">
-            <div className="max-w-7xl mx-auto flex flex-col gap-8">
+            <div className="max-w-[1280px] mx-auto flex flex-col gap-8">
                 {/* Heading */}
                 <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
                     <div className="flex flex-col gap-2">

@@ -29,78 +29,78 @@ const NewAddress: React.FC<NewAddressProps> = ({
     return (
         <div className="lg:col-span-8">
             <form className="space-y-8" onSubmit={(e) => e.preventDefault()}>
-                <div className="bg-white rounded-2xl shadow-sm border border-neutral-100 p-6 md:p-8">
+                <div className="bg-white rounded-3xl border border-slate-200/80 p-6 md:p-8 backdrop-blur-xl">
                     {/* HEADER */}
-                    <div className="flex items-center justify-between mb-6">
-                        <h2 className="text-xl font-bold text-neutral-900 flex items-center gap-2">
+                    <div className="flex items-center justify-between mb-6 border-b border-slate-200/80 pb-4">
+                        <h2 className="text-base font-extrabold text-slate-900 uppercase tracking-wider flex items-center gap-2">
                             <IoLocationOutline className="text-[#ee2b4b]" size={22} />
-                            Delivery Address
+                            Delivery Destination
                         </h2>
                     </div>
 
                     {/* NEW ADDRESS */}
                     <div>
                         {/* CONTACT DETAILS */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
                             <div className="md:col-span-2">
-                                <label className="block text-sm font-medium mb-2">Full Name *</label>
+                                <label className="block text-[10px] font-extrabold text-slate-500 uppercase tracking-widest mb-1.5">Full Name *</label>
                                 <input
                                     type="text"
-                                    placeholder="Full Name"
+                                    placeholder="Enter recipient full name"
                                     value={newAddress.fullName}
                                     onChange={(e) => handleAddressChange("fullName", e.target.value)}
-                                    className="block w-full rounded-lg border border-neutral-300 h-11 px-4 focus:ring-[#ee2b4b] focus:border-[#ee2b4b]"
+                                    className="w-full rounded-xl border border-slate-200/80 bg-slate-50 py-3 px-4 text-xs font-bold text-slate-900 placeholder-slate-400 focus:outline-none focus:border-[#ee2b4b]"
                                     required
                                 />
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium mb-2">Phone Number *</label>
+                                <label className="block text-[10px] font-extrabold text-slate-500 uppercase tracking-widest mb-1.5">Phone Number *</label>
                                 <input
                                     type="tel"
-                                    placeholder="Phone Number"
+                                    placeholder="+94 77 123 4567"
                                     value={newAddress.phoneNumber}
                                     onChange={(e) => handleAddressChange("phoneNumber", e.target.value)}
-                                    className="block w-full rounded-lg border border-neutral-300 h-11 px-4 focus:ring-[#ee2b4b] focus:border-[#ee2b4b]"
+                                    className="w-full rounded-xl border border-slate-200/80 bg-slate-50 py-3 px-4 text-xs font-bold text-slate-900 placeholder-slate-400 focus:outline-none focus:border-[#ee2b4b]"
                                     required
                                 />
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium mb-2">Email Address *</label>
+                                <label className="block text-[10px] font-extrabold text-slate-500 uppercase tracking-widest mb-1.5">Email Address *</label>
                                 <input
                                     type="email"
-                                    placeholder="Email Address"
+                                    placeholder="name@example.com"
                                     value={newAddress.email}
                                     onChange={(e) => handleAddressChange("email", e.target.value)}
-                                    className="block w-full rounded-lg border border-neutral-300 h-11 px-4 focus:ring-[#ee2b4b] focus:border-[#ee2b4b]"
+                                    className="w-full rounded-xl border border-slate-200/80 bg-slate-50 py-3 px-4 text-xs font-bold text-slate-900 placeholder-slate-400 focus:outline-none focus:border-[#ee2b4b]"
                                     required
                                 />
                             </div>
                         </div>
 
                         {/* ADDRESS DETAILS */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                             <div className="md:col-span-2">
-                                <label className="block text-sm font-medium text-neutral-700 mb-2">
+                                <label className="block text-[10px] font-extrabold text-slate-500 uppercase tracking-widest mb-1.5">
                                     Street Address *
                                 </label>
                                 <input
                                     type="text"
-                                    placeholder="Street Address"
+                                    placeholder="House No, Street name, Apartment"
                                     value={newAddress.street}
                                     onChange={(e) => handleAddressChange("street", e.target.value)}
-                                    className="block w-full rounded-lg border border-neutral-300 h-11 px-4 focus:ring-[#ee2b4b] focus:border-[#ee2b4b]"
+                                    className="w-full rounded-xl border border-slate-200/80 bg-slate-50 py-3 px-4 text-xs font-bold text-slate-900 placeholder-slate-400 focus:outline-none focus:border-[#ee2b4b]"
                                     required
                                 />
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium mb-2">Province *</label>
+                                <label className="block text-[10px] font-extrabold text-slate-500 uppercase tracking-widest mb-1.5">Province *</label>
                                 <select
                                     value={newAddress.province}
                                     onChange={(e) => handleAddressChange("province", e.target.value)}
-                                    className="block w-full rounded-lg border border-neutral-300 h-11 px-4 focus:ring-[#ee2b4b] focus:border-[#ee2b4b]"
+                                    className="block w-full rounded-xl border border-slate-200/80 bg-slate-50 h-11 px-4 text-xs font-bold text-slate-900 focus:outline-none focus:border-[#ee2b4b]"
                                     required
                                 >
                                     <option value="">Select Province</option>
@@ -111,12 +111,12 @@ const NewAddress: React.FC<NewAddressProps> = ({
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium mb-2">District *</label>
+                                <label className="block text-[10px] font-extrabold text-slate-500 uppercase tracking-widest mb-1.5">District *</label>
                                 <select
                                     value={newAddress.city}
                                     onChange={(e) => handleAddressChange("city", e.target.value)}
                                     disabled={!newAddress.province}
-                                    className="block w-full rounded-lg border border-neutral-300 h-11 px-4 focus:ring-[#ee2b4b] focus:border-[#ee2b4b]"
+                                    className="block w-full rounded-xl border border-slate-200/80 bg-slate-50 h-11 px-4 text-xs font-bold text-slate-900 focus:outline-none focus:border-[#ee2b4b]"
                                     required
                                 >
                                     <option value="">Select District</option>
@@ -128,25 +128,25 @@ const NewAddress: React.FC<NewAddressProps> = ({
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium mb-2">Country</label>
+                                <label className="block text-[10px] font-extrabold text-slate-500 uppercase tracking-widest mb-1.5">Country</label>
                                 <input
                                     type="text"
                                     placeholder="Country"
                                     value={newAddress.country}
                                     onChange={(e) => handleAddressChange("country", e.target.value)}
-                                    className="block w-full rounded-lg border border-neutral-300 h-11 px-4 focus:ring-[#ee2b4b] focus:border-[#ee2b4b]"
+                                    className="w-full rounded-xl border border-slate-200/80 bg-slate-100 py-3 px-4 text-xs font-bold text-slate-500 cursor-not-allowed"
                                     readOnly
                                 />
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium mb-2">Postal Code *</label>
+                                <label className="block text-[10px] font-extrabold text-slate-500 uppercase tracking-widest mb-1.5">Postal Code *</label>
                                 <input
                                     type="text"
                                     placeholder="Postal Code"
                                     value={newAddress.postalCode}
                                     onChange={(e) => handleAddressChange("postalCode", e.target.value)}
-                                    className="block w-full rounded-lg border border-neutral-300 h-11 px-4 focus:ring-[#ee2b4b] focus:border-[#ee2b4b]"
+                                    className="w-full rounded-xl border border-slate-200/80 bg-slate-50 py-3 px-4 text-xs font-bold text-slate-900 placeholder-slate-400 focus:outline-none focus:border-[#ee2b4b]"
                                     required
                                 />
                             </div>
@@ -159,10 +159,9 @@ const NewAddress: React.FC<NewAddressProps> = ({
             <div className="flex items-center justify-between pt-4">
                 <Link
                     href="/cart"
-                    className="flex items-center gap-2 text-neutral-500 hover:text-neutral-900 font-medium"
+                    className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-wider text-slate-600 hover:text-[#ee2b4b] transition-colors"
                 >
-                    {/* <IoMdArrowBack /> */}
-                    Back to Cart
+                    Back to Drop Bag
                 </Link>
             </div>
         </div>

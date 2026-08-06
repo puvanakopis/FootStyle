@@ -1,6 +1,7 @@
 "use client";
 
-import { FaMapMarkerAlt, FaPhone, FaEnvelope, FaClock, FaFacebookF, FaTwitter, FaInstagram, FaLinkedinIn } from "react-icons/fa";
+import { FaFacebookF, FaTwitter, FaInstagram, FaLinkedinIn } from "react-icons/fa";
+import { FaMapMarkerAlt as IconMap, FaPhone as IconPhone, FaEnvelope as IconMail, FaClock as IconClock } from "react-icons/fa";
 import { MdOutlineSupportAgent } from "react-icons/md";
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
@@ -8,31 +9,31 @@ import Footer from '@/components/Footer';
 const Contact = () => {
   const contactInfo = [
     {
-      icon: <FaMapMarkerAlt />,
-      title: "Our Headquarters",
+      icon: <IconMap />,
+      title: "Our Flagship Hub",
       details: ["No. 45, Galle Road, Colombo 03, Sri Lanka"],
     },
     {
-      icon: <FaPhone />,
-      title: "Contact Numbers",
+      icon: <IconPhone />,
+      title: "Direct Support Hotline",
       details: [
         "Customer Support: +94 75 123 4567",
-        "Sales Inquiries: +94 77 123 4567",
-        "WhatsApp: +94 77 123 4567"
+        "Sales & Restocks: +94 77 123 4567",
+        "WhatsApp Concierge: +94 77 123 4567"
       ]
     },
     {
-      icon: <FaEnvelope />,
-      title: "Email Addresses",
+      icon: <IconMail />,
+      title: "Official Email Concierge",
       details: [
         "Support: support@footstyle.com",
-        "Partnerships: partners@footstyle.com",
+        "Collaborations: partners@footstyle.com",
         "Press: press@footstyle.com"
       ]
     },
     {
-      icon: <FaClock />,
-      title: "Business Hours",
+      icon: <IconClock />,
+      title: "HQ Operating Hours",
       details: [
         "Monday - Friday: 9:00 AM - 6:00 PM",
         "Saturday: 10:00 AM - 4:00 PM",
@@ -42,40 +43,38 @@ const Contact = () => {
   ];
 
   return (
-    <main className="min-h-screen bg-background text-foreground">
+    <main className="min-h-screen bg-[#fafafc] text-slate-900">
       <Header />
 
       {/* Contact Content */}
       <div className="px-4 md:px-10 py-6">
         {/* Hero Section */}
-        <section className="flex justify-center py-12 md:py-20">
+        <section className="flex justify-center py-4 md:py-8">
           <div className="w-full max-w-[1280px]">
-            <div className="flex flex-col gap-8 lg:flex-row lg:items-center">
+            <div className="flex flex-col gap-10 lg:flex-row lg:items-center">
               {/* Text Content */}
               <div className="lg:w-1/2">
                 <div className="flex flex-col gap-6">
-                  <span className="w-fit rounded-full bg-[#ee2b4b]/10 px-3 py-1 text-xs font-bold uppercase tracking-wider text-[#ee2b4b]">
-                    Get In Touch
+                  <span className="w-fit rounded-full bg-[#ee2b4b]/10 px-3.5 py-1 text-xs font-extrabold uppercase tracking-wider text-[#ee2b4b] border border-[#ee2b4b]/20">
+                    24/7 Collector Support
                   </span>
 
-                  <h1 className="text-4xl font-black leading-tight tracking-tight text-text-main-light md:text-5xl lg:text-6xl">
+                  <h1 className="text-4xl font-black leading-tight tracking-tight text-slate-900 md:text-5xl lg:text-6xl">
                     We&#39;re Here to <br />
-                    <span className="text-[#ee2b4b]">Help You.</span>
+                    <span className="text-[#ee2b4b]">Assist You.</span>
                   </h1>
 
-                  <p className="text-lg leading-relaxed text-text-sec-light">
-                    Have questions about our products, need assistance with an order,
-                    or want to collaborate? Our dedicated team is ready to assist you
-                    with personalized support and timely responses.
+                  <p className="text-base leading-relaxed text-slate-600 font-medium">
+                    Have questions about an upcoming drop, sizing assistance, or need help with your order? Our concierge support team is ready to deliver fast solutions.
                   </p>
 
                   <div className="flex items-center gap-4">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#ee2b4b]/10 text-2xl text-[#ee2b4b]">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#ee2b4b]/10 text-2xl text-[#ee2b4b]">
                       <MdOutlineSupportAgent />
                     </div>
                     <div>
-                      <h3 className="font-bold text-text-main-light">24/7 Customer Support</h3>
-                      <p className="text-sm text-text-sec-light">Average response time: under 2 hours</p>
+                      <h3 className="font-extrabold text-slate-900 text-sm">Priority Support Desk</h3>
+                      <p className="text-xs text-slate-500 font-medium">Average response time: Under 2 hours</p>
                     </div>
                   </div>
                 </div>
@@ -83,7 +82,7 @@ const Contact = () => {
 
               {/* Image Section */}
               <div className="lg:w-1/2">
-                <div className="relative aspect-square overflow-hidden rounded-2xl group">
+                <div className="relative aspect-square overflow-hidden rounded-3xl group border border-slate-200/80">
                   <div
                     className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
                     style={{
@@ -91,16 +90,10 @@ const Contact = () => {
                         'url("https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=800&auto=format&fit=crop")',
                     }}
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 to-transparent" />
                   <div className="absolute bottom-8 left-8 text-white">
-                    <p className="text-xl font-bold">Our Support Team</p>
-                    <p className="text-sm opacity-90">Ready to assist you 24/7</p>
-                  </div>
-                  <div className="absolute top-8 right-8 bg-white/90 backdrop-blur-sm rounded-lg p-4 shadow-lg">
-                    <div className="text-center">
-                      <div className="text-2xl font-bold text-[#ee2b4b]">2h</div>
-                      <div className="text-xs text-gray-600">Avg. Response Time</div>
-                    </div>
+                    <p className="text-xl font-black">Collector Care Team</p>
+                    <p className="text-xs text-slate-300 font-medium">Live Chat & Direct Support</p>
                   </div>
                 </div>
               </div>
@@ -109,115 +102,104 @@ const Contact = () => {
         </section>
 
         {/* Contact Form Section */}
-        <section className="flex justify-center bg-gray-50 py-16">
+        <section className="flex justify-center py-12">
           <div className="w-full max-w-[960px] px-4">
-            <div className="rounded-3xl bg-[#ee2b4b]/5 p-8 shadow-sm md:p-12">
-              <div className="text-center">
-                <span className="rounded-full bg-[#ee2b4b]/10 px-4 py-1 text-sm font-bold text-[#ee2b4b]">
-                  Send Message
+            <div className="rounded-3xl border border-slate-200/80 bg-white p-8 md:p-12">
+              <div className="text-center mb-8">
+                <span className="rounded-full bg-[#ee2b4b]/10 px-3.5 py-1 text-xs font-extrabold text-[#ee2b4b] uppercase tracking-wider border border-[#ee2b4b]/20">
+                  Send Inquiry
                 </span>
-                <h2 className="mt-4 text-3xl font-bold leading-tight tracking-tight text-text-main-light md:text-4xl">
-                  Let&#39;s Start a Conversation
+                <h2 className="mt-4 text-3xl font-black text-slate-900">
+                  Drop Us a Message
                 </h2>
-                <p className="mx-auto mt-2 max-w-[600px] text-base text-text-sec-light">
-                  Fill out the form below and our team will get back to you within 24 hours.
+                <p className="mx-auto mt-2 max-w-[600px] text-xs text-slate-500 font-medium">
+                  Fill out the form below and our sneaker team will reply within 24 hours.
                 </p>
               </div>
 
-              <form className="mt-8 space-y-6">
-                <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+              <form className="space-y-5" onSubmit={(e) => e.preventDefault()}>
+                <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
                   <div>
-                    <label className="mb-2 block text-sm font-medium text-text-main-light">
+                    <label className="mb-1.5 block text-[10px] font-extrabold text-slate-500 uppercase tracking-widest">
                       First Name *
                     </label>
                     <input
                       type="text"
                       required
-                      placeholder="Puvanakopis"
-                      className="w-full rounded-lg border-0 bg-white px-4 py-3 text-sm text-gray-900 shadow-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#ee2b4b]"
+                      placeholder="John"
+                      className="w-full rounded-xl border border-slate-200/80 bg-slate-50 px-4 py-3 text-xs font-bold text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-[#ee2b4b]"
                     />
                   </div>
                   <div>
-                    <label className="mb-2 block text-sm font-medium text-text-main-light">
+                    <label className="mb-1.5 block text-[10px] font-extrabold text-slate-500 uppercase tracking-widest">
                       Last Name *
                     </label>
                     <input
                       type="text"
                       required
-                      placeholder="Mehanathan"
-                      className="w-full rounded-lg border-0 bg-white px-4 py-3 text-sm text-gray-900 shadow-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#ee2b4b]"
+                      placeholder="Doe"
+                      className="w-full rounded-xl border border-slate-200/80 bg-slate-50 px-4 py-3 text-xs font-bold text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-[#ee2b4b]"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="mb-2 block text-sm font-medium text-text-main-light">
+                  <label className="mb-1.5 block text-[10px] font-extrabold text-slate-500 uppercase tracking-widest">
                     Email Address *
                   </label>
                   <input
                     type="email"
                     required
-                    placeholder="puvanakopis@gmail.com"
-                    className="w-full rounded-lg border-0 bg-white px-4 py-3 text-sm text-gray-900 shadow-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#ee2b4b]"
+                    placeholder="john@example.com"
+                    className="w-full rounded-xl border border-slate-200/80 bg-slate-50 px-4 py-3 text-xs font-bold text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-[#ee2b4b]"
                   />
                 </div>
 
                 <div>
-                  <label className="mb-2 block text-sm font-medium text-text-main-light">
+                  <label className="mb-1.5 block text-[10px] font-extrabold text-slate-500 uppercase tracking-widest">
                     Phone Number
                   </label>
                   <input
                     type="tel"
-                    placeholder="+75 12 34 567"
-                    className="w-full rounded-lg border-0 bg-white px-4 py-3 text-sm text-gray-900 shadow-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#ee2b4b]"
+                    placeholder="+94 77 123 4567"
+                    className="w-full rounded-xl border border-slate-200/80 bg-slate-50 px-4 py-3 text-xs font-bold text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-[#ee2b4b]"
                   />
                 </div>
 
                 <div>
-                  <label className="mb-2 block text-sm font-medium text-text-main-light">
+                  <label className="mb-1.5 block text-[10px] font-extrabold text-slate-500 uppercase tracking-widest">
                     Subject *
                   </label>
                   <select
-                    className="w-full rounded-lg border-0 bg-white px-4 py-3 text-sm text-gray-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-[#ee2b4b]"
+                    className="w-full rounded-xl border border-slate-200/80 bg-slate-50 px-4 py-3 text-xs font-bold text-slate-900 focus:outline-none focus:border-[#ee2b4b]"
                   >
-                    <option value="">Select a subject</option>
-                    <option value="order">Order Inquiry</option>
-                    <option value="product">Product Question</option>
+                    <option value="">Select a topic</option>
+                    <option value="order">Order & Delivery Inquiry</option>
+                    <option value="product">Authenticity & Sizing Question</option>
                     <option value="return">Returns & Exchanges</option>
-                    <option value="collaboration">Business Collaboration</option>
-                    <option value="other">Other</option>
+                    <option value="collaboration">Streetwear Partnerships</option>
+                    <option value="other">General Query</option>
                   </select>
                 </div>
 
                 <div>
-                  <label className="mb-2 block text-sm font-medium text-text-main-light">
+                  <label className="mb-1.5 block text-[10px] font-extrabold text-slate-500 uppercase tracking-widest">
                     Message *
                   </label>
                   <textarea
-                    rows={5}
+                    rows={4}
                     required
-                    placeholder="Tell us how we can help you..."
-                    className="w-full rounded-lg border-0 bg-white px-4 py-3 text-sm text-gray-900 shadow-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#ee2b4b]"
+                    placeholder="Describe how we can help you..."
+                    className="w-full rounded-xl border border-slate-200/80 bg-slate-50 px-4 py-3 text-xs font-bold text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-[#ee2b4b] resize-none"
                   />
                 </div>
 
-                <div className="flex items-center">
-                  <input
-                    type="checkbox"
-                    id="newsletter"
-                    className="h-4 w-4 rounded border-gray-300 text-[#ee2b4b] focus:ring-[#ee2b4b]"
-                  />
-                  <label htmlFor="newsletter" className="ml-2 text-sm text-text-sec-light">
-                    Subscribe to our newsletter for updates and exclusive offers
-                  </label>
-                </div>
-
-                <div className="w-full flex justify-center">
+                <div className="w-full flex justify-center pt-2">
                   <button
                     type="submit"
-                    className="rounded-lg bg-[#ee2b4b] px-8 py-4 text-sm font-bold text-white shadow-lg shadow-[#ee2b4b]/20 transition-transform hover:scale-[1.02]"
+                    className="rounded-xl bg-[#ee2b4b] px-8 py-3.5 text-xs font-extrabold uppercase tracking-wider text-white shadow-md shadow-[#ee2b4b]/20 hover:bg-[#ff3b5c] transition-all"
                   >
-                    Send Message
+                    Submit Inquiry
                   </button>
                 </div>
               </form>
@@ -228,60 +210,36 @@ const Contact = () => {
         {/* Contact Information Grid */}
         <section className="flex justify-center py-12">
           <div className="w-full max-w-[1280px] px-4">
-            {/* Section Header */}
-            <div className="text-center">
-              <span className="w-fit rounded-full bg-[#ee2b4b]/10 px-3 py-1 text-xs font-bold uppercase tracking-wider text-[#ee2b4b]">
-                Contact Us
+            <div className="text-center mb-8">
+              <span className="w-fit rounded-full bg-[#ee2b4b]/10 px-3.5 py-1 text-xs font-extrabold uppercase tracking-wider text-[#ee2b4b]">
+                Connect With Us
               </span>
-              <h2 className="text-3xl font-black text-text-main-light mt-4">
-                Get in Touch
+              <h2 className="text-3xl font-black text-slate-900 mt-3">
+                Official Channels
               </h2>
-              <p className="text-text-sec-light mt-2 max-w-2xl mx-auto">
-                Have questions or need assistance? Reach out to our team through any of the following contact methods.
-              </p>
             </div>
 
-            {/* Contact Cards */}
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4 mt-8">
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
               {contactInfo.map((info, index) => (
                 <div
                   key={index}
-                  className="rounded-xl border border-[#f3e7e9] bg-white p-6 transition-all hover:shadow-md"
+                  className="rounded-2xl border border-slate-200/80 bg-white p-6 transition-all"
                 >
-                  <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-[#ee2b4b]/10 text-xl text-[#ee2b4b]">
+                  <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-[#ee2b4b]/10 text-xl text-[#ee2b4b]">
                     {info.icon}
                   </div>
-                  <h3 className="mb-3 text-lg font-bold text-text-main-light">
+                  <h3 className="mb-2 text-base font-extrabold text-slate-900">
                     {info.title}
                   </h3>
                   <ul className="space-y-1">
                     {info.details.map((detail, idx) => (
-                      <li key={idx} className="text-sm text-text-sec-light">
+                      <li key={idx} className="text-xs text-slate-500 font-medium">
                         {detail}
                       </li>
                     ))}
                   </ul>
                 </div>
               ))}
-            </div>
-
-            {/* Social Media Section */}
-            <div className="mt-16 text-center">
-              <h3 className="text-2xl font-bold text-text-main-light">Follow Us</h3>
-              <p className="text-text-sec-light mt-2 max-w-2xl mx-auto mb-6">
-                Stay updated with our latest collections, offers, and news
-              </p>
-              <div className="flex justify-center gap-4">
-                {[FaFacebookF, FaTwitter, FaInstagram, FaLinkedinIn].map((Icon, index) => (
-                  <a
-                    key={index}
-                    href="#"
-                    className="flex h-12 w-12 items-center justify-center rounded-full bg-gray-100 text-gray-700 transition-all hover:bg-[#ee2b4b] hover:text-white hover:scale-110"
-                  >
-                    <Icon />
-                  </a>
-                ))}
-              </div>
             </div>
           </div>
         </section>

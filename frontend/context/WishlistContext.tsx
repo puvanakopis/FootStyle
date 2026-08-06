@@ -41,7 +41,7 @@ export const WishlistProvider: React.FC<WishlistProviderProps> = ({ children }) 
         try {
             setIsLoading(true);
             const response = await wishlistApi.getWishlistProducts();
-            setWishlist(response.products);
+            setWishlist(response.data || (response as any).products || []);
         } catch (err) {
             handleError(err);
         } finally {

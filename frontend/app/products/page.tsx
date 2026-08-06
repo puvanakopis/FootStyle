@@ -66,35 +66,37 @@ export default function Products() {
 
   if (isLoading) {
     return (
-      <main className="min-h-screen bg-background text-foreground">
+      <main className="min-h-screen bg-[#fafafc] text-slate-900">
         <Header />
-        <Loading message='loading products .....'/>
+        <Loading message='loading products .....' />
         <Footer />
       </main>
     )
   }
 
   return (
-    <main className="min-h-screen bg-background text-foreground">
+    <main className="min-h-screen bg-[#fafafc] text-slate-900">
       <Header />
-      <div className="px-30 py-6">
-        <Breadcrumbs items={breadcrumbItems} />
+      <div className="px-4 md:px-10 py-6">
+        <div className="w-full max-w-[1280px] mx-auto">
+          <Breadcrumbs items={breadcrumbItems} />
 
-        <div className="flex flex-col lg:flex-row gap-6 mt-6">
-          <div className="w-full lg:w-1/5">
-            <Filters
-              selectedGender={selectedGender}
-              selectedMaterial={selectedMaterial}
-              priceRange={priceRange}
-              onGenderChange={handleGenderChange}
-              onMaterialChange={handleMaterialChange}
-              onPriceChange={handlePriceChange}
-              onClearAll={handleClearAll}
-            />
-          </div>
+          <div className="flex flex-col lg:flex-row gap-6 mt-6">
+            <div className="w-full lg:w-1/5">
+              <Filters
+                selectedGender={selectedGender}
+                selectedMaterial={selectedMaterial}
+                priceRange={priceRange}
+                onGenderChange={handleGenderChange}
+                onMaterialChange={handleMaterialChange}
+                onPriceChange={handlePriceChange}
+                onClearAll={handleClearAll}
+              />
+            </div>
 
-          <div className="w-full lg:w-4/5">
-            <ProductGrid products={filteredProducts} />
+            <div className="w-full lg:w-4/5">
+              <ProductGrid products={filteredProducts} />
+            </div>
           </div>
         </div>
       </div>

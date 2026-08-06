@@ -190,7 +190,7 @@ export default function Profile() {
 
     if (isLoading) {
         return (
-            <main className="min-h-screen bg-background text-foreground">
+            <main className="min-h-screen bg-[#fafafc] text-slate-900">
                 <Header />
                 <Loading message='loading profile .....' />
                 <Footer />
@@ -199,31 +199,42 @@ export default function Profile() {
     }
 
     return (
-        <main className="min-h-screen bg-background text-foreground">
+        <main className="min-h-screen bg-[#fafafc] text-slate-900">
             <Header />
-            <div className="px-30 py-6">
-                <Breadcrumbs items={breadcrumbItems} />
-                <div className="flex flex-col lg:flex-row gap-6 mt-6">
-                    <div className="w-full lg:w-1/5">
-                        <Sidebar />
-                    </div>
+            <div className="px-4 md:px-10 py-6">
+                <div className="w-full max-w-[1280px] mx-auto">
+                    <Breadcrumbs items={breadcrumbItems} />
+                    <div className="flex flex-col lg:flex-row gap-6 mt-6">
+                        <div className="w-full lg:w-1/5">
+                            <Sidebar />
+                        </div>
 
-                    <section className="w-full lg:w-4/5 space-y-6">
-                        <ProfileDetails
-                            formData={formData}
-                            isEditingAddress={isEditingAddress}
-                            isSubmitting={isSubmitting}
-                            provinceDistricts={provinceDistricts}
-                            handleChange={handleChange}
-                            handleAddressChange={handleAddressChange}
-                            handleSubmit={handleSubmit}
-                            handleSaveAddress={handleSaveAddress}
-                            handleClearAddress={handleClearAddress}
-                            setIsEditingAddress={setIsEditingAddress}
-                            isAddressEmpty={isAddressEmpty}
-                            getAddressLabel={getAddressLabel}
-                        />
-                    </section>
+                        <section className="w-full lg:w-4/5 space-y-6">
+                            <div className="flex justify-between items-center">
+                                <div>
+                                    <h1 className="text-2xl font-bold text-neutral-900">My Profile</h1>
+                                    <p className="text-neutral-600 mt-1">
+                                        Manage your personal details and shipping address
+                                    </p>
+                                </div>
+                            </div>
+
+                            <ProfileDetails
+                                formData={formData}
+                                isEditingAddress={isEditingAddress}
+                                isSubmitting={isSubmitting}
+                                provinceDistricts={provinceDistricts}
+                                handleChange={handleChange}
+                                handleAddressChange={handleAddressChange}
+                                handleSubmit={handleSubmit}
+                                handleSaveAddress={handleSaveAddress}
+                                handleClearAddress={handleClearAddress}
+                                setIsEditingAddress={setIsEditingAddress}
+                                isAddressEmpty={isAddressEmpty}
+                                getAddressLabel={getAddressLabel}
+                            />
+                        </section>
+                    </div>
                 </div>
             </div>
             <Footer />

@@ -259,7 +259,7 @@ const AdminUsersManagement: React.FC = () => {
 
     return (
         <div className="flex-1 overflow-y-auto p-6 lg:p-10 scroll-smooth">
-            <div className="max-w-7xl mx-auto flex flex-col gap-8">
+            <div className="max-w-[1280px] mx-auto flex flex-col gap-8">
                 {/* Header */}
                 <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
                     <div className="flex flex-col gap-2">

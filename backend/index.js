@@ -41,6 +41,17 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
+// Logger Middleware - Log all incoming API calls
+app.use((req, res, next) => {
+  const start = Date.now();
+  const { method, originalUrl } = req;
+  res.on("finish", () => {
+    const duration = Date.now() - start;
+    console.log(`[API CALL] ${method} ${originalUrl} - Status: ${res.statusCode} (${duration}ms)`);
+  });
+  next();
+});
+
 
 // Routes
 app.use("/api/authGoogle", googleAuthRoutes);

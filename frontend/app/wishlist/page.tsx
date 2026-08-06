@@ -11,8 +11,7 @@ import { useWishlist } from "@/context/WishlistContext";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { showToast } from "@/utils/toast";
-import { formatDate } from "@/utils/dateUtils"
-import Loading from "@/components/Loading";
+import { formatDate } from "@/utils/dateUtils";
 
 const breadcrumbItems = [
     { label: "Account", href: "" },
@@ -103,111 +102,106 @@ export default function Wishlist() {
         router.push(`/products/${productId}`);
     };
 
-    if (isLoading) {
-        return (
-            <main className="min-h-screen bg-background text-foreground">
-                <Header />
-                <Loading message='loading wishlist .....' />
-                <Footer />
-            </main>
-        )
-    }
-
-    // Error state
-    if (error) {
-        return (
-            <main className="min-h-screen bg-background text-foreground">
-                <Header />
-                <div className="px-30 py-6">
-                    <Breadcrumbs items={breadcrumbItems} />
-                    <div className="flex flex-col lg:flex-row gap-6 mt-6">
-                        <div className="w-full lg:w-1/5">
-                            <Sidebar />
-                        </div>
-                        <section className="w-full lg:w-4/5 space-y-6">
-                            <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
-                                <p className="text-red-600 font-medium">Error loading wishlist: {error}</p>
-                                <button
-                                    onClick={fetchWishlist}
-                                    className="mt-4 px-4 py-2 bg-[#ee2b4b] text-white rounded-lg hover:bg-[#d4203e] transition-colors"
-                                >
-                                    Try Again
-                                </button>
-                            </div>
-                        </section>
-                    </div>
-                </div>
-                <Footer />
-            </main>
-        );
-    }
-
-    // Empty wishlist
-    if (wishlist.length === 0) {
-        return (
-            <main className="min-h-screen bg-background text-foreground">
-                <Header />
-                <div className="px-30 py-6">
-                    <Breadcrumbs items={breadcrumbItems} />
-                    <div className="flex flex-col lg:flex-row gap-6 mt-6">
-                        <div className="w-full lg:w-1/5">
-                            <Sidebar />
-                        </div>
-                        <section className="w-full lg:w-4/5 space-y-6">
-                            <div className="bg-white rounded-2xl shadow-sm border border-neutral-100 p-12 text-center">
-                                <h3 className="text-2xl font-bold text-neutral-900 mb-3">Your wishlist is empty</h3>
-                                <p className="text-neutral-600 mb-8 max-w-md mx-auto">
-                                    Save items you love to your wishlist. Review them anytime and easily move them to the bag.
-                                </p>
-                                <Link
-                                    href="/products"
-                                    className="inline-flex items-center gap-2 px-6 py-3 bg-[#ee2b4b] text-white font-medium rounded-lg hover:bg-[#d4203e] transition-colors"
-                                >
-                                    Start Shopping
-                                </Link>
-                            </div>
-                        </section>
-                    </div>
-                </div>
-                <Footer />
-            </main>
-        );
-    }
-
     return (
-        <main className="min-h-screen bg-background text-foreground">
+        <main className="min-h-screen bg-[#fafafc] text-slate-900">
             <Header />
-            <div className="px-30 py-6">
-                <Breadcrumbs items={breadcrumbItems} />
-                <div className="flex flex-col lg:flex-row gap-6 mt-6">
-                    <div className="w-full lg:w-1/5">
-                        <Sidebar />
-                    </div>
-
-                    <section className="w-full lg:w-4/5 space-y-6">
-                        <div className="flex justify-between items-center">
-                            <div>
-                                <h1 className="text-2xl font-bold text-neutral-900">My Wishlist</h1>
-                                <p className="text-neutral-600 mt-1">
-                                    {wishlist.length} {wishlist.length === 1 ? "item" : "items"}
-                                </p>
-                            </div>
-                            <WishlistFilter selectedSort={sortOption} onSortChange={handleSortChange} />
+            <div className="px-4 md:px-10 py-6">
+                <div className="w-full max-w-[1280px] mx-auto">
+                    <Breadcrumbs items={breadcrumbItems} />
+                    <div className="flex flex-col lg:flex-row gap-6 mt-6">
+                        <div className="w-full lg:w-1/5">
+                            <Sidebar />
                         </div>
-                        <ProductList
-                            products={sortedProducts}
-                            isLoading={isLoading}
-                            getStockStatus={getStockStatus}
-                            getPrimaryImage={getPrimaryImage}
-                            getReviewCount={getReviewCount}
-                            formatDate={formatDate}
-                            getLastSavedSize={getLastSavedSize}
-                            calculateAverageRating={calculateAverageRating}
-                            handleRemoveFromWishlist={handleRemoveFromWishlist}
-                            handleAddToCart={handleAddToCart}
-                            handleViewProduct={handleViewProduct}
-                        />
-                    </section>
+
+                        <section className="w-full lg:w-4/5 space-y-6">
+                            <div className="flex justify-between items-center">
+                                <div>
+                                    <h1 className="text-2xl font-bold text-neutral-900">My Wishlist</h1>
+                                    <p className="text-neutral-600 mt-1">
+                                        {wishlist.length} {wishlist.length === 1 ? "Item" : "Items"}
+                                    </p>
+                                </div>
+                                {wishlist.length > 0 && (
+                                    <WishlistFilter selectedSort={sortOption} onSortChange={handleSortChange} />
+                                )}
+                            </div>
+
+                            {isLoading ? (
+                                <div className="bg-white rounded-2xl shadow-sm border border-neutral-100 p-12 text-center">
+                                    <div className="flex justify-center items-center">
+                                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#ee2b4b]"></div>
+                                    </div>
+                                    <p className="text-neutral-600 mt-4">Loading your wishlist...</p>
+                                </div>
+                            ) : error ? (
+                                <div className="bg-white rounded-2xl shadow-sm border border-neutral-100 p-12 text-center">
+                                    <div className="text-red-500 mb-4">
+                                        <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                    </div>
+                                    <h3 className="text-xl font-bold text-neutral-900 mb-2">
+                                        Error Loading Wishlist
+                                    </h3>
+                                    <p className="text-neutral-500 mb-6">
+                                        {error || "Failed to load your wishlist. Please try again."}
+                                    </p>
+                                    <button
+                                        onClick={fetchWishlist}
+                                        className="inline-block px-6 py-3 bg-[#ee2b4b] text-white rounded-lg font-bold hover:bg-red-600 transition"
+                                    >
+                                        Retry
+                                    </button>
+                                </div>
+                            ) : wishlist.length === 0 ? (
+                                <div className="bg-white rounded-2xl shadow-sm border border-neutral-100 p-12 text-center">
+                                    <div className="text-neutral-400 mb-4">
+                                        <svg
+                                            className="w-16 h-16 mx-auto"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                strokeWidth="1.5"
+                                                d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+                                            />
+                                        </svg>
+                                    </div>
+
+                                    <h3 className="text-xl font-bold text-neutral-900 mb-2">
+                                        Your wishlist is empty
+                                    </h3>
+                                    <p className="text-neutral-500 mb-6 max-w-md mx-auto">
+                                        Save items you love to your wishlist. Review them anytime and easily move them to the bag.
+                                    </p>
+
+                                    <Link
+                                        href="/products"
+                                        className="inline-block px-6 py-3 bg-[#ee2b4b] text-white rounded-lg font-bold hover:bg-red-600 transition"
+                                    >
+                                        Start Shopping
+                                    </Link>
+                                </div>
+                            ) : (
+                                <ProductList
+                                    products={sortedProducts}
+                                    isLoading={isLoading}
+                                    getStockStatus={getStockStatus}
+                                    getPrimaryImage={getPrimaryImage}
+                                    getReviewCount={getReviewCount}
+                                    formatDate={formatDate}
+                                    getLastSavedSize={getLastSavedSize}
+                                    calculateAverageRating={calculateAverageRating}
+                                    handleRemoveFromWishlist={handleRemoveFromWishlist}
+                                    handleAddToCart={handleAddToCart}
+                                    handleViewProduct={handleViewProduct}
+                                />
+                            )}
+                        </section>
+                    </div>
                 </div>
             </div>
             <Footer />

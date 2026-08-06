@@ -1,6 +1,7 @@
 "use client";
 
 import { MdOutlineDeleteOutline } from "react-icons/md";
+import { ShoppingBag } from "lucide-react";
 
 interface Variant {
     size: string;
@@ -29,33 +30,33 @@ const CartItems = ({ cartItems, handleUpdateQuantity, handleRemoveItem, handleRe
     const getTotalQuantity = (variants: Variant[]) =>
         variants.reduce((total, variant) => total + variant.quantity, 0);
 
-    const getTotalPriceForItem = (item: CartItem) =>
-        item.price * getTotalQuantity(item.variants);
-
     if (!cartItems || cartItems.length === 0) {
         return (
-            <div className="text-center py-12">
-                <h3 className="text-xl font-semibold mb-2">Your cart is empty</h3>
-                <p className="text-neutral-500 mb-6">Add some products to your cart to see them here</p>
+            <div className="text-center py-16 px-6 rounded-3xl border border-slate-200/80 bg-white backdrop-blur-xl shadow-xs">
+                <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-[#ee2b4b]/10 text-[#ee2b4b] mx-auto mb-4">
+                    <ShoppingBag className="w-8 h-8" />
+                </div>
+                <h3 className="text-xl font-black text-slate-900 mb-2">Your Drop Bag is Empty</h3>
+                <p className="text-xs text-slate-500 max-w-sm mx-auto mb-6 font-medium">Explore the latest streetwear sneaker drops and add items to your cart</p>
                 <button
                     onClick={handleRefreshCart}
-                    className="px-6 py-2 bg-[#ee2b4b] text-white rounded-lg hover:bg-[#d12541] transition-colors"
+                    className="px-6 py-3 bg-[#ee2b4b] text-white text-xs font-extrabold uppercase tracking-wider rounded-xl hover:bg-[#ff3b5c] transition-all shadow-md shadow-[#ee2b4b]/20"
                 >
-                    Refresh Cart
+                    Refresh Drop Bag
                 </button>
             </div>
         );
     }
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-4">
             {cartItems.map((item) => (
                 <div
                     key={`${item.id}-${item.variants[0]?.size}`}
-                    className="flex flex-col sm:flex-row gap-6 p-5 bg-white rounded-2xl shadow-sm border border-neutral-100 hover:border-[#ee2b4b]/20 transition-all"
+                    className="flex flex-col sm:flex-row gap-5 p-4 md:p-5 rounded-3xl border border-slate-200/80 bg-white shadow-sm transition-all"
                 >
                     {/* Product Image */}
-                    <div className="w-full sm:w-32 aspect-square rounded-xl overflow-hidden bg-neutral-50 flex-shrink-0 group">
+                    <div className="w-full sm:w-28 aspect-square rounded-2xl overflow-hidden bg-slate-50 border border-slate-100 flex-shrink-0 group">
                         <img
                             src={item.image}
                             alt={item.name}
@@ -65,75 +66,53 @@ const CartItems = ({ cartItems, handleUpdateQuantity, handleRemoveItem, handleRe
                     </div>
 
                     {/* Product Details */}
-                    <div className="flex flex-col flex-1 justify-between">
-                        <div className="flex flex-col sm:flex-row sm:justify-between gap-4">
-                            <div className="flex-1">
-                                <h3 className="text-lg font-bold text-gray-900">{item.name}</h3>
-                                <p className="text-sm text-neutral-500 mt-1">{item.category}</p>
+                    <div className="flex flex-col flex-1 justify-between gap-3">
+                        <div className="flex flex-col sm:flex-row sm:justify-between gap-2">
+                            <div>
+                                <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#ee2b4b]">{item.category || "Streetwear"}</span>
+                                <h3 className="text-base font-bold text-slate-900">{item.name}</h3>
+                            </div>
+                            <span className="text-lg font-black text-[#ee2b4b]">
+                                Rs {(item.price * getTotalQuantity(item.variants)).toLocaleString()}
+                            </span>
+                        </div>
 
-                                <div className="mt-4 space-y-3">
-                                    {item.variants.map((variant, index) => (
-                                        <div key={`${item.id}-${variant.size}-${index}`} className="p-3 bg-neutral-50 rounded-lg">
-                                            <div className="flex flex-wrap items-center justify-between gap-3">
-                                                <div className="flex flex-wrap gap-3">
-                                                    <span className="px-3 py-1 text-sm bg-white rounded-md border border-neutral-200">
-                                                        Size: {variant.size}
-                                                    </span>
-                                                    <span className="px-3 py-1 text-sm bg-white rounded-md border border-neutral-200">
-                                                        Qty: {variant.quantity}
-                                                    </span>
-                                                </div>
+                        <div className="space-y-2">
+                            {item.variants.map((variant, index) => (
+                                <div key={`${item.id}-${variant.size}-${index}`} className="flex items-center justify-between gap-3 p-2.5 rounded-xl bg-slate-50 border border-slate-200/80/60">
+                                    <span className="px-2.5 py-1 text-xs font-bold bg-white text-slate-800 rounded-lg border border-slate-200/80">
+                                        US {variant.size}
+                                    </span>
 
-                                                <div className="flex items-center gap-2">
-                                                    <div className="flex items-center border rounded-lg border-neutral-200 bg-white">
-                                                        <button
-                                                            onClick={() => handleUpdateQuantity(item.productId, variant.size, "decrement")}
-                                                            className="w-8 h-8 flex items-center justify-center cursor-pointer hover:bg-neutral-100"
-                                                        >
-                                                            −
-                                                        </button>
-                                                        <input
-                                                            readOnly
-                                                            value={variant.quantity}
-                                                            className="w-10 h-8 text-center text-sm bg-transparent"
-                                                        />
-                                                        <button
-                                                            onClick={() => handleUpdateQuantity(item.productId, variant.size, "increment")}
-                                                            className="w-8 h-8 flex items-center justify-center cursor-pointer hover:bg-neutral-100"
-                                                        >
-                                                            +
-                                                        </button>
-                                                    </div>
-
-                                                    <button
-                                                        onClick={() => handleRemoveItem(item.productId, variant.size)}
-                                                        className="flex items-center gap-1.5 text-sm font-medium text-neutral-400 hover:text-red-500 transition-colors"
-                                                        title="Remove this variant"
-                                                    >
-                                                        <MdOutlineDeleteOutline className="text-[20px]" />
-                                                        <span className="hidden sm:inline">Remove</span>
-                                                    </button>
-                                                </div>
-                                            </div>
-
-                                            <div className="text-right mt-2">
-                                                <span className="text-sm text-neutral-500">
-                                                    Rs {item.price} × {variant.quantity} = Rs {item.price * variant.quantity}.00
-                                                </span>
-                                            </div>
+                                    <div className="flex items-center gap-3">
+                                        <div className="flex items-center rounded-xl border border-slate-200/80 bg-white">
+                                            <button
+                                                onClick={() => handleUpdateQuantity(item.productId, variant.size, "decrement")}
+                                                className="w-8 h-8 flex items-center justify-center text-slate-700 hover:bg-slate-100 rounded-l-xl transition-colors font-bold"
+                                            >
+                                                −
+                                            </button>
+                                            <span className="w-9 text-center text-xs font-bold text-slate-900">
+                                                {variant.quantity}
+                                            </span>
+                                            <button
+                                                onClick={() => handleUpdateQuantity(item.productId, variant.size, "increment")}
+                                                className="w-8 h-8 flex items-center justify-center text-slate-700 hover:bg-slate-100 rounded-r-xl transition-colors font-bold"
+                                            >
+                                                +
+                                            </button>
                                         </div>
-                                    ))}
-                                </div>
-                            </div>
 
-                            <div className="sm:text-right">
-                                <p className="text-lg font-bold text-gray-900">
-                                    Rs {getTotalPriceForItem(item)}.00
-                                </p>
-                                <p className="text-sm text-neutral-500 mt-1">
-                                    {getTotalQuantity(item.variants)} item(s) total
-                                </p>
-                            </div>
+                                        <button
+                                            onClick={() => handleRemoveItem(item.productId, variant.size)}
+                                            className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors"
+                                            title="Remove item"
+                                        >
+                                            <MdOutlineDeleteOutline className="text-lg" />
+                                        </button>
+                                    </div>
+                                </div>
+                            ))}
                         </div>
                     </div>
                 </div>

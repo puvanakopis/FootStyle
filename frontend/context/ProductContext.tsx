@@ -42,7 +42,6 @@ export const ProductProvider: React.FC<ProductProviderProps> = ({ children }) =>
             setIsLoading(true);
             const fetchedProducts = await productApi.getProducts();
             setProducts(fetchedProducts);
-            fetchProducts();
         } catch (err) {
             handleError(err);
         } finally {
@@ -56,7 +55,6 @@ export const ProductProvider: React.FC<ProductProviderProps> = ({ children }) =>
             setIsLoading(true);
             const product = await productApi.getProductById(id);
             setCurrentProduct(product);
-            fetchProducts();
         } catch (err) {
             handleError(err);
             throw err;

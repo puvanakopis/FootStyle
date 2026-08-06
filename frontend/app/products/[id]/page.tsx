@@ -33,7 +33,7 @@ export default function ProductDetailPage() {
 
     if (isLoading) {
         return (
-            <main className="min-h-screen bg-background text-foreground">
+            <main className="min-h-screen bg-[#fafafc] text-slate-900">
                 <Header />
                 <Loading message='loading products .....' />
                 <Footer />
@@ -42,11 +42,13 @@ export default function ProductDetailPage() {
     }
 
     return (
-        <main className="min-h-screen bg-background text-foreground">
+        <main className="min-h-screen bg-[#fafafc] text-slate-900">
             <Header />
-            <div className="px-8 lg:px-30 py-6">
-                <Breadcrumbs items={breadcrumbItems} />
-                <ProductDetail product={currentProduct} />
+            <div className="px-4 md:px-10 py-6">
+                <div className="w-full max-w-[1280px] mx-auto">
+                    <Breadcrumbs items={breadcrumbItems} />
+                    <ProductDetail product={currentProduct} />
+                </div>
             </div>
             <Footer />
         </main>

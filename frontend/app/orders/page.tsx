@@ -77,107 +77,109 @@ export default function Orders() {
     }, [userOrders, filter]);
 
     return (
-        <main className="min-h-screen bg-background text-foreground">
+        <main className="min-h-screen bg-[#fafafc] text-slate-900">
             <Header />
 
-            <div className="px-30 py-6">
-                <Breadcrumbs items={breadcrumbItems} />
+            <div className="px-4 md:px-10 py-6">
+                <div className="w-full max-w-[1280px] mx-auto">
+                    <Breadcrumbs items={breadcrumbItems} />
 
-                <div className="flex flex-col lg:flex-row gap-6 mt-6">
-                    {/* Sidebar */}
-                    <div className="w-full lg:w-1/5">
-                        <Sidebar />
-                    </div>
-
-                    {/* Main Content */}
-                    <section className="w-full lg:w-4/5 space-y-6">
-                        <div className="flex justify-between items-center">
-                            <div>
-                                <h1 className="text-2xl font-bold text-neutral-900">
-                                    My Orders
-                                </h1>
-                                <p className="text-neutral-600 mt-1">
-                                    {userOrders.length} {userOrders.length === 1 ? 'Order' : 'Orders'}
-                                </p>
-                            </div>
-
-                            <OrderFilter
-                                currentFilter={filter}
-                                onFilterChange={setFilter}
-                            />
+                    <div className="flex flex-col lg:flex-row gap-6 mt-6">
+                        {/* Sidebar */}
+                        <div className="w-full lg:w-1/5">
+                            <Sidebar />
                         </div>
 
-                        {/* Loading State */}
-                        {userOrdersLoading ? (
-                            <div className="bg-white rounded-2xl shadow-sm border border-neutral-100 p-12 text-center">
-                                <div className="flex justify-center items-center">
-                                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#ee2b4b]"></div>
+                        {/* Main Content */}
+                        <section className="w-full lg:w-4/5 space-y-6">
+                            <div className="flex justify-between items-center">
+                                <div>
+                                    <h1 className="text-2xl font-bold text-neutral-900">
+                                        My Orders
+                                    </h1>
+                                    <p className="text-neutral-600 mt-1">
+                                        {userOrders.length} {userOrders.length === 1 ? 'Order' : 'Orders'}
+                                    </p>
                                 </div>
-                                <p className="text-neutral-600 mt-4">Loading your orders...</p>
+
+                                <OrderFilter
+                                    currentFilter={filter}
+                                    onFilterChange={setFilter}
+                                />
                             </div>
-                        ) : userOrdersError ? (
-                            <div className="bg-white rounded-2xl shadow-sm border border-neutral-100 p-12 text-center">
-                                <div className="text-red-500 mb-4">
-                                    <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
+
+                            {/* Loading State */}
+                            {userOrdersLoading ? (
+                                <div className="bg-white rounded-2xl shadow-sm border border-neutral-100 p-12 text-center">
+                                    <div className="flex justify-center items-center">
+                                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#ee2b4b]"></div>
+                                    </div>
+                                    <p className="text-neutral-600 mt-4">Loading your orders...</p>
                                 </div>
-                                <h3 className="text-xl font-bold text-neutral-900 mb-2">
-                                    Error Loading Orders
-                                </h3>
-                                <p className="text-neutral-500 mb-6">
-                                    {userOrdersError || "Failed to load your orders. Please try again."}
-                                </p>
-                                <button
-                                    onClick={() => getUserOrders()}
-                                    className="inline-block px-6 py-3 bg-[#ee2b4b] text-white rounded-lg font-bold hover:bg-red-600 transition"
-                                >
-                                    Retry
-                                </button>
-                            </div>
-                        ) : filteredOrders.length === 0 ? (
-                            <div className="bg-white rounded-2xl shadow-sm border border-neutral-100 p-12 text-center">
-                                <div className="text-neutral-400 mb-4">
-                                    <svg
-                                        className="w-16 h-16 mx-auto"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        viewBox="0 0 24 24"
+                            ) : userOrdersError ? (
+                                <div className="bg-white rounded-2xl shadow-sm border border-neutral-100 p-12 text-center">
+                                    <div className="text-red-500 mb-4">
+                                        <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                    </div>
+                                    <h3 className="text-xl font-bold text-neutral-900 mb-2">
+                                        Error Loading Orders
+                                    </h3>
+                                    <p className="text-neutral-500 mb-6">
+                                        {userOrdersError || "Failed to load your orders. Please try again."}
+                                    </p>
+                                    <button
+                                        onClick={() => getUserOrders()}
+                                        className="inline-block px-6 py-3 bg-[#ee2b4b] text-white rounded-lg font-bold hover:bg-red-600 transition"
                                     >
-                                        <path
-                                            strokeLinecap="round"
-                                            strokeLinejoin="round"
-                                            strokeWidth="1.5"
-                                            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
-                                        />
-                                    </svg>
+                                        Retry
+                                    </button>
                                 </div>
+                            ) : filteredOrders.length === 0 ? (
+                                <div className="bg-white rounded-2xl shadow-sm border border-neutral-100 p-12 text-center">
+                                    <div className="text-neutral-400 mb-4">
+                                        <svg
+                                            className="w-16 h-16 mx-auto"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                strokeWidth="1.5"
+                                                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+                                            />
+                                        </svg>
+                                    </div>
 
-                                <h3 className="text-xl font-bold text-neutral-900 mb-2">
-                                    No orders found
-                                </h3>
-                                <p className="text-neutral-500 mb-6">
-                                    {filter === "all"
-                                        ? "You haven't placed any orders yet."
-                                        : `You don't have any ${filter} orders.`}
-                                </p>
+                                    <h3 className="text-xl font-bold text-neutral-900 mb-2">
+                                        No orders found
+                                    </h3>
+                                    <p className="text-neutral-500 mb-6">
+                                        {filter === "all"
+                                            ? "You haven't placed any orders yet."
+                                            : `You don't have any ${filter} orders.`}
+                                    </p>
 
-                                <Link
-                                    href="/products"
-                                    className="inline-block px-6 py-3 bg-[#ee2b4b] text-white rounded-lg font-bold hover:bg-red-600 transition"
-                                >
-                                    Start Shopping
-                                </Link>
-                            </div>
-                        ) : (
-                            <OrderHistory
-                                orders={filteredOrders}
-                                formatDate={formatDate}
-                                formatCurrency={formatCurrency}
-                                getPrimaryImage={getPrimaryImage}
-                            />
-                        )}
-                    </section>
+                                    <Link
+                                        href="/products"
+                                        className="inline-block px-6 py-3 bg-[#ee2b4b] text-white rounded-lg font-bold hover:bg-red-600 transition"
+                                    >
+                                        Start Shopping
+                                    </Link>
+                                </div>
+                            ) : (
+                                <OrderHistory
+                                    orders={filteredOrders}
+                                    formatDate={formatDate}
+                                    formatCurrency={formatCurrency}
+                                    getPrimaryImage={getPrimaryImage}
+                                />
+                            )}
+                        </section>
+                    </div>
                 </div>
             </div>
 

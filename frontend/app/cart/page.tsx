@@ -60,8 +60,8 @@ export default function CartPage() {
     // Cart helpers
     const calculateSubtotal = () => {
         if (!cartItems || cartItems.length === 0) return 0;
-        return cartItems.reduce((total, item) => {
-            const itemTotal = item.variants.reduce((variantTotal, variant) => {
+        return cartItems.reduce((total: number, item: any) => {
+            const itemTotal = item.variants.reduce((variantTotal: number, variant: any) => {
                 return variantTotal + (item.price * variant.quantity);
             }, 0);
             return total + itemTotal;
@@ -83,8 +83,8 @@ export default function CartPage() {
     const tax = calculateTax(subtotal);
     const total = calculateTotal(subtotal, shipping, tax);
 
-    const totalItems = cartItems.reduce((total, item) => {
-        return total + item.variants.reduce((variantTotal, variant) => variantTotal + variant.quantity, 0);
+    const totalItems = cartItems.reduce((total: number, item: any) => {
+        return total + item.variants.reduce((variantTotal: number, variant: any) => variantTotal + variant.quantity, 0);
     }, 0);
 
     const handleCheckoutClick = () => {
@@ -142,34 +142,36 @@ export default function CartPage() {
     };
 
     return (
-        <main className="min-h-screen bg-background text-foreground">
+        <main className="min-h-screen bg-[#fafafc] text-slate-900">
             <Header />
             {isLoading ? (
                 <Loading message="Loading products..." />
             ) : (
-                <div className="px-30 py-6">
-                    <Breadcrumbs items={breadcrumbItems} />
-                    <PageHeader title="Your Shopping Cart" />
-                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
-                        <div className="lg:col-span-8 space-y-6">
-                            <CartItems
-                                cartItems={cartItems}
-                                isLoading={isLoading || localLoading}
-                                handleUpdateQuantity={handleUpdateQuantity}
-                                handleRemoveItem={handleRemoveItem}
-                                handleRefreshCart={handleRefreshCart}
-                            />
-                        </div>
+                <div className="px-4 md:px-10 py-6">
+                    <div className="w-full max-w-[1280px] mx-auto">
+                        <Breadcrumbs items={breadcrumbItems} />
+                        <PageHeader title="Your Shopping Cart" />
+                        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
+                            <div className="lg:col-span-8 space-y-6">
+                                <CartItems
+                                    cartItems={cartItems}
+                                    isLoading={isLoading || localLoading}
+                                    handleUpdateQuantity={handleUpdateQuantity}
+                                    handleRemoveItem={handleRemoveItem}
+                                    handleRefreshCart={handleRefreshCart}
+                                />
+                            </div>
 
-                        <div className="lg:col-span-4 lg:sticky lg:top-24">
-                            <OrderSummary
-                                subtotal={subtotal}
-                                shipping={shipping}
-                                tax={tax}
-                                total={total}
-                                totalItems={totalItems}
-                                handleCheckoutClick={handleCheckoutClick}
-                            />
+                            <div className="lg:col-span-4 lg:sticky lg:top-24">
+                                <OrderSummary
+                                    subtotal={subtotal}
+                                    shipping={shipping}
+                                    tax={tax}
+                                    total={total}
+                                    totalItems={totalItems}
+                                    handleCheckoutClick={handleCheckoutClick}
+                                />
+                            </div>
                         </div>
                     </div>
                 </div>

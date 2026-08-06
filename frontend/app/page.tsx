@@ -29,7 +29,7 @@ export default function Home() {
     .slice(0, 4);
 
   return (
-    <main className="min-h-screen bg-background text-foreground">
+    <main className="min-h-screen bg-[#fafafc] text-slate-900">
       <Header />
 
       {isLoading ? (
